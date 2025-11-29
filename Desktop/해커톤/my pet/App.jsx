@@ -445,14 +445,15 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
             </button>
             <h1 className="text-lg font-bold text-gray-900">대시보드</h1>
           </div>
-        <button 
-          onClick={() => onNavigate('profile-list')}
-          className="text-sm font-medium text-teal-600 hover:text-teal-700"
-        >
-          변경
-        </button>
+          <button
+            onClick={() => onNavigate('profile-list')}
+            className="text-sm font-medium text-teal-600 hover:text-teal-700"
+          >
+            변경
+          </button>
+        </div>
       </div>
-      
+
       <div className="pt-20 max-w-md mx-auto space-y-6">
         {/* Welcome Card */}
         <div className="bg-teal-600 text-white p-6 rounded-2xl shadow-lg animate-fade-in">
