@@ -21,6 +21,7 @@ import { BottomTabNavigation } from './src/components/BottomTabNavigation'
 import { callCareAgent } from './src/services/ai/careAgent'
 import { CareActionButton } from './src/components/CareActionButton'
 import { loadDailyLog, saveDailyLog, getTodayKey } from './src/lib/careLogs'
+import DiagnosisReport from './src/components/DiagnosisReport'
 
 // ============ 로컬 스토리지 유틸리티 ============
 const STORAGE_KEY = 'petMedical_pets';
@@ -637,170 +638,159 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
           )}
         </div>
         
-        {/* Action Cards */}
-        <div className="grid grid-cols-2 gap-4 mb-6">
-          <div 
-            className="flex flex-col items-start justify-between rounded-lg bg-surface-light p-4 aspect-square shadow-soft cursor-pointer hover:shadow-md transition-all"
+        {/* 빠른 액션 버튼들 (작게) */}
+        <div className="flex gap-3 mb-6">
+          <button
+            className="flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-gradient-to-r from-amber-400 to-orange-400 text-white font-bold text-sm shadow-md hover:shadow-lg transition-all hover:scale-[1.02] active:scale-[0.98]"
             onClick={() => onNavigate('symptom-input')}
           >
-            <div>
-              <div className="w-14 h-14 rounded-full bg-accent/20 flex items-center justify-center mb-2">
-                <span className="material-symbols-outlined text-accent text-4xl">pets</span>
-              </div>
-              <p className="text-slate-900 font-bold font-display">AI 진단하기</p>
-            </div>
-            <p className="text-slate-500 text-sm">건강 상태를 체크해요</p>
-          </div>
-          
-          <div 
-            className="flex flex-col items-start justify-between rounded-lg bg-surface-light p-4 aspect-square shadow-soft cursor-pointer hover:shadow-md transition-all"
+            <span className="text-lg">🩺</span>
+            <span>AI 진단</span>
+          </button>
+          <button
+            className="flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-gradient-to-r from-teal-400 to-cyan-400 text-white font-bold text-sm shadow-md hover:shadow-lg transition-all hover:scale-[1.02] active:scale-[0.98]"
             onClick={() => onNavigate('hospital')}
           >
-            <div>
-              <div className="w-14 h-14 rounded-full bg-primary/20 flex items-center justify-center mb-2">
-                <span className="material-symbols-outlined text-primary text-4xl">local_hospital</span>
-              </div>
-              <p className="text-slate-900 font-bold font-display">병원 추천 / 예약</p>
-            </div>
-            <p className="text-slate-500 text-sm">주변 병원을 찾아봐요</p>
-          </div>
+            <span className="text-lg">🏥</span>
+            <span>병원 찾기</span>
+          </button>
         </div>
-        
-        {/* 게임형 케어 루프 */}
-        <div className="bg-surface-light rounded-lg p-4 shadow-soft mb-6">
-          <h3 className="font-bold text-slate-900 mb-4 font-display flex items-center gap-2">
-            <span className="material-symbols-outlined text-primary">favorite</span>
-            케어 행동 수행하기
-          </h3>
-          <div className="grid grid-cols-5 gap-2 mb-4">
-            <CareActionButton
-              action="meal"
-              icon="🍚"
-              label="밥 주기"
-              healthPoints={5}
-              cooldown={300}
-              onAction={(action) => {
-                setCareActions(prev => ({ ...prev, meal: prev.meal + 1 }));
-                setHealthPoints(prev => {
-                  const newPoints = Math.min(100, prev + 5);
-                  localStorage.setItem(`petMedical_healthPoints_${petData.id}`, newPoints.toString());
-                  return newPoints;
-                });
-                // 일일 로그에도 반영
-                const today = getTodayKey();
-                const log = loadDailyLog(petData.id, today);
-                if (log) {
-                  saveDailyLog(petData.id, { ...log, mealCount: (log.mealCount || 0) + 1 });
-                }
-              }}
-            />
-            <CareActionButton
-              action="water"
-              icon="💧"
-              label="물 주기"
-              healthPoints={3}
-              cooldown={180}
-              onAction={(action) => {
-                setCareActions(prev => ({ ...prev, water: prev.water + 1 }));
-                setHealthPoints(prev => {
-                  const newPoints = Math.min(100, prev + 3);
-                  localStorage.setItem(`petMedical_healthPoints_${petData.id}`, newPoints.toString());
-                  return newPoints;
-                });
-                const today = getTodayKey();
-                const log = loadDailyLog(petData.id, today);
-                if (log) {
-                  saveDailyLog(petData.id, { ...log, waterCount: (log.waterCount || 0) + 1 });
-                }
-              }}
-            />
-            <CareActionButton
-              action="walk"
-              icon="🚶"
-              label="산책"
-              healthPoints={10}
-              cooldown={600}
-              onAction={(action) => {
-                setCareActions(prev => ({ ...prev, walk: prev.walk + 1 }));
-                setHealthPoints(prev => {
-                  const newPoints = Math.min(100, prev + 10);
-                  localStorage.setItem(`petMedical_healthPoints_${petData.id}`, newPoints.toString());
-                  return newPoints;
-                });
-                const today = getTodayKey();
-                const log = loadDailyLog(petData.id, today);
-                if (log) {
-                  saveDailyLog(petData.id, { ...log, walkCount: (log.walkCount || 0) + 1 });
-                }
-              }}
-            />
-            <CareActionButton
-              action="grooming"
-              icon="✨"
-              label="털 손질"
-              healthPoints={7}
-              cooldown={3600}
-              onAction={(action) => {
-                setCareActions(prev => ({ ...prev, grooming: prev.grooming + 1 }));
-                setHealthPoints(prev => {
-                  const newPoints = Math.min(100, prev + 7);
-                  localStorage.setItem(`petMedical_healthPoints_${petData.id}`, newPoints.toString());
-                  return newPoints;
-                });
-              }}
-            />
-            <CareActionButton
-              action="play"
-              icon="🎾"
-              label="놀아주기"
-              healthPoints={8}
-              cooldown={300}
-              onAction={(action) => {
-                setCareActions(prev => ({ ...prev, play: prev.play + 1 }));
-                setHealthPoints(prev => {
-                  const newPoints = Math.min(100, prev + 8);
-                  localStorage.setItem(`petMedical_healthPoints_${petData.id}`, newPoints.toString());
-                  return newPoints;
-                });
-              }}
-            />
+
+        {/* 오늘 케어 기록 (간소화) */}
+        <div className="bg-white rounded-2xl p-5 shadow-md mb-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-bold text-slate-800 flex items-center gap-2">
+              <span>📋</span> 오늘 케어 기록
+            </h3>
+            <span className="text-xs text-slate-400">{new Date().toLocaleDateString('ko-KR')}</span>
           </div>
-          
-          {/* 건강 포인트 표시 */}
-          <div className="mt-4 pt-4 border-t border-slate-200">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-slate-700">건강 포인트</span>
-              <span className="text-lg font-bold text-primary">{healthPoints}/100</span>
+
+          {/* 케어 버튼 + 누적 횟수 */}
+          <div className="grid grid-cols-5 gap-2 mb-4">
+            <div className="flex flex-col items-center">
+              <button
+                className="w-12 h-12 rounded-xl bg-orange-50 hover:bg-orange-100 flex items-center justify-center text-2xl transition-all hover:scale-110 active:scale-95"
+                onClick={() => {
+                  setCareActions(prev => ({ ...prev, meal: prev.meal + 1 }));
+                  setHealthPoints(prev => {
+                    const newPoints = Math.min(100, prev + 5);
+                    if (petData?.id) localStorage.setItem(`petMedical_healthPoints_${petData.id}`, newPoints.toString());
+                    return newPoints;
+                  });
+                  if (petData?.id) {
+                    const today = getTodayKey();
+                    const log = loadDailyLog(petData.id, today) || {};
+                    saveDailyLog(petData.id, { ...log, mealCount: (log.mealCount || 0) + 1 });
+                  }
+                }}
+              >🍚</button>
+              <span className="text-xs text-slate-600 mt-1">밥</span>
+              <span className="text-sm font-bold text-orange-500">{careActions.meal}회</span>
             </div>
-            <div className="w-full h-3 bg-slate-200 rounded-full overflow-hidden">
-              <div 
+            <div className="flex flex-col items-center">
+              <button
+                className="w-12 h-12 rounded-xl bg-blue-50 hover:bg-blue-100 flex items-center justify-center text-2xl transition-all hover:scale-110 active:scale-95"
+                onClick={() => {
+                  setCareActions(prev => ({ ...prev, water: prev.water + 1 }));
+                  setHealthPoints(prev => {
+                    const newPoints = Math.min(100, prev + 3);
+                    if (petData?.id) localStorage.setItem(`petMedical_healthPoints_${petData.id}`, newPoints.toString());
+                    return newPoints;
+                  });
+                  if (petData?.id) {
+                    const today = getTodayKey();
+                    const log = loadDailyLog(petData.id, today) || {};
+                    saveDailyLog(petData.id, { ...log, waterCount: (log.waterCount || 0) + 1 });
+                  }
+                }}
+              >💧</button>
+              <span className="text-xs text-slate-600 mt-1">물</span>
+              <span className="text-sm font-bold text-blue-500">{careActions.water}회</span>
+            </div>
+            <div className="flex flex-col items-center">
+              <button
+                className="w-12 h-12 rounded-xl bg-green-50 hover:bg-green-100 flex items-center justify-center text-2xl transition-all hover:scale-110 active:scale-95"
+                onClick={() => {
+                  setCareActions(prev => ({ ...prev, walk: prev.walk + 1 }));
+                  setHealthPoints(prev => {
+                    const newPoints = Math.min(100, prev + 10);
+                    if (petData?.id) localStorage.setItem(`petMedical_healthPoints_${petData.id}`, newPoints.toString());
+                    return newPoints;
+                  });
+                  if (petData?.id) {
+                    const today = getTodayKey();
+                    const log = loadDailyLog(petData.id, today) || {};
+                    saveDailyLog(petData.id, { ...log, walkCount: (log.walkCount || 0) + 1 });
+                  }
+                }}
+              >🚶</button>
+              <span className="text-xs text-slate-600 mt-1">산책</span>
+              <span className="text-sm font-bold text-green-500">{careActions.walk}회</span>
+            </div>
+            <div className="flex flex-col items-center">
+              <button
+                className="w-12 h-12 rounded-xl bg-purple-50 hover:bg-purple-100 flex items-center justify-center text-2xl transition-all hover:scale-110 active:scale-95"
+                onClick={() => {
+                  setCareActions(prev => ({ ...prev, grooming: prev.grooming + 1 }));
+                  setHealthPoints(prev => {
+                    const newPoints = Math.min(100, prev + 7);
+                    if (petData?.id) localStorage.setItem(`petMedical_healthPoints_${petData.id}`, newPoints.toString());
+                    return newPoints;
+                  });
+                }}
+              >✨</button>
+              <span className="text-xs text-slate-600 mt-1">손질</span>
+              <span className="text-sm font-bold text-purple-500">{careActions.grooming}회</span>
+            </div>
+            <div className="flex flex-col items-center">
+              <button
+                className="w-12 h-12 rounded-xl bg-pink-50 hover:bg-pink-100 flex items-center justify-center text-2xl transition-all hover:scale-110 active:scale-95"
+                onClick={() => {
+                  setCareActions(prev => ({ ...prev, play: prev.play + 1 }));
+                  setHealthPoints(prev => {
+                    const newPoints = Math.min(100, prev + 8);
+                    if (petData?.id) localStorage.setItem(`petMedical_healthPoints_${petData.id}`, newPoints.toString());
+                    return newPoints;
+                  });
+                }}
+              >🎾</button>
+              <span className="text-xs text-slate-600 mt-1">놀이</span>
+              <span className="text-sm font-bold text-pink-500">{careActions.play}회</span>
+            </div>
+          </div>
+
+          {/* 건강 포인트 바 */}
+          <div className="bg-slate-50 rounded-xl p-3">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-medium text-slate-600">💚 건강 포인트</span>
+              <span className="text-sm font-bold" style={{ color: healthPoints >= 70 ? '#22c55e' : healthPoints >= 40 ? '#f59e0b' : '#ef4444' }}>{healthPoints}%</span>
+            </div>
+            <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
+              <div
                 className="h-full rounded-full transition-all duration-500"
-                style={{ 
+                style={{
                   width: `${healthPoints}%`,
                   background: healthPoints >= 70 ? 'linear-gradient(90deg, #4ade80, #22c55e)' :
                              healthPoints >= 40 ? 'linear-gradient(90deg, #fbbf24, #f59e0b)' :
                              'linear-gradient(90deg, #f87171, #ef4444)'
                 }}
-              ></div>
+              />
             </div>
-            <p className="text-xs text-slate-500 mt-1">
-              케어 행동을 수행하면 건강 포인트가 올라가요! 💚
-            </p>
           </div>
         </div>
 
-        {/* 일상 케어 로그 */}
-        <div className="bg-surface-light rounded-lg p-4 shadow-soft mb-6">
+        {/* 특이사항 메모 */}
+        <div className="bg-white rounded-2xl p-5 shadow-md mb-6">
           <DailyCareLog pet={petData} />
         </div>
-        
+
         {/* AI 패턴 분석 버튼 */}
         <button
-          className="w-full h-14 flex items-center justify-center gap-2 rounded-lg bg-primary text-white font-bold text-base shadow-lg shadow-primary/30 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-primary/90 transition-colors"
+          className="w-full py-4 flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-purple-500 text-white font-bold shadow-lg shadow-purple-500/30 disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-xl transition-all hover:scale-[1.01] active:scale-[0.99]"
           onClick={handleAnalyzePattern}
           disabled={analyzing}
         >
-          <span className="material-symbols-outlined text-xl">auto_graph</span>
+          <span className="text-xl">✨</span>
           <span>{analyzing ? "AI가 패턴 분석 중..." : "AI로 7일 건강 패턴 분석하기"}</span>
         </button>
         
@@ -1191,6 +1181,7 @@ function MultiAgentDiagnosis({ petData, symptomData, onComplete, onBack, onDiagn
   const [chatMode, setChatMode] = useState(false); // 대화 모드 활성화 여부
   const [waitingForAnswer, setWaitingForAnswer] = useState(false); // AI 질문 대기 중
   const [conversationHistory, setConversationHistory] = useState([]);
+  const [showDiagnosisReport, setShowDiagnosisReport] = useState(false); // 진단서 표시 여부
   
   useEffect(() => {
     let isMounted = true; // 컴포넌트 마운트 상태 추적
@@ -1766,7 +1757,6 @@ ${userQuestion}
               <button className="action-btn primary" onClick={() => onComplete('treatment')}>
                 🏠 직접 치료하기
               </button>
-            {diagnosisResult.hospitalVisit && (
               <button className="action-btn secondary" onClick={async () => {
                 // 병원 패킷 생성
                 try {
@@ -1779,9 +1769,11 @@ ${userQuestion}
                   onComplete('hospital');
                 }
               }}>
-                🏥 병원 예약하기 (AI 패킷 생성)
+                🏥 병원 예약하기
               </button>
-            )}
+              <button className="action-btn highlight" onClick={() => setShowDiagnosisReport(true)}>
+                📄 진단서 보기
+              </button>
               {chatMode && (
                 <button className="action-btn outline" onClick={() => {
                   setChatMode(false);
@@ -1797,12 +1789,181 @@ ${userQuestion}
           </div>
         </div>
       )}
+
+      {/* 진단서 페이퍼 모달 */}
+      {showDiagnosisReport && diagnosisResult && (
+        <DiagnosisReport
+          petData={petData}
+          diagnosisResult={diagnosisResult}
+          symptomData={symptomData}
+          onClose={() => setShowDiagnosisReport(false)}
+          onGoToHospital={() => {
+            setShowDiagnosisReport(false);
+            onComplete('hospital');
+          }}
+          onGoToTreatment={() => {
+            setShowDiagnosisReport(false);
+            onComplete('treatment');
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
+// ============ 진단 결과 보기 화면 (재진단 없이) ============
+function DiagnosisResultView({ petData, diagnosisResult, symptomData, onGoToTreatment, onGoToHospital, onBack }) {
+  const [showDiagnosisReport, setShowDiagnosisReport] = useState(false);
+
+  const getEmergencyInfo = (emergency) => {
+    switch(emergency) {
+      case 'high':
+        return { text: '응급', color: '#ef4444', icon: '🔴', desc: '즉시 병원 방문 필요' };
+      case 'medium':
+        return { text: '주의', color: '#f59e0b', icon: '🟡', desc: '병원 방문 권장' };
+      default:
+        return { text: '경미', color: '#22c55e', icon: '🟢', desc: '가정 내 관리 가능' };
+    }
+  };
+
+  const emergencyInfo = getEmergencyInfo(diagnosisResult?.emergency);
+
+  return (
+    <div className="diagnosis-result-view">
+      <div className="result-view-header">
+        <button className="back-btn" onClick={onBack}>←</button>
+        <h1>📋 진단 결과</h1>
+      </div>
+
+      <div className="result-view-content">
+        <div className="result-card-summary">
+          <div className="pet-info-mini">
+            <span className="pet-avatar">{petData?.species === 'cat' ? '🐱' : '🐕'}</span>
+            <span className="pet-name">{petData?.name || '반려동물'}</span>
+          </div>
+
+          <div className="diagnosis-main-box">
+            <h2>🎯 {diagnosisResult?.diagnosis || '진단 결과 없음'}</h2>
+            <div
+              className="emergency-badge-inline"
+              style={{ backgroundColor: emergencyInfo.color }}
+            >
+              {emergencyInfo.icon} {emergencyInfo.text} - {emergencyInfo.desc}
+            </div>
+          </div>
+
+          {diagnosisResult?.triage_score !== undefined && (
+            <div className="triage-summary">
+              <span>응급도 점수: </span>
+              <strong>{diagnosisResult.triage_score}/5</strong>
+            </div>
+          )}
+
+          {diagnosisResult?.description && (
+            <div className="description-summary">
+              <h3>📋 설명</h3>
+              <p>{diagnosisResult.description}</p>
+            </div>
+          )}
+
+          <div className="actions-summary">
+            <h3>💊 권장 조치</h3>
+            <ul>
+              {diagnosisResult?.actions?.map((action, idx) => (
+                <li key={idx}>{action}</li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+        <div className="result-view-actions">
+          <button className="action-btn highlight" onClick={() => setShowDiagnosisReport(true)}>
+            📄 진단서 보기
+          </button>
+          <button className="action-btn primary" onClick={onGoToTreatment}>
+            🏠 직접 치료하기
+          </button>
+          <button className="action-btn secondary" onClick={onGoToHospital}>
+            🏥 병원 예약하기
+          </button>
+          <button className="action-btn outline" onClick={onBack}>
+            📋 대시보드로
+          </button>
+        </div>
+      </div>
+
+      {/* 진단서 모달 */}
+      {showDiagnosisReport && (
+        <DiagnosisReport
+          petData={petData}
+          diagnosisResult={diagnosisResult}
+          symptomData={symptomData}
+          onClose={() => setShowDiagnosisReport(false)}
+          onGoToHospital={() => {
+            setShowDiagnosisReport(false);
+            onGoToHospital();
+          }}
+          onGoToTreatment={() => {
+            setShowDiagnosisReport(false);
+            onGoToTreatment();
+          }}
+        />
+      )}
     </div>
   );
 }
 
 // ============ 직접 치료 가이드 화면 ============
 function HomeTreatmentGuide({ petData, diagnosisResult, onBack }) {
+  const CHECKLIST_KEY = `petMedical_checklist_${petData?.id || 'default'}_${new Date().toISOString().split('T')[0]}`;
+
+  const defaultChecklist = [
+    { id: 'observe', label: '증상 관찰 및 기록', checked: false },
+    { id: 'water', label: '수분 섭취 확인', checked: false },
+    { id: 'appetite', label: '식욕 상태 확인', checked: false },
+    { id: 'stool', label: '배변 상태 확인', checked: false },
+    { id: 'activity', label: '활동량 관찰', checked: false }
+  ];
+
+  const [checklist, setChecklist] = useState(() => {
+    try {
+      const saved = localStorage.getItem(CHECKLIST_KEY);
+      return saved ? JSON.parse(saved) : defaultChecklist;
+    } catch {
+      return defaultChecklist;
+    }
+  });
+  const [saveMessage, setSaveMessage] = useState('');
+
+  const handleChecklistChange = (id) => {
+    setChecklist(prev => {
+      const updated = prev.map(item =>
+        item.id === id ? { ...item, checked: !item.checked } : item
+      );
+      // 자동 저장
+      try {
+        localStorage.setItem(CHECKLIST_KEY, JSON.stringify(updated));
+      } catch (e) {
+        console.error('체크리스트 저장 실패:', e);
+      }
+      return updated;
+    });
+  };
+
+  const handleSaveChecklist = () => {
+    try {
+      localStorage.setItem(CHECKLIST_KEY, JSON.stringify(checklist));
+      setSaveMessage('✅ 체크리스트가 저장되었습니다!');
+      setTimeout(() => setSaveMessage(''), 2000);
+    } catch (e) {
+      setSaveMessage('❌ 저장에 실패했습니다.');
+      setTimeout(() => setSaveMessage(''), 2000);
+    }
+  };
+
+  const completedCount = checklist.filter(item => item.checked).length;
+  const totalCount = checklist.length;
+
   const getTreatmentSteps = () => {
     if (!diagnosisResult) {
       return [
@@ -1835,7 +1996,7 @@ function HomeTreatmentGuide({ petData, diagnosisResult, onBack }) {
   };
 
   const steps = getTreatmentSteps();
-  const recoveryTime = diagnosisResult?.emergency === 'low' ? '3-5일' : 
+  const recoveryTime = diagnosisResult?.emergency === 'low' ? '3-5일' :
                        diagnosisResult?.emergency === 'medium' ? '5-7일' : '병원 치료 후 확인';
 
   return (
@@ -1889,14 +2050,36 @@ function HomeTreatmentGuide({ petData, diagnosisResult, onBack }) {
             </div>
 
             <div className="treatment-checklist">
-              <h3>✅ 일일 체크리스트</h3>
-              <div className="checklist-items">
-                <label><input type="checkbox" /> 증상 관찰 및 기록</label>
-                <label><input type="checkbox" /> 수분 섭취 확인</label>
-                <label><input type="checkbox" /> 식욕 상태 확인</label>
-                <label><input type="checkbox" /> 배변 상태 확인</label>
-                <label><input type="checkbox" /> 활동량 관찰</label>
+              <div className="checklist-header">
+                <h3>✅ 일일 체크리스트</h3>
+                <span className="checklist-progress">{completedCount}/{totalCount} 완료</span>
               </div>
+              <div className="checklist-progress-bar">
+                <div
+                  className="checklist-progress-fill"
+                  style={{ width: `${(completedCount / totalCount) * 100}%` }}
+                />
+              </div>
+              <div className="checklist-items">
+                {checklist.map(item => (
+                  <label key={item.id} className={item.checked ? 'checked' : ''}>
+                    <input
+                      type="checkbox"
+                      checked={item.checked}
+                      onChange={() => handleChecklistChange(item.id)}
+                    />
+                    <span className="checkmark">{item.checked ? '✓' : ''}</span>
+                    <span className="label-text">{item.label}</span>
+                  </label>
+                ))}
+              </div>
+              <div className="checklist-actions">
+                <button className="save-checklist-btn" onClick={handleSaveChecklist}>
+                  💾 체크리스트 저장
+                </button>
+                {saveMessage && <span className="save-message">{saveMessage}</span>}
+              </div>
+              <p className="checklist-note">※ 체크 시 자동 저장됩니다</p>
             </div>
           </>
         )}
@@ -1944,18 +2127,13 @@ function App() {
   useEffect(() => {
     const savedPets = getPetsFromStorage();
     setPets(savedPets);
-    
-    // 첫 방문 시 프로필 등록 화면으로
-    if (savedPets.length === 0) {
-      setCurrentView('registration');
-      setCurrentTab(null);
-    } else if (!petData) {
-      // 저장된 반려동물이 있으면 첫 번째 선택
+
+    // 저장된 반려동물이 있으면 첫 번째 선택, 없으면 샘플 데이터로 시작
+    if (savedPets.length > 0) {
       setPetData(savedPets[0]);
-      setCurrentTab('care');
-    } else {
-      setCurrentTab('care');
     }
+    // 등록 화면 없이 바로 대시보드로 (등록은 마이페이지에서)
+    setCurrentTab('care');
   }, []);
 
   const handleRegistrationComplete = (data) => {
@@ -2047,19 +2225,37 @@ function App() {
       )}
 
       {currentView === 'treatment' && petData && (
-        <HomeTreatmentGuide 
+        <HomeTreatmentGuide
           petData={petData}
           diagnosisResult={lastDiagnosis}
-          onBack={() => setCurrentView('diagnosis')}
+          onBack={() => setCurrentView('diagnosis-result')}
+        />
+      )}
+
+      {/* 진단 결과만 보기 (재진단 없이) */}
+      {currentView === 'diagnosis-result' && petData && lastDiagnosis && (
+        <DiagnosisResultView
+          petData={petData}
+          diagnosisResult={lastDiagnosis}
+          symptomData={symptomData}
+          onGoToTreatment={() => setCurrentView('treatment')}
+          onGoToHospital={() => {
+            setCurrentTab('hospital');
+            setCurrentView(null);
+          }}
+          onBack={() => {
+            setCurrentView(null);
+            setCurrentTab('care');
+          }}
         />
       )}
 
       {currentView === 'hospital' && petData && lastDiagnosis && (
-        <HospitalBooking 
+        <HospitalBooking
           petData={petData}
           diagnosis={lastDiagnosis}
           symptomData={symptomData}
-          onBack={() => setCurrentView('diagnosis')}
+          onBack={() => setCurrentView('diagnosis-result')}
           onSelectHospital={async (hospital) => {
             setSelectedHospital(hospital);
             if (lastDiagnosis) {
