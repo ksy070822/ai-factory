@@ -1,0 +1,113 @@
+/* src/components/Avatar.css */
+
+.avatar-card {
+  background: linear-gradient(135deg, #f9f5ff 0%, #e3f2fd 100%);
+  border-radius: 16px;
+  padding: 16px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+}
+
+.avatar-card-md {
+  max-width: 320px;
+}
+
+.avatar-card-lg {
+  max-width: 420px;
+}
+
+.avatar-emoji-wrapper {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  flex-shrink: 0;
+}
+
+.avatar-emoji {
+  line-height: 1;
+}
+
+.avatar-tag {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  background: #fffb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  z-index: 10;
+}
+
+.avatar-tag-ear {
+  top: -4px;
+  right: -4px;
+}
+
+.avatar-tag-belly {
+  bottom: -4px;
+  right: 0;
+}
+
+.avatar-tag-skin {
+  bottom: -4px;
+  left: 0;
+}
+
+.avatar-tag-fever {
+  top: -4px;
+  left: -4px;
+}
+
+.avatar-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+
+.avatar-name {
+  font-weight: 700;
+  font-size: 16px;
+  color: #333;
+}
+
+.avatar-breed {
+  font-size: 13px;
+  color: #666;
+}
+
+.avatar-energy {
+  font-size: 12px;
+  color: #555;
+  font-weight: 500;
+}
+
+.avatar-badges {
+  margin-top: 4px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.avatar-badge {
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 10px;
+  background: rgba(103, 80, 164, 0.1);
+  color: #4a148c;
+  white-space: nowrap;
+}
+
