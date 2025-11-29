@@ -451,6 +451,7 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
         >
           변경
         </button>
+        </div>
       </div>
       
       <div className="pt-20 max-w-md mx-auto space-y-6">
