@@ -30,6 +30,23 @@ export function LoginScreen({ onLogin, onGoToRegister, onSkipLogin }) {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  // 페이지 로드 시 리다이렉트 결과 확인 (모바일 구글 로그인)
+  useEffect(() => {
+    const checkRedirectResult = async () => {
+      setLoading(true);
+      try {
+        const result = await authService.handleRedirectResult();
+        if (result.success) {
+          onLogin(result.user);
+        }
+      } catch (error) {
+        console.error('리다이렉트 결과 확인 실패:', error);
+      }
+      setLoading(false);
+    };
+    checkRedirectResult();
+  }, [onLogin]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -56,6 +73,12 @@ export function LoginScreen({ onLogin, onGoToRegister, onSkipLogin }) {
 
     if (result.success) {
       onLogin({ ...result.user, userMode });
+    } else if (result.redirecting) {
+      // 모바일에서 리다이렉트 중이면 아무것도 안함
+      return;
+    } else if (result.isEmbeddedBrowser) {
+      // 임베디드 브라우저 안내
+      setError(result.error);
     } else {
       setError(result.error);
     }
@@ -166,9 +189,9 @@ export function LoginScreen({ onLogin, onGoToRegister, onSkipLogin }) {
           </div>
 
           {error && (
-            <div className="bg-red-50 text-red-600 text-sm p-3 rounded-lg flex items-center gap-2">
-              <span className="material-symbols-outlined text-sm">error</span>
-              {error}
+            <div className="bg-red-50 text-red-600 text-sm p-3 rounded-lg flex items-start gap-2">
+              <span className="material-symbols-outlined text-sm mt-0.5">error</span>
+              <span className="whitespace-pre-line">{error}</span>
             </div>
           )}
 
