@@ -4,6 +4,7 @@ import react from '@vitejs/plugin-react'
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
+  base: process.env.NODE_ENV === 'production' ? '/ai-factory/' : '/',
   server: {
     fs: {
       deny: ['**/google-ai studio/**']
@@ -14,7 +15,8 @@ export default defineConfig({
       input: {
         main: './index.html'
       }
-    }
+    },
+    outDir: 'dist'
   }
 })
 
