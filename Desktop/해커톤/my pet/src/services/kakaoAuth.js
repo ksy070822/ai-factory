@@ -3,7 +3,8 @@
  */
 
 const KAKAO_JS_KEY = '72f88f8c8193dd28d0539df80f16ab87';
-const KAKAO_REDIRECT_URI = window.location.origin + '/oauth/kakao/callback';
+// 리다이렉트 URI는 현재 페이지로 설정 (카카오 개발자 콘솔에 등록 필요)
+const KAKAO_REDIRECT_URI = window.location.origin;
 
 // Kakao SDK 초기화 상태
 let isKakaoInitialized = false;
@@ -108,77 +109,27 @@ export const initKakao = () => {
 
 /**
  * 카카오 로그인
+ * Kakao SDK 2.x에서는 authorize (리다이렉트 방식)만 지원
  */
 export const loginWithKakao = (userMode = 'guardian') => {
   return new Promise(async (resolve, reject) => {
     try {
       await initKakao();
 
-      // 모바일 또는 임베디드 브라우저에서는 리다이렉트 방식 사용
-      if (isMobile() || isEmbeddedBrowser()) {
-        // 유저 모드 저장
-        sessionStorage.setItem('pendingUserMode', userMode);
-        sessionStorage.setItem('pendingKakaoLogin', 'true');
+      // 유저 모드 저장
+      sessionStorage.setItem('pendingUserMode', userMode);
+      sessionStorage.setItem('pendingKakaoLogin', 'true');
 
-        // 리다이렉트 방식으로 로그인
-        window.Kakao.Auth.authorize({
-          redirectUri: KAKAO_REDIRECT_URI,
-          scope: 'profile_nickname,profile_image,account_email',
-        });
-
-        // 리다이렉트 되므로 여기서 반환
-        resolve({ success: false, redirecting: true });
-        return;
-      }
-
-      // 데스크톱에서는 팝업 방식 사용 (타임아웃 추가)
-      let isResolved = false;
-      const timeout = setTimeout(() => {
-        if (!isResolved) {
-          isResolved = true;
-          reject({ success: false, error: '카카오 로그인 시간이 초과되었습니다. 팝업이 차단되었는지 확인해주세요.' });
-        }
-      }, 60000); // 60초 타임아웃
-
-      window.Kakao.Auth.login({
-        success: (authObj) => {
-          if (isResolved) return;
-          clearTimeout(timeout);
-
-          // 사용자 정보 가져오기
-          window.Kakao.API.request({
-            url: '/v2/user/me',
-            success: (res) => {
-              if (isResolved) return;
-              isResolved = true;
-
-              const kakaoUser = {
-                uid: `kakao_${res.id}`,
-                email: res.kakao_account?.email || `kakao_${res.id}@kakao.com`,
-                displayName: res.kakao_account?.profile?.nickname || '카카오 사용자',
-                photoURL: res.kakao_account?.profile?.profile_image_url || null,
-                provider: 'kakao',
-                kakaoId: res.id,
-                accessToken: authObj.access_token,
-              };
-              resolve({ success: true, user: kakaoUser });
-            },
-            fail: (error) => {
-              if (isResolved) return;
-              isResolved = true;
-              console.error('카카오 사용자 정보 조회 실패:', error);
-              reject({ success: false, error: '사용자 정보를 가져올 수 없습니다.' });
-            },
-          });
-        },
-        fail: (error) => {
-          if (isResolved) return;
-          isResolved = true;
-          clearTimeout(timeout);
-          console.error('카카오 로그인 실패:', error);
-          reject({ success: false, error: '카카오 로그인에 실패했습니다.' });
-        },
+      // 리다이렉트 방식으로 로그인 (SDK 2.x는 이 방식만 지원)
+      // response_type: 'token'으로 설정하면 access_token을 URL 해시로 직접 받음
+      window.Kakao.Auth.authorize({
+        redirectUri: KAKAO_REDIRECT_URI,
+        responseType: 'token',
+        scope: 'profile_nickname,profile_image,account_email',
       });
+
+      // 리다이렉트 되므로 여기서 반환
+      resolve({ success: false, redirecting: true });
     } catch (error) {
       console.error('카카오 초기화 실패:', error);
       reject({ success: false, error: 'Kakao SDK 초기화에 실패했습니다.' });
@@ -187,7 +138,8 @@ export const loginWithKakao = (userMode = 'guardian') => {
 };
 
 /**
- * 카카오 리다이렉트 결과 처리 (모바일용)
+ * 카카오 리다이렉트 결과 처리
+ * URL 해시에서 access_token을 추출하거나 code를 확인
  */
 export const handleKakaoRedirectResult = () => {
   return new Promise(async (resolve, reject) => {
@@ -199,22 +151,34 @@ export const handleKakaoRedirectResult = () => {
         return;
       }
 
-      // URL에서 인증 코드 확인
+      await initKakao();
+
+      // URL 해시에서 access_token 확인 (implicit grant)
+      const hash = window.location.hash.substring(1);
+      const hashParams = new URLSearchParams(hash);
+      const accessToken = hashParams.get('access_token');
+
+      // URL 쿼리에서 code 확인 (authorization code grant)
       const urlParams = new URLSearchParams(window.location.search);
       const code = urlParams.get('code');
+      const error = urlParams.get('error');
 
-      if (!code) {
+      // 에러 확인
+      if (error) {
         sessionStorage.removeItem('pendingKakaoLogin');
-        resolve({ success: false, noCode: true });
+        sessionStorage.removeItem('pendingUserMode');
+        window.history.replaceState({}, document.title, window.location.pathname);
+        reject({ success: false, error: '카카오 로그인이 취소되었습니다.' });
         return;
       }
 
-      await initKakao();
-
-      // 액세스 토큰이 이미 있는지 확인
-      const accessToken = window.Kakao.Auth.getAccessToken();
-
+      // access_token이 있으면 바로 사용
       if (accessToken) {
+        window.Kakao.Auth.setAccessToken(accessToken);
+
+        // URL 정리
+        window.history.replaceState({}, document.title, window.location.pathname);
+
         // 사용자 정보 가져오기
         window.Kakao.API.request({
           url: '/v2/user/me',
@@ -222,9 +186,6 @@ export const handleKakaoRedirectResult = () => {
             const userMode = sessionStorage.getItem('pendingUserMode') || 'guardian';
             sessionStorage.removeItem('pendingKakaoLogin');
             sessionStorage.removeItem('pendingUserMode');
-
-            // URL에서 code 파라미터 제거
-            window.history.replaceState({}, document.title, window.location.pathname);
 
             const kakaoUser = {
               uid: `kakao_${res.id}`,
@@ -239,23 +200,29 @@ export const handleKakaoRedirectResult = () => {
           },
           fail: (error) => {
             sessionStorage.removeItem('pendingKakaoLogin');
+            sessionStorage.removeItem('pendingUserMode');
             console.error('카카오 사용자 정보 조회 실패:', error);
             reject({ success: false, error: '사용자 정보를 가져올 수 없습니다.' });
           },
         });
-      } else {
-        // 인증 코드로 토큰을 받아야 하는 경우 (서버 사이드 처리 필요)
-        // 클라이언트에서는 SDK로 직접 처리가 어려우므로 에러 표시
-        sessionStorage.removeItem('pendingKakaoLogin');
-        console.warn('카카오 리다이렉트 로그인: 서버 사이드 토큰 교환이 필요합니다.');
-
-        // URL에서 code 파라미터 제거
-        window.history.replaceState({}, document.title, window.location.pathname);
-
-        reject({ success: false, error: '카카오 로그인 처리 중 오류가 발생했습니다. 다시 시도해주세요.' });
+        return;
       }
+
+      // code만 있는 경우 (서버 사이드 처리 필요)
+      if (code) {
+        sessionStorage.removeItem('pendingKakaoLogin');
+        sessionStorage.removeItem('pendingUserMode');
+        window.history.replaceState({}, document.title, window.location.pathname);
+        reject({ success: false, error: '카카오 로그인 설정을 확인해주세요. (Redirect URI 설정 필요)' });
+        return;
+      }
+
+      // 토큰도 코드도 없는 경우
+      sessionStorage.removeItem('pendingKakaoLogin');
+      resolve({ success: false, noToken: true });
     } catch (error) {
       sessionStorage.removeItem('pendingKakaoLogin');
+      sessionStorage.removeItem('pendingUserMode');
       console.error('카카오 리다이렉트 결과 처리 실패:', error);
       reject({ success: false, error: 'Kakao 로그인 처리에 실패했습니다.' });
     }
