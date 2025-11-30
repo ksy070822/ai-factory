@@ -1626,7 +1626,35 @@ const generateAIQuestion = (symptomText, conversationHistory) => {
 
 // ============ 멀티에이전트 진료 (핵심!) ============
 // 백엔드 Triage API 호출 함수
-const TRIAGE_API_BASE_URL = import.meta.env.VITE_TRIAGE_API_BASE_URL || 'http://127.0.0.1:8000';
+// 배포 환경 감지: GitHub Pages에서는 환경 변수 또는 프로덕션 URL 사용
+const getTriageApiBaseUrl = () => {
+  // 환경 변수가 명시적으로 설정되어 있으면 사용
+  if (import.meta.env.VITE_TRIAGE_API_BASE_URL) {
+    return import.meta.env.VITE_TRIAGE_API_BASE_URL;
+  }
+  
+  // 배포 환경 감지 (GitHub Pages)
+  const isProduction = window.location.hostname === 'ksy070822.github.io' || 
+                       window.location.hostname.includes('github.io');
+  
+  if (isProduction) {
+    // 프로덕션 환경: 백엔드 서버 URL
+    // 백엔드 서버를 배포한 후 실제 URL로 변경 필요
+    // 예: 'https://petcare-backend.railway.app' 또는 'https://petcare-backend.render.com'
+    // 현재는 백엔드가 배포되지 않아서 로컬 URL 사용 (작동하지 않음)
+    // TODO: 백엔드 배포 후 아래 주석을 해제하고 실제 URL로 변경
+    // return 'https://your-backend-url.railway.app';
+    
+    // 임시: 빈 화면 대신 에러 메시지 표시를 위해 로컬 URL 반환
+    // (실제 API 호출 시 에러 처리에서 명확한 메시지 표시)
+    return 'http://127.0.0.1:8000';
+  }
+  
+  // 로컬 개발 환경
+  return 'http://127.0.0.1:8000';
+};
+
+const TRIAGE_API_BASE_URL = getTriageApiBaseUrl();
 
 async function callTriageAPI(petData, symptomData) {
   try {
@@ -1669,7 +1697,18 @@ async function callTriageAPI(petData, symptomData) {
     // 디버깅: 종 정보 확인
     console.log('[callTriageAPI] 종 정보:', { rawSpecies, normalizedSpecies, petData });
 
-    const response = await fetch(`${TRIAGE_API_BASE_URL}/api/triage`, {
+    // 배포 환경에서 백엔드 URL 확인
+    const apiUrl = getTriageApiBaseUrl();
+    console.log('[callTriageAPI] API URL:', apiUrl);
+    
+    // 프로덕션 환경에서 로컬 서버 URL이면 경고
+    const isProduction = window.location.hostname === 'ksy070822.github.io' || 
+                         window.location.hostname.includes('github.io');
+    if (isProduction && apiUrl.includes('127.0.0.1')) {
+      throw new Error('백엔드 서버가 배포되지 않았습니다. 백엔드 서버를 배포하고 VITE_TRIAGE_API_BASE_URL 환경 변수를 설정해주세요.');
+    }
+
+    const response = await fetch(`${apiUrl}/api/triage`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -1686,6 +1725,16 @@ async function callTriageAPI(petData, symptomData) {
     return data;
   } catch (error) {
     console.error('Triage API 호출 오류:', error);
+    // 네트워크 오류 감지
+    if (error?.message?.includes('Failed to fetch') || error?.name === 'TypeError') {
+      const isProduction = window.location.hostname === 'ksy070822.github.io' || 
+                           window.location.hostname.includes('github.io');
+      if (isProduction) {
+        throw new Error('백엔드 서버에 연결할 수 없습니다. 백엔드 서버가 배포되어 있는지 확인해주세요.');
+      } else {
+        throw new Error('백엔드 서버에 연결할 수 없습니다. 로컬 서버(http://127.0.0.1:8000)가 실행 중인지 확인해주세요.');
+      }
+    }
     throw error;
   }
 }
@@ -1988,12 +2037,22 @@ function MultiAgentDiagnosis({ petData, symptomData, onComplete, onBack, onDiagn
         if (!isMounted) return;
         
         // 에러 메시지 표시
+        const isProductionEnv = window.location.hostname === 'ksy070822.github.io' || 
+                                window.location.hostname.includes('github.io');
+        let errorMessage = `오류가 발생했습니다: ${error.message}`;
+        
+        if (isProductionEnv && (error.message.includes('백엔드 서버가 배포되지 않았습니다') || error.message.includes('연결할 수 없습니다'))) {
+          errorMessage = `⚠️ 백엔드 서버 연결 실패\n\n현재 GitHub Pages에서 AI 진단 기능을 사용하려면 백엔드 서버를 배포해야 합니다.\n\n해결 방법:\n1. 백엔드 서버를 Railway, Render 등에 배포\n2. GitHub Secrets에 VITE_TRIAGE_API_BASE_URL 설정\n3. 자세한 내용은 DEPLOYMENT.md 참고\n\n서버 URL: ${TRIAGE_API_BASE_URL}`;
+        } else if (error.message.includes('Failed to fetch') || error.message.includes('연결할 수 없습니다')) {
+          errorMessage = `백엔드 서버에 연결할 수 없습니다.\n\n${isProductionEnv ? '백엔드 서버가 배포되어 있는지 확인해주세요.' : '로컬 서버(http://127.0.0.1:8000)가 실행 중인지 확인해주세요.'}\n\n서버 URL: ${TRIAGE_API_BASE_URL}`;
+        }
+        
         setMessages(prev => [...prev, {
           agent: 'System',
           role: '시스템',
           icon: '⚠️',
           type: 'error',
-          content: `오류가 발생했습니다: ${error.message}\n\n백엔드 서버(${TRIAGE_API_BASE_URL})가 실행 중인지 확인해주세요.\n\n브라우저 개발자 도구(F12)의 Console 탭에서 자세한 오류를 확인할 수 있습니다.`,
+          content: errorMessage,
           timestamp: Date.now()
         }]);
         

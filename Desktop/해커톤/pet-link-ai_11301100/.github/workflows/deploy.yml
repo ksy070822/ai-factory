@@ -35,6 +35,9 @@ jobs:
         run: npm run build
         env:
           NODE_ENV: production
+          # 백엔드 API URL (GitHub Secrets에서 가져오기)
+          # GitHub 저장소 → Settings → Secrets → VITE_TRIAGE_API_BASE_URL 추가 필요
+          VITE_TRIAGE_API_BASE_URL: ${{ secrets.VITE_TRIAGE_API_BASE_URL }}
 
       - name: Setup Pages
         uses: actions/configure-pages@v4

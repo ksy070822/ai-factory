@@ -37,6 +37,33 @@ gh-pages -d dist
 
 GitHub Pages에서는 환경 변수를 직접 설정할 수 없으므로, 필요한 경우 빌드 시점에 환경 변수를 주입해야 합니다.
 
+#### 백엔드 API URL 설정 (중요!)
+
+**현재 문제**: GitHub Pages에서 AI 진단이 작동하지 않는 이유는 백엔드 서버가 로컬(`127.0.0.1:8000`)에만 있기 때문입니다.
+
+**해결 방법**:
+
+1. **백엔드 서버 배포** (필수)
+   - Railway, Render, Fly.io, Heroku 등에 백엔드 서버 배포
+   - 배포 후 받은 URL 예: `https://petcare-backend.railway.app`
+
+2. **GitHub Actions 빌드 시 환경 변수 주입**
+   - GitHub 저장소 → Settings → Secrets and variables → Actions
+   - 새 레포지토리 시크릿 추가: `VITE_TRIAGE_API_BASE_URL`
+   - 값: 배포된 백엔드 서버 URL (예: `https://petcare-backend.railway.app`)
+
+3. **워크플로우 파일 수정**
+   ```yaml
+   - name: Build
+     run: npm run build
+     env:
+       NODE_ENV: production
+       VITE_TRIAGE_API_BASE_URL: ${{ secrets.VITE_TRIAGE_API_BASE_URL }}
+   ```
+
+4. **또는 코드에서 직접 설정** (임시 방법)
+   - `App.jsx`의 `getTriageApiBaseUrl()` 함수에서 프로덕션 URL 직접 설정
+
 `.env` 파일의 API 키는 클라이언트 측에서 사용되므로, GitHub Pages에 배포할 때는:
 - API 키가 코드에 노출되지 않도록 주의
 - 또는 환경 변수 대신 다른 방식으로 관리
