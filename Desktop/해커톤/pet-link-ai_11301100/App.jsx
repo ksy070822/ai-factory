@@ -265,7 +265,7 @@ const SPECIES_OPTIONS = [
 function ProfileRegistration({ onComplete, userId }) {
   const [formData, setFormData] = useState({
     petName: '',
-    species: 'dog',
+    species: null, // null로 시작하여 동물 종류를 먼저 선택하도록
     breed: '',
     birthDate: '',
     sex: 'M',
@@ -309,8 +309,11 @@ function ProfileRegistration({ onComplete, userId }) {
       defaultCharacter = 'other_pet';
     }
     
-    setFormData(prev => ({ ...prev, species, character: defaultCharacter }));
+    setFormData(prev => ({ ...prev, species, character: defaultCharacter, breed: '' })); // 품종도 초기화
   };
+  
+  // 품종 옵션 가져오기
+  const availableBreeds = formData.species ? getBreedsForSpecies(formData.species) : [];
 
   const regions = {
     '서울특별시': ['강남구', '강동구', '강북구', '강서구', '관악구', '광진구', '구로구', '금천구', '노원구', '도봉구', '동대문구', '동작구', '마포구', '서대문구', '서초구', '성동구', '성북구', '송파구', '양천구', '영등포구', '용산구', '은평구', '종로구', '중구', '중랑구'],
@@ -378,9 +381,47 @@ function ProfileRegistration({ onComplete, userId }) {
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="registration-form">
-            {/* 프로필 사진/캐릭터 선택 */}
-            <div className="form-group">
-              <label>프로필 사진 또는 캐릭터 *</label>
+            {/* 1단계: 동물 종류 선택 (상단 고정) */}
+            <div className="form-group" style={{ borderBottom: '2px solid #e5e7eb', paddingBottom: '24px', marginBottom: '24px' }}>
+              <label style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '16px', display: 'block' }}>동물 종류 선택 *</label>
+              <div className="grid grid-cols-4 gap-3" style={{ minHeight: '200px' }}>
+                {SPECIES_OPTIONS.map(option => (
+                  <div
+                    key={option.id}
+                    className={`cursor-pointer rounded-lg border-2 p-4 text-center transition-all ${
+                      formData.species === option.id
+                        ? 'border-primary bg-primary/10 shadow-md scale-105'
+                        : 'border-slate-200 bg-white hover:border-primary/50 hover:scale-102'
+                    }`}
+                    onClick={() => handleSpeciesChange(option.id)}
+                    style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}
+                  >
+                    <div className="text-4xl mb-2">{option.emoji}</div>
+                    <div className="text-sm font-medium text-slate-700">{option.label}</div>
+                    <input
+                      type="radio"
+                      id={option.id}
+                      name="species"
+                      value={option.id}
+                      checked={formData.species === option.id}
+                      onChange={(e) => handleSpeciesChange(e.target.value)}
+                      className="hidden"
+                    />
+                  </div>
+                ))}
+              </div>
+              {/* 디버깅: 실제로 몇 개가 렌더링되는지 확인 */}
+              <div style={{ fontSize: '12px', color: '#999', marginTop: '8px' }}>
+                총 {SPECIES_OPTIONS.length}개 종류 표시 중
+              </div>
+            </div>
+            
+            {/* 2단계: 선택한 동물에 따른 프로필 입력 (동물 선택 후 표시) */}
+            {formData.species && (
+              <>
+                {/* 프로필 사진/캐릭터 선택 */}
+                <div className="form-group">
+                  <label>프로필 사진 또는 캐릭터 *</label>
               <div className="profile-selector">
                 {/* 프로필 이미지 미리보기 */}
                 <div className="profile-preview-container">
@@ -443,152 +484,167 @@ function ProfileRegistration({ onComplete, userId }) {
                   ))}
                 </div>
               </div>
-            </div>
+                </div>
 
-            <div className="form-group">
-              <label>반려동물 이름 *</label>
-              <input
-                type="text"
-                required
-                placeholder="예: 초코"
-                value={formData.petName}
-                onChange={(e) => setFormData({...formData, petName: e.target.value})}
-              />
-            </div>
+                <div className="form-group">
+                  <label>반려동물 이름 *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="예: 초코"
+                    value={formData.petName}
+                    onChange={(e) => setFormData({...formData, petName: e.target.value})}
+                  />
+                </div>
 
-            <div className="form-group">
-              <label>종류 *</label>
-              <div className="grid grid-cols-4 gap-3">
-                {SPECIES_OPTIONS.map(option => (
-                  <div
-                    key={option.id}
-                    className={`cursor-pointer rounded-lg border-2 p-3 text-center transition-all ${
-                      formData.species === option.id
-                        ? 'border-primary bg-primary/10 shadow-md'
-                        : 'border-slate-200 bg-white hover:border-primary/50'
-                    }`}
-                    onClick={() => handleSpeciesChange(option.id)}
+                <div className="form-group">
+                  <label>품종 *</label>
+                  <div className="grid grid-cols-3 gap-3 max-h-64 overflow-y-auto">
+                    {availableBreeds.map(breed => (
+                      <div
+                        key={breed.id}
+                        className={`cursor-pointer rounded-lg border-2 p-3 text-center transition-all ${
+                          formData.breed === breed.id
+                            ? 'border-primary bg-primary/10 shadow-md'
+                            : 'border-slate-200 bg-white hover:border-primary/50'
+                        }`}
+                        onClick={() => setFormData({...formData, breed: breed.id})}
+                      >
+                        <div className="text-2xl mb-1">{breed.emoji}</div>
+                        <div className="text-xs font-medium text-slate-700">{breed.name}</div>
+                        <input
+                          type="radio"
+                          id={breed.id}
+                          name="breed"
+                          value={breed.id}
+                          checked={formData.breed === breed.id}
+                          onChange={(e) => setFormData({...formData, breed: e.target.value})}
+                          className="hidden"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                  {/* 직접 입력 옵션 */}
+                  <div className="mt-3">
+                    <input
+                      type="text"
+                      placeholder="또는 직접 입력 (예: 믹스견, 믹스묘 등)"
+                      value={formData.breed && !availableBreeds.find(b => b.id === formData.breed) ? formData.breed : ''}
+                      onChange={(e) => setFormData({...formData, breed: e.target.value})}
+                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-primary"
+                    />
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label>생년월일 *</label>
+                  <input
+                    type="date"
+                    required
+                    value={formData.birthDate}
+                    onChange={(e) => setFormData({...formData, birthDate: e.target.value})}
+                  />
+                </div>
+                
+                <div className="form-group">
+                  <label>성별 *</label>
+                  <div className="radio-group">
+                    <div className={`radio-item ${formData.sex === 'M' ? 'active' : ''}`}>
+                      <input
+                        type="radio"
+                        id="male"
+                        name="sex"
+                        value="M"
+                        checked={formData.sex === 'M'}
+                        onChange={(e) => setFormData({...formData, sex: e.target.value})}
+                      />
+                      <label htmlFor="male">♂ 수컷</label>
+                    </div>
+                    <div className={`radio-item ${formData.sex === 'F' ? 'active' : ''}`}>
+                      <input
+                        type="radio"
+                        id="female"
+                        name="sex"
+                        value="F"
+                        checked={formData.sex === 'F'}
+                        onChange={(e) => setFormData({...formData, sex: e.target.value})}
+                      />
+                      <label htmlFor="female">♀ 암컷</label>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="form-group">
+                  <label>중성화 여부 *</label>
+                  <div className="radio-group">
+                    <div className={`radio-item ${formData.neutered === true ? 'active' : ''}`}>
+                      <input
+                        type="radio"
+                        id="neutered-yes"
+                        name="neutered"
+                        checked={formData.neutered === true}
+                        onChange={() => setFormData({...formData, neutered: true})}
+                      />
+                      <label htmlFor="neutered-yes">✓ 완료</label>
+                    </div>
+                    <div className={`radio-item ${formData.neutered === false ? 'active' : ''}`}>
+                      <input
+                        type="radio"
+                        id="neutered-no"
+                        name="neutered"
+                        checked={formData.neutered === false}
+                        onChange={() => setFormData({...formData, neutered: false})}
+                      />
+                      <label htmlFor="neutered-no">✗ 미완료</label>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="form-group">
+                  <label>거주 지역 *</label>
+                  <select
+                    required
+                    value={formData.sido}
+                    onChange={(e) => setFormData({...formData, sido: e.target.value, sigungu: ''})}
                   >
-                    <div className="text-3xl mb-1">{option.emoji}</div>
-                    <div className="text-sm font-medium text-slate-700">{option.label}</div>
-                  <input
-                    type="radio"
-                      id={option.id}
-                    name="species"
-                      value={option.id}
-                      checked={formData.species === option.id}
-                    onChange={(e) => handleSpeciesChange(e.target.value)}
-                      className="hidden"
-                  />
+                    <option value="">시/도 선택</option>
+                    {Object.keys(regions).map(sido => (
+                      <option key={sido} value={sido}>{sido}</option>
+                    ))}
+                  </select>
                 </div>
-                ))}
-              </div>
-            </div>
-            
-            <div className="form-group">
-              <label>품종</label>
-              <input
-                type="text"
-                placeholder="예: 푸들"
-                value={formData.breed}
-                onChange={(e) => setFormData({...formData, breed: e.target.value})}
-              />
-            </div>
-            
-            <div className="form-group">
-              <label>생년월일 *</label>
-              <input
-                type="date"
-                required
-                value={formData.birthDate}
-                onChange={(e) => setFormData({...formData, birthDate: e.target.value})}
-              />
-            </div>
-            
-            <div className="form-group">
-              <label>성별 *</label>
-              <div className="radio-group">
-                <div className={`radio-item ${formData.sex === 'M' ? 'active' : ''}`}>
-                  <input
-                    type="radio"
-                    id="male"
-                    name="sex"
-                    value="M"
-                    checked={formData.sex === 'M'}
-                    onChange={(e) => setFormData({...formData, sex: e.target.value})}
-                  />
-                  <label htmlFor="male">♂ 수컷</label>
-                </div>
-                <div className={`radio-item ${formData.sex === 'F' ? 'active' : ''}`}>
-                  <input
-                    type="radio"
-                    id="female"
-                    name="sex"
-                    value="F"
-                    checked={formData.sex === 'F'}
-                    onChange={(e) => setFormData({...formData, sex: e.target.value})}
-                  />
-                  <label htmlFor="female">♀ 암컷</label>
-                </div>
-              </div>
-            </div>
-            
-            <div className="form-group">
-              <label>중성화 여부 *</label>
-              <div className="radio-group">
-                <div className={`radio-item ${formData.neutered === true ? 'active' : ''}`}>
-                  <input
-                    type="radio"
-                    id="neutered-yes"
-                    name="neutered"
-                    checked={formData.neutered === true}
-                    onChange={() => setFormData({...formData, neutered: true})}
-                  />
-                  <label htmlFor="neutered-yes">✓ 완료</label>
-                </div>
-                <div className={`radio-item ${formData.neutered === false ? 'active' : ''}`}>
-                  <input
-                    type="radio"
-                    id="neutered-no"
-                    name="neutered"
-                    checked={formData.neutered === false}
-                    onChange={() => setFormData({...formData, neutered: false})}
-                  />
-                  <label htmlFor="neutered-no">✗ 미완료</label>
-                </div>
-              </div>
-            </div>
-            
-            <div className="form-group">
-              <label>거주 지역 *</label>
-              <select
-                required
-                value={formData.sido}
-                onChange={(e) => setFormData({...formData, sido: e.target.value, sigungu: ''})}
-              >
-                <option value="">시/도 선택</option>
-                {Object.keys(regions).map(sido => (
-                  <option key={sido} value={sido}>{sido}</option>
-                ))}
-              </select>
-            </div>
-            
-            {formData.sido && (
-              <div className="form-group">
-                <select
-                  required
-                  value={formData.sigungu}
-                  onChange={(e) => setFormData({...formData, sigungu: e.target.value})}
+                
+                {formData.sido && (
+                  <div className="form-group">
+                    <select
+                      required
+                      value={formData.sigungu}
+                      onChange={(e) => setFormData({...formData, sigungu: e.target.value})}
+                    >
+                      <option value="">시/군/구 선택</option>
+                      {regions[formData.sido]?.map(sigungu => (
+                        <option key={sigungu} value={sigungu}>{sigungu}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+                
+                <button 
+                  type="submit" 
+                  className="submit-btn"
+                  disabled={!formData.species || !formData.breed || !formData.petName || !formData.birthDate}
                 >
-                  <option value="">시/군/구 선택</option>
-                  {regions[formData.sido]?.map(sigungu => (
-                    <option key={sigungu} value={sigungu}>{sigungu}</option>
-                  ))}
-                </select>
-              </div>
+                  등록 완료
+                </button>
+              </>
             )}
             
-            <button type="submit" className="submit-btn">등록 완료</button>
+            {!formData.species && (
+              <div className="text-center py-8 text-slate-500">
+                <p className="text-lg mb-2">위에서 동물 종류를 선택해주세요</p>
+                <p className="text-sm">선택하시면 프로필 입력 화면이 나타납니다</p>
+              </div>
+            )}
           </form>
         )}
       </div>
