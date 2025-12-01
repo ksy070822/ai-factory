@@ -326,7 +326,7 @@ export function HospitalBooking({ petData, diagnosis, symptomData, onBack, onSel
 위 정보를 바탕으로 이 병원의 특징을 2-3줄로 요약해주세요. 예: "24시간 운영으로 응급 상황에 대비할 수 있는 병원입니다. 평점이 높아 신뢰할 수 있는 진료를 제공합니다."`;
 
         const response = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
           {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
