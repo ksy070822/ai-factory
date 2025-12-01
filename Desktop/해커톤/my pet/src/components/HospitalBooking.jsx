@@ -275,7 +275,7 @@ export function HospitalBooking({ petData, diagnosis, symptomData, onBack, onSel
   // AI 진단서 첨부 여부
   const [attachDiagnosis, setAttachDiagnosis] = useState(true);
 
-  const handleConfirmBooking = () => {
+  const handleConfirmBooking = async () => {
     if (!bookingDate || !bookingTime) {
       alert('날짜와 시간을 선택해주세요.');
       return;
