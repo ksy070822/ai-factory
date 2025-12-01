@@ -49,57 +49,64 @@ const DUMMY_MEDICATIONS = [
     id: 'med_1',
     date: '2024-11-28',
     medications: ['피부연고 (히드로코르티손)', '항히스타민제'],
-    pharmacyName: '행복한동물병원',
+    hospitalName: '행복한동물병원',
     daysSupply: '7일분',
-    status: 'effective'
+    source: 'dummy',
+    feedbackStatus: 'effective'
   },
   {
     id: 'med_2',
     date: '2024-11-20',
     medications: ['아목시실린 (항생제)', '소염진통제'],
-    pharmacyName: '24시 강남동물의료센터',
+    hospitalName: '24시 강남동물의료센터',
     daysSupply: '5일분',
-    status: 'effective'
+    source: 'dummy',
+    feedbackStatus: 'effective'
   },
   {
     id: 'med_3',
     date: '2024-11-15',
     medications: ['감기약 (콧물/기침)', '면역강화제'],
-    pharmacyName: '행복한동물병원',
+    hospitalName: '행복한동물병원',
     daysSupply: '3일분',
-    status: 'side_effect'
+    source: 'dummy',
+    feedbackStatus: 'side_effect'
   },
   {
     id: 'med_4',
     date: '2024-11-10',
     medications: ['귀연고 (항균)', '귀세정제'],
-    pharmacyName: '24시 강남동물의료센터',
+    hospitalName: '24시 강남동물의료센터',
     daysSupply: '10일분',
-    status: 'effective'
+    source: 'dummy',
+    feedbackStatus: 'effective'
   },
   {
     id: 'med_5',
     date: '2024-11-05',
     medications: ['프로바이오틱스', '장영양제'],
-    pharmacyName: '행복한동물병원',
+    hospitalName: '행복한동물병원',
     daysSupply: '14일분',
-    status: 'none'
+    source: 'dummy',
+    feedbackStatus: 'none'
   },
   {
     id: 'med_6',
     date: '2024-10-28',
     medications: ['안연고 (항생제)', '인공눈물'],
-    pharmacyName: '24시 강남동물의료센터',
+    hospitalName: '24시 강남동물의료센터',
     daysSupply: '7일분',
-    status: 'none'
+    source: 'dummy',
+    feedbackStatus: 'none'
   },
   {
     id: 'med_7',
     date: '2024-10-15',
     medications: ['넥스가드 스펙트라'],
-    pharmacyName: '행복한동물병원',
+    hospitalName: '행복한동물병원',
     daysSupply: '1회분',
-    status: 'none'
+    source: 'dummy',
+    feedbackStatus: 'none'
   }
 ];
 
@@ -222,6 +229,7 @@ export function RecordsView({ petData, onBack, onViewDiagnosis, onOCR, onHome, o
   const [clinicResults, setClinicResults] = useState([]);
   const [medicationFeedback, setMedicationFeedback] = useState({});
   const [useDummyData, setUseDummyData] = useState(true); // 더미데이터 사용 플래그 - 샘플 데이터 표시
+  const [selectedCheckup, setSelectedCheckup] = useState(null); // 선택된 건강검진 상세보기
 
   // 진단 기록 로드
   useEffect(() => {
@@ -717,6 +725,75 @@ export function RecordsView({ petData, onBack, onViewDiagnosis, onOCR, onHome, o
                       )}
                     </>
                   )}
+
+                  {/* 더미 데이터 (샘플) */}
+                  {record.source === 'dummy' && (
+                    <>
+                      <div className="flex justify-between items-start mb-3">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="px-2 py-0.5 bg-green-100 text-green-700 rounded-full text-xs font-medium">
+                              병원 처방
+                            </span>
+                            <span className="text-xs text-slate-500">{formatDateShort(record.date)}</span>
+                          </div>
+                          <h4 className="text-slate-900 font-bold text-base">
+                            {Array.isArray(record.medications) && record.medications.length > 0
+                              ? (record.medications.length > 1
+                                  ? `${record.medications[0]} 외 ${record.medications.length - 1}개`
+                                  : record.medications[0])
+                              : '처방 정보'}
+                            {record.daysSupply && ` (${record.daysSupply})`}
+                          </h4>
+                          <p className="text-slate-500 text-sm">{record.hospitalName}</p>
+                        </div>
+                        {record.feedbackStatus === 'effective' && (
+                          <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium flex items-center gap-1">
+                            <span className="material-symbols-outlined text-xs">check</span>
+                            잘 맞음
+                          </span>
+                        )}
+                        {record.feedbackStatus === 'side_effect' && (
+                          <span className="px-2 py-1 bg-red-100 text-red-700 rounded-full text-xs font-medium flex items-center gap-1">
+                            <span className="material-symbols-outlined text-xs">warning</span>
+                            부작용
+                          </span>
+                        )}
+                      </div>
+
+                      {/* 피드백 버튼 */}
+                      <div className="flex gap-2">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            saveMedicationFeedback(record.id, 'effective');
+                          }}
+                          className={`flex-1 flex items-center justify-center gap-1 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                            record.feedbackStatus === 'effective'
+                              ? 'bg-green-500 text-white shadow-md'
+                              : 'bg-green-50 text-green-700 hover:bg-green-100'
+                          }`}
+                        >
+                          <span className="material-symbols-outlined text-sm">thumb_up</span>
+                          약이 잘 들었어요
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            saveMedicationFeedback(record.id, 'side_effect');
+                          }}
+                          className={`flex-1 flex items-center justify-center gap-1 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                            record.feedbackStatus === 'side_effect'
+                              ? 'bg-red-500 text-white shadow-md'
+                              : 'bg-red-50 text-red-700 hover:bg-red-100'
+                          }`}
+                        >
+                          <span className="material-symbols-outlined text-sm">thumb_down</span>
+                          부작용이 있었어요
+                        </button>
+                      </div>
+                    </>
+                  )}
                 </div>
               ))
             )}
@@ -768,12 +845,118 @@ export function RecordsView({ petData, onBack, onViewDiagnosis, onOCR, onHome, o
                     ))}
                   </div>
 
-                  <button className="w-full mt-4 py-2 text-primary text-sm font-medium flex items-center justify-center gap-1 hover:bg-primary/5 rounded-lg transition-colors">
+                  <button
+                    onClick={() => setSelectedCheckup(record)}
+                    className="w-full mt-4 py-2 text-primary text-sm font-medium flex items-center justify-center gap-1 hover:bg-primary/5 rounded-lg transition-colors"
+                  >
                     상세 결과 보기
                     <span className="material-symbols-outlined text-sm">arrow_forward_ios</span>
                   </button>
                 </div>
               ))
+            )}
+
+            {/* 건강검진 상세 모달 */}
+            {selectedCheckup && (
+              <div className="fixed inset-0 bg-black/50 z-50 flex items-end justify-center">
+                <div className="bg-white w-full max-w-lg rounded-t-3xl max-h-[90vh] overflow-y-auto animate-slide-up">
+                  <div className="sticky top-0 bg-white px-4 py-4 border-b border-slate-100 flex items-center justify-between">
+                    <h2 className="text-lg font-bold text-slate-900">건강검진 상세 결과</h2>
+                    <button
+                      onClick={() => setSelectedCheckup(null)}
+                      className="p-2 hover:bg-slate-100 rounded-full"
+                    >
+                      <span className="material-symbols-outlined">close</span>
+                    </button>
+                  </div>
+
+                  <div className="p-4 space-y-4">
+                    {/* 기본 정보 */}
+                    <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-4">
+                      <div className="flex justify-between items-start mb-3">
+                        <div>
+                          <h3 className="text-slate-900 font-bold text-lg">{selectedCheckup.type}</h3>
+                          <p className="text-slate-500 text-sm mt-1">{formatDate(selectedCheckup.date)}</p>
+                          <p className="text-slate-600 text-sm flex items-center gap-1 mt-1">
+                            <span className="material-symbols-outlined text-sm">location_on</span>
+                            {selectedCheckup.hospitalName}
+                          </p>
+                        </div>
+                        <span className={`px-4 py-2 rounded-full text-sm font-bold ${
+                          selectedCheckup.overallStatus === '건강'
+                            ? 'bg-green-100 text-green-700'
+                            : 'bg-yellow-100 text-yellow-700'
+                        }`}>
+                          {selectedCheckup.overallStatus}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* 검사 결과 상세 */}
+                    <div className="space-y-3">
+                      <h4 className="font-bold text-slate-800">검사 항목별 결과</h4>
+                      {selectedCheckup.results.map((result, idx) => (
+                        <div key={idx} className="bg-white border border-slate-200 rounded-xl p-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-2">
+                              <span className={`material-symbols-outlined ${
+                                result.status === 'normal' ? 'text-green-500' :
+                                result.status === 'caution' ? 'text-yellow-500' : 'text-red-500'
+                              }`}>{getStatusIcon(result.status)}</span>
+                              <span className="font-bold text-slate-900">{result.item}</span>
+                            </div>
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                              result.status === 'normal' ? 'bg-green-100 text-green-700' :
+                              result.status === 'caution' ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700'
+                            }`}>
+                              {result.status === 'normal' ? '정상' : result.status === 'caution' ? '주의' : '이상'}
+                            </span>
+                          </div>
+                          <p className="text-slate-600 text-sm bg-slate-50 rounded-lg p-3">
+                            {result.note}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* 수의사 소견 */}
+                    <div className="bg-slate-50 rounded-xl p-4">
+                      <h4 className="font-bold text-slate-800 mb-2 flex items-center gap-2">
+                        <span className="material-symbols-outlined text-primary">stethoscope</span>
+                        수의사 소견
+                      </h4>
+                      <p className="text-slate-600 text-sm">
+                        {selectedCheckup.overallStatus === '건강'
+                          ? '전반적인 건강 상태가 양호합니다. 정기적인 건강검진을 통해 건강을 유지하세요.'
+                          : '일부 항목에서 주의가 필요합니다. 권장 사항을 따라주시고, 필요시 재검진을 받으세요.'
+                        }
+                      </p>
+                    </div>
+
+                    {/* 다음 검진 권장일 */}
+                    <div className="bg-primary/10 rounded-xl p-4 flex items-center gap-3">
+                      <span className="material-symbols-outlined text-primary text-2xl">event</span>
+                      <div>
+                        <p className="text-slate-700 font-medium">다음 건강검진 권장일</p>
+                        <p className="text-primary font-bold">
+                          {new Date(new Date(selectedCheckup.date).setFullYear(new Date(selectedCheckup.date).getFullYear() + 1)).toLocaleDateString('ko-KR', {year: 'numeric', month: 'long', day: 'numeric'})}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* 병원 예약 버튼 */}
+                    <button
+                      onClick={() => {
+                        setSelectedCheckup(null);
+                        onHospitalBooking && onHospitalBooking();
+                      }}
+                      className="w-full bg-primary text-white font-bold py-4 rounded-xl hover:bg-primary/90 transition-colors"
+                    >
+                      건강검진 예약하기
+                    </button>
+                  </div>
+                </div>
+              </div>
             )}
           </div>
         )}

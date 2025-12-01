@@ -642,6 +642,7 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
   const [analyzing, setAnalyzing] = useState(false);
   const [healthPoints, setHealthPoints] = useState(100);
   const [todayWeight, setTodayWeight] = useState('');
+  const [todayNote, setTodayNote] = useState(''); // 오늘의 상태 메모
   const [careSaved, setCareSaved] = useState(false);
   const [careActions, setCareActions] = useState({
     meal: 0,
@@ -660,6 +661,7 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
       date: todayKey,
       petId: petData.id,
       weight: todayWeight ? parseFloat(todayWeight) : null,
+      note: todayNote || '', // 오늘의 상태 메모
       actions: careActions,
       savedAt: new Date().toISOString()
     };
@@ -690,6 +692,7 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
 
     if (todayRecord) {
       if (todayRecord.weight) setTodayWeight(todayRecord.weight.toString());
+      if (todayRecord.note) setTodayNote(todayRecord.note);
       if (todayRecord.actions) setCareActions(todayRecord.actions);
     }
   }, [petData?.id]);
@@ -1061,10 +1064,21 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
                 </div>
               </div>
 
+              {/* 오늘의 상태 입력 */}
+              <div className="mt-4">
+                <input
+                  type="text"
+                  placeholder={`오늘 ${petData?.name || '우리 아이'}는 어땠나요?`}
+                  value={todayNote}
+                  onChange={(e) => setTodayNote(e.target.value)}
+                  className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-sky-500 focus:border-sky-500 placeholder-slate-400"
+                />
+              </div>
+
               {/* 오늘 케어 완료 버튼 */}
               <button
                 onClick={saveTodayCare}
-                className={`w-full mt-4 py-3 rounded-xl font-bold text-sm transition-all ${
+                className={`w-full mt-3 py-3 rounded-xl font-bold text-sm transition-all ${
                   careSaved
                     ? 'bg-green-500 text-white'
                     : 'bg-sky-500 text-white hover:bg-sky-600'
@@ -1104,7 +1118,20 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
                   전체보기 →
                 </button>
               </div>
-              <p className="text-sm text-slate-500">아직 병원 방문 기록이 없습니다</p>
+              {/* 샘플 데이터 - 최근 방문 기록 */}
+              <div className="space-y-3">
+                <div
+                  className="bg-slate-50 rounded-xl p-3 cursor-pointer hover:bg-slate-100 transition-colors"
+                  onClick={() => onNavigate('records')}
+                >
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">병원</span>
+                    <span className="text-xs text-slate-500">2024. 11. 15.</span>
+                  </div>
+                  <p className="text-slate-900 font-medium text-sm">행복한동물병원</p>
+                  <p className="text-slate-500 text-xs mt-1">경미한 피부염 - 알레르기성 피부 반응</p>
+                </div>
+              </div>
             </div>
           </>
         )}
