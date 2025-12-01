@@ -2370,7 +2370,7 @@ ${userQuestion}
             color: '#64748b',
             fontSize: '14px'
           }}>
-            <span>AI 에이전트들이 협업하여 진료 중입니다...</span>
+            <span>AI 전문 의료진들이 협업하여 진료 중입니다...</span>
           </div>
         )}
       </div>
