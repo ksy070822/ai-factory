@@ -222,8 +222,11 @@ ${diagnosisResult?.hospitalVisit ? `
           <div className="report-section symptoms-summary">
             <h2>📝 증상 요약</h2>
             <p className="symptom-description">
-              {symptomData?.description || '보호자가 직접 입력한 증상 설명'}
+              {symptomData?.symptomText || symptomData?.description || symptomData?.userDescription || '증상 정보 없음'}
             </p>
+            {symptomData?.department && (
+              <p className="symptom-duration">🏥 진료과목: {symptomData.department}</p>
+            )}
             {symptomData?.duration && (
               <p className="symptom-duration">⏱️ 증상 지속: {symptomData.duration}</p>
             )}

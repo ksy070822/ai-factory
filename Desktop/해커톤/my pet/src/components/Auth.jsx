@@ -45,9 +45,11 @@ export function LoginScreen({ onLogin, onGoToRegister, onSkipLogin }) {
       try {
         // 구글 리다이렉트 결과 확인
         if (hasPendingGoogle) {
+          const savedUserMode = hasPendingGoogle; // sessionStorage에 저장된 userMode
           const googleResult = await authService.handleRedirectResult();
           if (googleResult.success) {
-            onLogin(googleResult.user);
+            sessionStorage.removeItem('pendingUserMode');
+            onLogin({ ...googleResult.user, userMode: savedUserMode });
             setLoading(false);
             return;
           }
