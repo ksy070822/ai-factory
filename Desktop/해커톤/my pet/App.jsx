@@ -1585,6 +1585,7 @@ function MultiAgentDiagnosis({ petData, symptomData, onComplete, onBack, onDiagn
   const [messages, setMessages] = useState([]);
   const [currentStep, setCurrentStep] = useState(0);
   const [showResult, setShowResult] = useState(false);
+  const [expandedRooms, setExpandedRooms] = useState({}); // 완료된 룸의 상세보기 확장 상태
   const [diagnosisResult, setDiagnosisResult] = useState(null);
   const [isProcessing, setIsProcessing] = useState(true);
   const [userInput, setUserInput] = useState('');
@@ -1608,15 +1609,20 @@ function MultiAgentDiagnosis({ petData, symptomData, onComplete, onBack, onDiagn
           symptomData,
           (log) => {
             if (!isMounted) return; // 컴포넌트가 언마운트되었으면 무시
-            
-            // 중복 메시지 방지: 같은 에이전트의 "진행 중..." 메시지가 있으면 제거
+
+            // 모든 메시지를 유지하되, 완전히 동일한 중복 메시지만 제거
             setMessages(prev => {
-              const filtered = prev.filter(msg => 
-                !(msg.agent === log.agent && msg.content.includes('중...') && log.content !== msg.content)
+              // 완전히 동일한 메시지(같은 에이전트, 같은 내용)인 경우만 제거
+              const isDuplicate = prev.some(msg =>
+                msg.agent === log.agent && msg.content === log.content
               );
-              
-              // 새 메시지 추가
-              return [...filtered, {
+
+              if (isDuplicate) {
+                return prev; // 중복이면 추가하지 않음
+              }
+
+              // 새 메시지 추가 (기존 메시지 모두 유지)
+              return [...prev, {
                 agent: log.agent,
                 role: log.role,
                 icon: log.icon,
@@ -2146,19 +2152,43 @@ ${userQuestion}
                   gap: '6px'
                 }}>
                   {status === 'completed' && (
-                    <div style={{
-                      background: '#22c55e',
-                      color: 'white',
-                      padding: '4px 12px',
-                      borderRadius: '20px',
-                      fontSize: '12px',
-                      fontWeight: '600',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '4px'
-                    }}>
-                      <span>✓</span> 완료
-                    </div>
+                    <>
+                      <button
+                        onClick={() => setExpandedRooms(prev => ({
+                          ...prev,
+                          [room.id]: !prev[room.id]
+                        }))}
+                        style={{
+                          background: 'transparent',
+                          border: '1px solid #22c55e',
+                          color: '#22c55e',
+                          padding: '4px 10px',
+                          borderRadius: '16px',
+                          fontSize: '11px',
+                          fontWeight: '600',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          transition: 'all 0.2s ease'
+                        }}
+                      >
+                        {expandedRooms[room.id] ? '▲ 접기' : '▼ 펼치기'}
+                      </button>
+                      <div style={{
+                        background: '#22c55e',
+                        color: 'white',
+                        padding: '4px 12px',
+                        borderRadius: '20px',
+                        fontSize: '12px',
+                        fontWeight: '600',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px'
+                      }}>
+                        <span>✓</span> 완료
+                      </div>
+                    </>
                   )}
                   {status === 'processing' && (
                     <div style={{
@@ -2216,12 +2246,15 @@ ${userQuestion}
                 </div>
               </div>
 
-              {/* 대화 내용 (모든 메시지 표시) */}
-              {isActive && roomMessages.length > 0 && (
+              {/* 대화 내용 - 진행중이거나 펼친 상태일 때 표시 */}
+              {isActive && roomMessages.length > 0 && (status === 'processing' || expandedRooms[room.id]) && (
                 <div style={{
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: '8px'
+                  gap: '8px',
+                  marginTop: '12px',
+                  paddingTop: '12px',
+                  borderTop: '1px solid rgba(0,0,0,0.08)'
                 }}>
                   {roomMessages.map((msg, msgIdx) => {
                     const isUserMessage = msg.agent === '사용자';
@@ -2255,6 +2288,21 @@ ${userQuestion}
                       </div>
                     );
                   })}
+                </div>
+              )}
+
+              {/* 완료된 룸 - 접힌 상태일 때 요약 메시지 표시 */}
+              {status === 'completed' && roomMessages.length > 0 && !expandedRooms[room.id] && (
+                <div style={{
+                  marginTop: '8px',
+                  padding: '8px 12px',
+                  background: 'rgba(34, 197, 94, 0.1)',
+                  borderRadius: '8px',
+                  fontSize: '13px',
+                  color: '#16a34a',
+                  fontWeight: '500'
+                }}>
+                  ✓ {roomMessages.length}개의 메시지 (클릭하여 상세 내용 확인)
                 </div>
               )}
             </div>
