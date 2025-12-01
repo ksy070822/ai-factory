@@ -148,13 +148,14 @@ const PET_CHARACTERS = {
     { id: 'rabbit_white', emoji: '🐰', label: '흰 토끼', color: '#FFFAF0' },
     { id: 'rabbit_brown', emoji: '🐇', label: '갈색 토끼', color: '#A0522D' },
   ],
-  fish: [
-    { id: 'fish_gold', emoji: '🐠', label: '금붕어', color: '#FF6347' },
-    { id: 'fish_tropical', emoji: '🐟', label: '열대어', color: '#00CED1' },
+  hedgehog: [
+    { id: 'hedgehog_normal', emoji: '🦔', label: '고슴도치', color: '#8B7355' },
+    { id: 'hedgehog_white', emoji: '🦔', label: '백설 고슴도치', color: '#FFFAFA' },
   ],
-  turtle: [
-    { id: 'turtle_land', emoji: '🐢', label: '육지거북', color: '#228B22' },
-    { id: 'turtle_water', emoji: '🐢', label: '반수생거북', color: '#3CB371' },
+  reptile: [
+    { id: 'reptile_lizard', emoji: '🦎', label: '도마뱀', color: '#228B22' },
+    { id: 'reptile_turtle', emoji: '🐢', label: '거북이', color: '#3CB371' },
+    { id: 'reptile_snake', emoji: '🐍', label: '뱀', color: '#556B2F' },
   ],
   other: [
     { id: 'other_pet', emoji: '🐾', label: '기타', color: '#808080' },
@@ -165,12 +166,25 @@ const PET_CHARACTERS = {
 const SPECIES_OPTIONS = [
   { id: 'dog', label: '강아지', emoji: '🐕' },
   { id: 'cat', label: '고양이', emoji: '🐈' },
-  { id: 'bird', label: '새', emoji: '🐦' },
-  { id: 'hamster', label: '햄스터', emoji: '🐹' },
   { id: 'rabbit', label: '토끼', emoji: '🐰' },
-  { id: 'fish', label: '물고기', emoji: '🐠' },
-  { id: 'turtle', label: '거북이', emoji: '🐢' },
+  { id: 'hamster', label: '햄스터', emoji: '🐹' },
+  { id: 'bird', label: '새', emoji: '🦜' },
+  { id: 'hedgehog', label: '고슴도치', emoji: '🦔' },
+  { id: 'reptile', label: '파충류', emoji: '🦎' },
   { id: 'other', label: '기타', emoji: '🐾' },
+];
+
+// 개/고양이 대표 품종 목록
+const DOG_BREEDS = [
+  '믹스견', '말티즈', '푸들', '포메라니안', '치와와', '시츄', '요크셔테리어',
+  '비숑프리제', '골든리트리버', '래브라도리트리버', '사모예드', '웰시코기',
+  '진돗개', '시바이누', '비글', '프렌치불독', '불독', '닥스훈트', '슈나우저', '기타'
+];
+
+const CAT_BREEDS = [
+  '믹스묘', '코리안숏헤어', '러시안블루', '페르시안', '브리티시숏헤어',
+  '스코티시폴드', '먼치킨', '노르웨이숲', '메인쿤', '랙돌', '아비시니안',
+  '뱅갈', '샴', '버만', '터키시앙고라', '아메리칸숏헤어', '기타'
 ];
 
 // ============ 프로필 등록 화면 ============
@@ -211,10 +225,28 @@ function ProfileRegistration({ onComplete, userId }) {
     }
   };
 
-  // 종류 변경시 캐릭터도 변경
+  // 종류 변경시 캐릭터와 품종도 변경
   const handleSpeciesChange = (species) => {
-    const defaultCharacter = species === 'dog' ? 'dog_white' : 'cat_orange';
-    setFormData(prev => ({ ...prev, species, character: defaultCharacter }));
+    // 각 종류별 기본 캐릭터 설정
+    const defaultCharacters = {
+      dog: 'dog_white',
+      cat: 'cat_orange',
+      bird: 'bird_parrot',
+      hamster: 'hamster_gold',
+      rabbit: 'rabbit_white',
+      hedgehog: 'hedgehog_normal',
+      reptile: 'reptile_lizard',
+      other: 'other_pet'
+    };
+    const defaultCharacter = defaultCharacters[species] || 'other_pet';
+    // 개/고양이가 아닌 경우 품종 초기화
+    const shouldClearBreed = species !== 'dog' && species !== 'cat';
+    setFormData(prev => ({
+      ...prev,
+      species,
+      character: defaultCharacter,
+      breed: shouldClearBreed ? '' : prev.breed
+    }));
   };
 
   const regions = {
@@ -360,41 +392,37 @@ function ProfileRegistration({ onComplete, userId }) {
 
             <div className="form-group">
               <label>종류 *</label>
-              <div className="radio-group">
-                <div className={`radio-item ${formData.species === 'dog' ? 'active' : ''}`}>
-                  <input
-                    type="radio"
-                    id="dog"
-                    name="species"
-                    value="dog"
-                    checked={formData.species === 'dog'}
-                    onChange={(e) => handleSpeciesChange(e.target.value)}
-                  />
-                  <label htmlFor="dog">🐕 개</label>
-                </div>
-                <div className={`radio-item ${formData.species === 'cat' ? 'active' : ''}`}>
-                  <input
-                    type="radio"
-                    id="cat"
-                    name="species"
-                    value="cat"
-                    checked={formData.species === 'cat'}
-                    onChange={(e) => handleSpeciesChange(e.target.value)}
-                  />
-                  <label htmlFor="cat">🐈 고양이</label>
-                </div>
+              <div className="species-grid">
+                {SPECIES_OPTIONS.map(option => (
+                  <button
+                    key={option.id}
+                    type="button"
+                    className={`species-btn ${formData.species === option.id ? 'active' : ''}`}
+                    onClick={() => handleSpeciesChange(option.id)}
+                  >
+                    <span className="species-emoji">{option.emoji}</span>
+                    <span className="species-label">{option.label}</span>
+                  </button>
+                ))}
               </div>
             </div>
-            
-            <div className="form-group">
-              <label>품종</label>
-              <input
-                type="text"
-                placeholder="예: 푸들"
-                value={formData.breed}
-                onChange={(e) => setFormData({...formData, breed: e.target.value})}
-              />
-            </div>
+
+            {/* 개/고양이인 경우에만 품종 선택 표시 */}
+            {(formData.species === 'dog' || formData.species === 'cat') && (
+              <div className="form-group">
+                <label>품종</label>
+                <select
+                  value={formData.breed}
+                  onChange={(e) => setFormData({...formData, breed: e.target.value})}
+                  className="breed-select"
+                >
+                  <option value="">품종을 선택하세요</option>
+                  {(formData.species === 'dog' ? DOG_BREEDS : CAT_BREEDS).map(breed => (
+                    <option key={breed} value={breed}>{breed}</option>
+                  ))}
+                </select>
+              </div>
+            )}
             
             <div className="form-group">
               <label>생년월일 *</label>
@@ -564,6 +592,8 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
   const [patternFlags, setPatternFlags] = useState(null);
   const [analyzing, setAnalyzing] = useState(false);
   const [healthPoints, setHealthPoints] = useState(100);
+  const [todayWeight, setTodayWeight] = useState('');
+  const [careSaved, setCareSaved] = useState(false);
   const [careActions, setCareActions] = useState({
     meal: 0,
     water: 0,
@@ -571,6 +601,49 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
     grooming: 0,
     play: 0
   });
+
+  // 오늘 케어 기록 저장
+  const saveTodayCare = () => {
+    if (!petData?.id) return;
+
+    const todayKey = new Date().toISOString().split('T')[0];
+    const careRecord = {
+      date: todayKey,
+      petId: petData.id,
+      weight: todayWeight ? parseFloat(todayWeight) : null,
+      actions: careActions,
+      savedAt: new Date().toISOString()
+    };
+
+    // localStorage에 저장
+    const existingRecords = JSON.parse(localStorage.getItem(`petMedical_careRecords_${petData.id}`) || '[]');
+    const todayIndex = existingRecords.findIndex(r => r.date === todayKey);
+    if (todayIndex >= 0) {
+      existingRecords[todayIndex] = careRecord;
+    } else {
+      existingRecords.unshift(careRecord);
+    }
+    // 최근 30일만 보관
+    const recentRecords = existingRecords.slice(0, 30);
+    localStorage.setItem(`petMedical_careRecords_${petData.id}`, JSON.stringify(recentRecords));
+
+    setCareSaved(true);
+    setTimeout(() => setCareSaved(false), 2000);
+  };
+
+  // 오늘 케어 기록 불러오기
+  useEffect(() => {
+    if (!petData?.id) return;
+
+    const todayKey = new Date().toISOString().split('T')[0];
+    const existingRecords = JSON.parse(localStorage.getItem(`petMedical_careRecords_${petData.id}`) || '[]');
+    const todayRecord = existingRecords.find(r => r.date === todayKey);
+
+    if (todayRecord) {
+      if (todayRecord.weight) setTodayWeight(todayRecord.weight.toString());
+      if (todayRecord.actions) setCareActions(todayRecord.actions);
+    }
+  }, [petData?.id]);
 
   useEffect(() => {
     if (!petData) return;
@@ -916,15 +989,69 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
                   <span className="text-xs text-slate-500 mt-1">배변</span>
                 </div>
               </div>
+
+              {/* 체중 입력 */}
+              <div className="mt-4 pt-4 border-t border-slate-100">
+                <div className="flex items-center gap-3">
+                  <span className="text-sm text-slate-600">오늘 체중</span>
+                  <div className="flex-1 flex items-center gap-2">
+                    <input
+                      type="number"
+                      step="0.1"
+                      placeholder="0.0"
+                      value={todayWeight}
+                      onChange={(e) => setTodayWeight(e.target.value)}
+                      className="w-20 px-3 py-2 text-center border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+                    />
+                    <span className="text-sm text-slate-500">kg</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* 오늘 케어 완료 버튼 */}
+              <button
+                onClick={saveTodayCare}
+                className={`w-full mt-4 py-3 rounded-xl font-bold text-sm transition-all ${
+                  careSaved
+                    ? 'bg-green-500 text-white'
+                    : 'bg-sky-500 text-white hover:bg-sky-600'
+                }`}
+              >
+                {careSaved ? '✓ 저장 완료!' : '오늘 케어 완료'}
+              </button>
+            </div>
+
+            {/* AI 건강 문진 카드 */}
+            <div className="bg-gradient-to-br from-violet-500 to-purple-600 rounded-2xl p-5 shadow-sm mb-4">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
+                  <span className="text-xl">🤖</span>
+                </div>
+                <div>
+                  <h3 className="font-bold text-white">AI 건강 문진</h3>
+                  <p className="text-xs text-white/70">7일간의 케어 기록을 분석합니다</p>
+                </div>
+              </div>
+              <button
+                onClick={() => onNavigate('ai-consultation')}
+                className="w-full py-3 bg-white/20 hover:bg-white/30 text-white font-bold rounded-xl text-sm transition-all"
+              >
+                7일 케어 기록으로 AI 문진하기 →
+              </button>
             </div>
 
             {/* 병원 방문 기록 */}
             <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
               <div className="flex items-center justify-between mb-3">
-                <h3 className="font-bold text-slate-800">병원 방문</h3>
-                <span className="text-xs text-slate-400">{new Date(Date.now() - 86400000).toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\. /g, '-').replace('.', '')}</span>
+                <h3 className="font-bold text-slate-800">최근 병원 방문</h3>
+                <button
+                  onClick={() => onNavigate('records')}
+                  className="text-xs text-sky-500 font-medium"
+                >
+                  전체보기 →
+                </button>
               </div>
-              <p className="text-sm text-slate-600">정기 검진 - 건강함</p>
+              <p className="text-sm text-slate-500">아직 병원 방문 기록이 없습니다</p>
             </div>
           </>
         )}
@@ -934,10 +1061,69 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
 }
 
 // Symptom Input Screen
-function SymptomInput({ petData, onComplete, onBack }) {
+function SymptomInput({ petData, onComplete, onBack, onRegister }) {
   const [symptomText, setSymptomText] = useState('');
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [selectedDepartment, setSelectedDepartment] = useState('');
+  const [selectedSymptoms, setSelectedSymptoms] = useState([]);
+
+  // 동물별 진료과목
+  const DEPARTMENTS = {
+    dog: ['내과', '외과', '피부과', '안과', '치과', '정형외과', '신경과', '종양과'],
+    cat: ['내과', '외과', '피부과', '안과', '치과', '비뇨기과', '신경과'],
+    rabbit: ['내과', '피부과', '치과', '안과'],
+    hamster: ['내과', '피부과', '치과'],
+    bird: ['조류 전문', '내과', '피부과'],
+    hedgehog: ['특수동물과', '피부과', '내과'],
+    reptile: ['파충류 전문', '피부과', '내과'],
+    other: ['특수동물과', '내과', '외과']
+  };
+
+  // 동물별 대표 증상
+  const COMMON_SYMPTOMS = {
+    dog: ['식욕감소', '구토', '설사', '기침', '피부 발적', '눈 충혈', '절뚝거림', '무기력', '체중 감소', '가려움증'],
+    cat: ['식욕감소', '구토', '설사', '기침', '재채기', '눈물/눈곱', '털 빠짐', '무기력', '배변 문제', '숨김 행동'],
+    rabbit: ['식욕감소', '설사', '배변 이상', '털 빠짐', '눈물', '콧물', '치아 문제', '무기력'],
+    hamster: ['식욕감소', '설사', '피부 문제', '털 빠짐', '눈 이상', '치아 문제', '무기력', '종양/혹'],
+    bird: ['깃털 빠짐', '식욕감소', '설사', '호흡 곤란', '무기력', '눈 이상', '발 문제', '부리 이상'],
+    hedgehog: ['식욕감소', '피부 문제', '가시 빠짐', '설사', '무기력', '진드기', '눈 이상'],
+    reptile: ['식욕감소', '피부 탈피 문제', '눈 이상', '설사', '무기력', '호흡 문제', '피부 변색'],
+    other: ['식욕감소', '설사', '피부 문제', '무기력', '호흡 문제', '눈 이상']
+  };
+
+  // 반려동물 등록 확인
+  if (!petData) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+        <div className="bg-white rounded-2xl p-8 shadow-lg border border-slate-100 text-center max-w-sm">
+          <div className="w-20 h-20 bg-sky-100 rounded-full mx-auto mb-4 flex items-center justify-center">
+            <span className="text-4xl">🐾</span>
+          </div>
+          <h2 className="text-xl font-bold text-slate-900 mb-2">반려동물을 등록해주세요</h2>
+          <p className="text-sm text-slate-500 mb-6">
+            사랑하는 반려동물 정보를 입력해주시면<br/>
+            맞춤형 AI 진단 서비스를 이용할 수 있어요
+          </p>
+          <button
+            onClick={() => onRegister ? onRegister() : onBack()}
+            className="w-full py-3 bg-sky-500 text-white font-bold rounded-xl hover:bg-sky-600 transition-colors"
+          >
+            반려동물 등록하기
+          </button>
+          <button
+            onClick={onBack}
+            className="w-full mt-3 py-3 bg-slate-100 text-slate-600 font-medium rounded-xl hover:bg-slate-200 transition-colors"
+          >
+            돌아가기
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const currentDepartments = DEPARTMENTS[petData.species] || DEPARTMENTS.other;
+  const currentSymptoms = COMMON_SYMPTOMS[petData.species] || COMMON_SYMPTOMS.other;
 
   const handleImageUpload = (e) => {
     const files = Array.from(e.target.files);
@@ -959,26 +1145,40 @@ function SymptomInput({ petData, onComplete, onBack }) {
   };
 
   const handleSubmit = () => {
-    if (!symptomText.trim() && images.length === 0) {
-      alert('증상을 입력하거나 사진을 업로드해주세요.');
+    if (!symptomText.trim() && selectedSymptoms.length === 0 && images.length === 0) {
+      alert('증상을 선택하거나 설명해주세요.');
       return;
     }
 
     setLoading(true);
 
+    // 선택된 증상과 텍스트 증상 합치기
+    const allSymptoms = [...selectedSymptoms];
+    if (symptomText.trim()) {
+      allSymptoms.push(symptomText.trim());
+    }
+    const combinedSymptomText = allSymptoms.join(', ');
+
     // 증상 데이터를 진료 화면으로 전달
     setTimeout(() => {
       onComplete({
-        symptomText,
+        symptomText: combinedSymptomText,
+        selectedSymptoms,
+        userDescription: symptomText,
+        department: selectedDepartment,
         images,
         petData
       });
     }, 500);
   };
 
-  // 증상 클릭 핸들러
-  const addSymptom = (symptom) => {
-    setSymptomText(prev => prev ? `${prev}, ${symptom}` : symptom);
+  // 증상 토글 핸들러
+  const toggleSymptom = (symptom) => {
+    setSelectedSymptoms(prev =>
+      prev.includes(symptom)
+        ? prev.filter(s => s !== symptom)
+        : [...prev, symptom]
+    );
   };
 
   return (
@@ -994,69 +1194,99 @@ function SymptomInput({ petData, onComplete, onBack }) {
         <p className="text-sm text-slate-500 mt-1">질문을 입력하면 AI가 증상을 분석합니다</p>
       </div>
 
-      <div className="px-4 pt-6 pb-32">
-        {/* 증상 입력 영역 */}
-        <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 mb-6">
-          <h3 className="font-bold text-slate-800 mb-3">반려동물의 증상을 설명해주세요</h3>
+      <div className="px-4 pt-4 pb-32 space-y-4">
+        {/* 진료과목 선택 */}
+        <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100">
+          <h3 className="font-bold text-slate-800 mb-3 text-sm">진료과목 선택</h3>
+          <div className="flex flex-wrap gap-2">
+            {currentDepartments.map(dept => (
+              <button
+                key={dept}
+                onClick={() => setSelectedDepartment(selectedDepartment === dept ? '' : dept)}
+                className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                  selectedDepartment === dept
+                    ? 'bg-sky-500 text-white'
+                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                }`}
+              >
+                {dept}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* 증상 선택 */}
+        <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100">
+          <h3 className="font-bold text-slate-800 mb-3 text-sm">
+            {petData.species === 'dog' ? '강아지' :
+             petData.species === 'cat' ? '고양이' :
+             petData.species === 'rabbit' ? '토끼' :
+             petData.species === 'hamster' ? '햄스터' :
+             petData.species === 'bird' ? '새' :
+             petData.species === 'hedgehog' ? '고슴도치' :
+             petData.species === 'reptile' ? '파충류' : '반려동물'} 대표 증상
+          </h3>
+          <div className="flex flex-wrap gap-2">
+            {currentSymptoms.map(symptom => (
+              <button
+                key={symptom}
+                onClick={() => toggleSymptom(symptom)}
+                className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                  selectedSymptoms.includes(symptom)
+                    ? 'bg-sky-500 text-white'
+                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                }`}
+              >
+                {symptom}
+              </button>
+            ))}
+          </div>
+          {selectedSymptoms.length > 0 && (
+            <div className="mt-3 p-3 bg-sky-50 rounded-lg">
+              <p className="text-xs text-sky-700">선택됨: {selectedSymptoms.join(', ')}</p>
+            </div>
+          )}
+        </div>
+
+        {/* 증상 상세 설명 */}
+        <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100">
+          <h3 className="font-bold text-slate-800 mb-3 text-sm">증상 상세 설명</h3>
           <textarea
-            className="w-full p-4 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 min-h-[120px] text-sm resize-none"
-            placeholder="예: 기침증상, 피부 발적, 무기력함"
+            className="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 min-h-[100px] text-sm resize-none"
+            placeholder="증상에 대해 더 자세히 설명해주세요 (언제부터, 어떤 상황에서, 빈도 등)"
             value={symptomText}
             onChange={(e) => setSymptomText(e.target.value)}
           />
         </div>
 
-        {/* 증상 선택 영역 */}
-        <div className="grid grid-cols-2 gap-4">
-          {/* 일반적인 증상 */}
-          <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100">
-            <h4 className="font-bold text-slate-800 mb-3 text-sm">일반적인 증상</h4>
-            <div className="space-y-2">
-              <button
-                onClick={() => addSymptom('식욕감소')}
-                className="w-full text-left px-3 py-2 text-sm text-slate-600 hover:bg-sky-50 rounded-lg transition-colors"
-              >
-                • 식욕감소
-              </button>
-              <button
-                onClick={() => addSymptom('피부 발적')}
-                className="w-full text-left px-3 py-2 text-sm text-slate-600 hover:bg-sky-50 rounded-lg transition-colors"
-              >
-                • 피부 발적
-              </button>
-              <button
-                onClick={() => addSymptom('무기력함')}
-                className="w-full text-left px-3 py-2 text-sm text-slate-600 hover:bg-sky-50 rounded-lg transition-colors"
-              >
-                • 무기력함
-              </button>
-            </div>
+        {/* 사진 업로드 */}
+        <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100">
+          <h3 className="font-bold text-slate-800 mb-3 text-sm">증상 사진 첨부 (선택)</h3>
+          <div className="flex gap-3 overflow-x-auto pb-2">
+            {images.map((img, idx) => (
+              <div key={idx} className="relative shrink-0">
+                <img src={img} alt={`증상 사진 ${idx + 1}`} className="w-20 h-20 object-cover rounded-xl" />
+                <button
+                  onClick={() => removeImage(idx)}
+                  className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full text-xs flex items-center justify-center"
+                >
+                  ✕
+                </button>
+              </div>
+            ))}
+            <label className="w-20 h-20 shrink-0 border-2 border-dashed border-slate-300 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:border-sky-500 hover:bg-sky-50 transition-all">
+              <span className="text-2xl text-slate-400">📷</span>
+              <span className="text-[10px] text-slate-400 mt-1">추가</span>
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={handleImageUpload}
+                className="hidden"
+              />
+            </label>
           </div>
-
-          {/* 행동 변화 */}
-          <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100">
-            <h4 className="font-bold text-slate-800 mb-3 text-sm">행동 변화</h4>
-            <div className="space-y-2">
-              <button
-                onClick={() => addSymptom('식이활동 저하')}
-                className="w-full text-left px-3 py-2 text-sm text-slate-600 hover:bg-sky-50 rounded-lg transition-colors"
-              >
-                • 식이활동 저하
-              </button>
-              <button
-                onClick={() => addSymptom('과식활동')}
-                className="w-full text-left px-3 py-2 text-sm text-slate-600 hover:bg-sky-50 rounded-lg transition-colors"
-              >
-                • 과식활동
-              </button>
-              <button
-                onClick={() => addSymptom('배변이상')}
-                className="w-full text-left px-3 py-2 text-sm text-slate-600 hover:bg-sky-50 rounded-lg transition-colors"
-              >
-                • 배변이상
-              </button>
-            </div>
-          </div>
+          <p className="text-xs text-slate-400 mt-2">피부, 눈, 귀 등 증상 부위 사진을 첨부하면 더 정확한 진단이 가능해요</p>
         </div>
       </div>
 
@@ -2405,7 +2635,7 @@ function App() {
       
       {/* dashboard는 탭 기반으로 이동 */}
 
-      {currentView === 'symptom-input' && petData && (
+      {currentView === 'symptom-input' && (
         <SymptomInput
           petData={petData}
           onComplete={handleSymptomSubmit}
@@ -2413,6 +2643,7 @@ function App() {
             setCurrentView(null);
             setCurrentTab('care');
           }}
+          onRegister={() => setCurrentView('registration')}
         />
       )}
       
