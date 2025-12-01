@@ -1,11 +1,12 @@
-// Ops Agent - Claude 3.5 Sonnet (JSON 구조화/기록 최강)
+// Ops Agent - Gemini Pro (JSON 구조화/기록)
+// 브라우저 CORS 정책으로 인해 Anthropic 대신 Gemini 사용
 import { COMMON_CONTEXT } from './commonContext';
 import { getApiKey, API_KEY_TYPES } from '../apiKeyManager';
 
 export const callOpsAgent = async (petData, symptomData, medicalDiagnosis, triageResult, csSummary, infoSummary) => {
-  const apiKey = getApiKey(API_KEY_TYPES.ANTHROPIC);
+  const apiKey = getApiKey(API_KEY_TYPES.GEMINI);
   if (!apiKey) {
-    throw new Error('Anthropic API 키가 설정되지 않았습니다. 마이페이지 > API 설정에서 키를 입력해주세요.');
+    throw new Error('Gemini API 키가 설정되지 않았습니다. 마이페이지 > API 설정에서 키를 입력해주세요.');
   }
 
   const prompt = `${COMMON_CONTEXT}
@@ -26,7 +27,7 @@ export const callOpsAgent = async (petData, symptomData, medicalDiagnosis, triag
 
 반려동물 정보:
 - 이름: ${petData.petName}
-- 종류: ${petData.species === 'dog' ? '개' : '고양이'}
+- 종류: ${petData.species === 'dog' ? '개' : petData.species === 'cat' ? '고양이' : petData.species}
 - 품종: ${petData.breed || '미등록'}
 
 CS Agent 요약:
@@ -45,14 +46,14 @@ ${JSON.stringify(triageResult, null, 2)}
 
 {
   "medical_log": {
-    "pet_id": "${petData.id}",
+    "pet_id": "${petData.id || 'unknown'}",
     "created_at": "${new Date().toISOString()}",
     "summary_kor": "이번 진료의 핵심 내용을 한국어 한 단락으로 요약",
     "triage_score": 0,
-    "triage_level": "green | yellow | orange | red",
-    "risk_level": "low | moderate | high | emergency",
+    "triage_level": "green | yellow | orange | red 중 하나",
+    "risk_level": "low | moderate | high | emergency 중 하나",
     "need_hospital_visit": true,
-    "hospital_visit_timing": "지금 바로 | 오늘 안에 | 24~48시간 내 | 증상 악화 시 | 경과 관찰",
+    "hospital_visit_timing": "지금 바로 | 오늘 안에 | 24~48시간 내 | 증상 악화 시 | 경과 관찰 중 하나",
     "health_flags": {
       "earIssue": false,
       "digestionIssue": false,
@@ -64,7 +65,7 @@ ${JSON.stringify(triageResult, null, 2)}
       {
         "name_kor": "의심 질환명",
         "probability": 0.7,
-        "body_part": "귀 | 피부 | 소화기 | 호흡기 | 눈 | 관절/다리 | 기타",
+        "body_part": "귀 | 피부 | 소화기 | 호흡기 | 눈 | 관절/다리 | 기타 중 하나",
         "reasoning_kor": "간단한 근거 요약"
       }
     ],
@@ -72,7 +73,7 @@ ${JSON.stringify(triageResult, null, 2)}
     "suggested_tests": ["권장 검사 1", "권장 검사 2"]
   },
   "owner_friendly_diagnosis_sheet": {
-    "title": "진단서 제목 (예: '${petData.petName}의 귀 상태 AI 진단 결과')",
+    "title": "진단서 제목",
     "intro": "보호자에게 보여줄 인사 및 전체 상황 요약 (한국어, 2~3문장)",
     "problem_summary": "지금 어떤 문제가 의심되는지 쉽게 설명",
     "risk_explanation": "응급도/위험도를 보호자 눈높이에 맞게 풀어쓴 설명",
@@ -86,8 +87,8 @@ ${JSON.stringify(triageResult, null, 2)}
       "name": "${petData.petName}",
       "species": "${petData.species}",
       "breed": "${petData.breed || '미등록'}",
-      "age_info": "예: 만 ${petData.age || '?'}세 추정, ${petData.species === 'dog' ? '개' : '고양이'}",
-      "sex_neutered": "예: ${petData.sex === 'M' ? '수컷' : '암컷'}"
+      "age_info": "${petData.age || '?'}세",
+      "sex_neutered": "${petData.sex === 'M' ? '수컷' : '암컷'}"
     },
     "visit_reason": "이번에 병원을 방문하게 되는 주된 이유를 한 문장으로 요약",
     "symptom_timeline": "증상이 언제부터, 어떻게 진행되었는지 타임라인 형식 요약",
@@ -95,50 +96,50 @@ ${JSON.stringify(triageResult, null, 2)}
       {
         "name_kor": "의심 질환명",
         "probability": 0.7,
-        "note_for_vet": "수의사가 참고할 만한 코멘트 (검사 제안, 감별 포인트 등)"
+        "note_for_vet": "수의사가 참고할 만한 코멘트"
       }
     ],
     "triage_and_risk": {
       "triage_score": 0,
-      "triage_level": "green | yellow | orange | red",
-      "risk_level": "low | moderate | high | emergency",
+      "triage_level": "green | yellow | orange | red 중 하나",
+      "risk_level": "low | moderate | high | emergency 중 하나",
       "urgency_comment": "시급성에 대한 짧은 코멘트"
     },
-    "requested_actions_for_hospital": ["가능하다면 귀 내시경 검사 및 세균배양검사 고려 바랍니다."]
+    "requested_actions_for_hospital": ["권장 검사 1"]
   }
 }
 
 규칙:
 - JSON 구조를 반드시 지키고, 모든 필드를 포함하세요.
-- 보호자용(owner_friendly_diagnosis_sheet)과 병원용(hospital_previsit_packet)은 톤을 다르게 써야 합니다.
-  - 보호자용: 쉽고 부드럽게
-  - 병원용: 전문 용어 허용, 요약 중심
+- 보호자용과 병원용은 톤을 다르게 써야 합니다.
 - 출력은 반드시 JSON만 반환하세요.`;
 
   try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01'
-      },
-      body: JSON.stringify({
-        model: 'claude-3-5-sonnet-20241022',
-        max_tokens: 3000,
-        messages: [
-          { role: 'user', content: prompt }
-        ]
-      })
-    });
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          contents: [{
+            parts: [{ text: prompt }]
+          }],
+          generationConfig: {
+            temperature: 0.3
+          }
+        })
+      }
+    );
 
     if (!response.ok) {
-      throw new Error(`Anthropic API 오류: ${response.status}`);
+      throw new Error(`Gemini API 오류: ${response.status}`);
     }
 
     const data = await response.json();
-    const text = data.content[0].text;
-    
+    const text = data.candidates[0].content.parts[0].text;
+
     // JSON 추출
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
@@ -148,11 +149,11 @@ ${JSON.stringify(triageResult, null, 2)}
         message: `진료 기록 생성 완료.\n진단서 템플릿 준비 중...\n데이터 저장 완료.\n\n→ 진단서 생성 완료!`
       };
     }
-    
+
     throw new Error('JSON 파싱 실패');
   } catch (error) {
     console.error('Ops Agent 오류:', error);
-    
+
     // Fallback
     const healthFlags = triageResult?.health_flags || {
       earIssue: false,
@@ -161,7 +162,7 @@ ${JSON.stringify(triageResult, null, 2)}
       fever: false,
       energyLevel: 0.7
     };
-    
+
     return {
       json: {
         medical_log: {
