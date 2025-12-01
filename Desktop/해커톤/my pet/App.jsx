@@ -312,7 +312,25 @@ function ProfileRegistration({ onComplete, userId }) {
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="registration-form">
-            {/* 프로필 사진/캐릭터 선택 */}
+            {/* 1. 종류 선택 - 가장 먼저 */}
+            <div className="form-group">
+              <label>종류 *</label>
+              <div className="species-grid">
+                {SPECIES_OPTIONS.map(option => (
+                  <button
+                    key={option.id}
+                    type="button"
+                    className={`species-btn ${formData.species === option.id ? 'active' : ''}`}
+                    onClick={() => handleSpeciesChange(option.id)}
+                  >
+                    <span className="species-emoji">{option.emoji}</span>
+                    <span className="species-label">{option.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* 2. 프로필 사진/캐릭터 선택 */}
             <div className="form-group">
               <label>프로필 사진 또는 캐릭터 *</label>
               <div className="profile-selector">
@@ -335,10 +353,10 @@ function ProfileRegistration({ onComplete, userId }) {
                   ) : (
                     <div
                       className="profile-preview character"
-                      style={{ backgroundColor: PET_CHARACTERS[formData.species].find(c => c.id === formData.character)?.color + '40' }}
+                      style={{ backgroundColor: PET_CHARACTERS[formData.species]?.find(c => c.id === formData.character)?.color + '40' }}
                     >
                       <span className="character-emoji">
-                        {PET_CHARACTERS[formData.species].find(c => c.id === formData.character)?.emoji}
+                        {PET_CHARACTERS[formData.species]?.find(c => c.id === formData.character)?.emoji}
                       </span>
                     </div>
                   )}
@@ -360,7 +378,7 @@ function ProfileRegistration({ onComplete, userId }) {
 
                 {/* 캐릭터 선택 */}
                 <div className="character-grid">
-                  {PET_CHARACTERS[formData.species].map(char => (
+                  {PET_CHARACTERS[formData.species]?.map(char => (
                     <button
                       key={char.id}
                       type="button"
@@ -379,6 +397,7 @@ function ProfileRegistration({ onComplete, userId }) {
               </div>
             </div>
 
+            {/* 3. 반려동물 이름 */}
             <div className="form-group">
               <label>반려동물 이름 *</label>
               <input
@@ -390,24 +409,7 @@ function ProfileRegistration({ onComplete, userId }) {
               />
             </div>
 
-            <div className="form-group">
-              <label>종류 *</label>
-              <div className="species-grid">
-                {SPECIES_OPTIONS.map(option => (
-                  <button
-                    key={option.id}
-                    type="button"
-                    className={`species-btn ${formData.species === option.id ? 'active' : ''}`}
-                    onClick={() => handleSpeciesChange(option.id)}
-                  >
-                    <span className="species-emoji">{option.emoji}</span>
-                    <span className="species-label">{option.label}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* 개/고양이인 경우에만 품종 선택 표시 */}
+            {/* 4. 품종 - 개/고양이인 경우에만 표시 */}
             {(formData.species === 'dog' || formData.species === 'cat') && (
               <div className="form-group">
                 <label>품종</label>
@@ -2511,13 +2513,45 @@ function App() {
 
   // 로그인 없이 바로 입장 (테스트용)
   const handleSkipLogin = () => {
-    // 테스트용 게스트 유저
+    // 테스트용 게스트 유저 (고정 ID로 데이터 유지)
     const guestUser = {
-      uid: 'guest_' + Date.now(),
+      uid: 'guest_test_user',
       email: 'guest@test.com',
       displayName: '테스트 유저',
       userMode: 'guardian'
     };
+
+    // 이미 등록된 반려동물이 있는지 확인
+    const existingPets = getPetsForUser(guestUser.uid);
+
+    if (existingPets.length > 0) {
+      // 기존 반려동물 데이터 사용
+      setPets(existingPets);
+      setPetData(existingPets[0]);
+    } else {
+      // 기본 반려동물 자동 등록 (테스트 편의성)
+      const defaultPet = {
+        id: Date.now(),
+        userId: guestUser.uid,
+        name: '멍멍이',
+        species: 'dog',
+        breed: '믹스견',
+        birthDate: '2022-01-01',
+        sex: 'M',
+        neutered: true,
+        weight: 8.5,
+        sido: '서울특별시',
+        sigungu: '강남구',
+        profileImage: null,
+        character: 'dog_white',
+        createdAt: new Date().toISOString()
+      };
+
+      savePetsForUser(guestUser.uid, [defaultPet]);
+      setPets([defaultPet]);
+      setPetData(defaultPet);
+    }
+
     setCurrentUser(guestUser);
     setUserMode('guardian');
     setAuthScreen(null);
