@@ -3262,6 +3262,30 @@ function App() {
                 </p>
               </div>
             )}
+
+            {/* 병원 예약 버튼 - 병원에 가지 않은 AI 진단인 경우 표시 */}
+            {(!lastDiagnosis.visitedHospital) && (
+              <div className="bg-primary/5 rounded-lg p-4 border border-primary/20">
+                <h3 className="flex items-center gap-2 text-slate-900 font-bold mb-3">
+                  <span className="material-symbols-outlined text-primary">event_available</span>
+                  병원 예약
+                </h3>
+                <p className="text-slate-600 text-sm mb-4">
+                  AI 진단 결과를 바탕으로 가까운 동물병원에 예약하세요. 진단서가 자동으로 전송됩니다.
+                </p>
+                <button
+                  onClick={() => {
+                    setSymptomData({ symptomText: lastDiagnosis.symptom || lastDiagnosis.description });
+                    setCurrentTab('hospital');
+                    setCurrentView(null);
+                  }}
+                  className="w-full py-3 bg-primary text-white font-bold rounded-lg hover:bg-primary/90 transition-colors flex items-center justify-center gap-2 shadow-lg shadow-primary/30"
+                >
+                  <span className="material-symbols-outlined">local_hospital</span>
+                  병원 예약하기
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -3369,6 +3393,7 @@ function App() {
                 setCurrentView('diagnosis-view');
               }}
               onOCR={() => setCurrentView('ocr')}
+              onHospitalBooking={() => setCurrentTab('hospital')}
             />
           )}
 
