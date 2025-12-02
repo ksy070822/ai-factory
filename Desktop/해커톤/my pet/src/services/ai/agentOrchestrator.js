@@ -1,4 +1,4 @@
-// 멀티 에이전트 오케스트레이터
+// 멀티 에이전트 오케스트레이터 (협진 시스템 통합)
 import { callCSAgent } from './csAgent';
 import { callInformationAgent } from './informationAgent';
 import { callMedicalAgent } from './medicalAgent';
@@ -7,6 +7,7 @@ import { callCareAgent } from './careAgent';
 import { calculateTriageScore } from './triageEngine';
 import { convertHealthFlagsFormat } from '../../utils/healthFlagsMapper';
 import { buildAIContext } from './dataContextService';
+import { runCollaborativeDiagnosis } from './collaborativeDiagnosis';
 
 export const runMultiAgentDiagnosis = async (petData, symptomData, onLogReceived) => {
   const logs = [];
@@ -162,7 +163,7 @@ export const runMultiAgentDiagnosis = async (petData, symptomData, onLogReceived
 
     await new Promise(resolve => setTimeout(resolve, 600));
 
-    // 4. Triage Engine (GPT-4o) - 응급도 판정실
+    // 4. Triage Engine (Claude Sonnet) - 응급도 판정실
     onLogReceived({
       agent: 'Triage Engine',
       role: '응급도 판정실',
@@ -181,7 +182,7 @@ export const runMultiAgentDiagnosis = async (petData, symptomData, onLogReceived
         role: '응급도 판정실',
         icon: '🚨',
         type: 'triage',
-        content: `응급도 평가 완료했습니다.\n\n📊 Triage Score: ${triageResult.triage_score}/5\n🏷️ 응급 등급: ${triageResult.triage_level}\n⏰ 권장 조치: ${triageResult.recommended_action_window}\n\n${triageResult.emergency_summary_kor}\n\n📋 치료 계획팀에 협진 의뢰드립니다.`,
+        content: `응급도 평가 완료했습니다.\n\n📊 Triage Score: ${triageResult.triage_score}/5\n🏷️ 응급 등급: ${triageResult.triage_level}\n⏰ 권장 조치: ${triageResult.recommended_action_window}\n\n${triageResult.emergency_summary_kor}`,
         timestamp: Date.now()
       });
       onLogReceived(logs[logs.length - 1]);
@@ -190,6 +191,78 @@ export const runMultiAgentDiagnosis = async (petData, symptomData, onLogReceived
     }
 
     await new Promise(resolve => setTimeout(resolve, 1000));
+
+    // 4.5 협진 시스템 (Collaborative Diagnosis) - 다중 모델 교차 검증
+    onLogReceived({
+      agent: 'Collaborative System',
+      role: '협진 검토팀',
+      icon: '🤝',
+      type: 'collaboration',
+      content: '여러 AI 수의사들의 진단을 교차 검증하고 있습니다...',
+      timestamp: Date.now()
+    });
+
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    let collaborationResult = null;
+    try {
+      collaborationResult = await runCollaborativeDiagnosis(
+        normalizedPetData,
+        normalizedSymptomData,
+        medicalResult.json,
+        triageResult,
+        infoResult.json
+      );
+
+      // 협진 결과 로그
+      const consensusMsg = collaborationResult.consensus.consensus_reached
+        ? `✅ 모든 AI 수의사가 일치된 견해를 보였습니다.`
+        : `⚠️ ${collaborationResult.discrepancy_analysis.discrepancy_count}개의 의견 차이를 발견하여 조정했습니다.`;
+
+      logs.push({
+        agent: 'Collaborative System',
+        role: '협진 검토팀',
+        icon: '🤝',
+        type: 'collaboration',
+        content: `${collaborationResult.collaboration_summary}\n\n${consensusMsg}\n\n📊 최종 위험도: ${collaborationResult.consensus.final_risk_level}\n🎯 신뢰도: ${(collaborationResult.consensus.confidence_score * 100).toFixed(0)}%\n\n${collaborationResult.consensus.collaborative_notes.reviewer_opinion || ''}`,
+        timestamp: Date.now()
+      });
+      onLogReceived(logs[logs.length - 1]);
+
+      // 협진 결과로 triage와 medical 결과 업데이트
+      if (collaborationResult.consensus) {
+        triageResult.triage_score = collaborationResult.consensus.final_triage_score;
+        triageResult.triage_level = collaborationResult.consensus.final_risk_level === 'low' ? 'yellow' :
+                                     collaborationResult.consensus.final_risk_level === 'moderate' ? 'orange' :
+                                     collaborationResult.consensus.final_risk_level === 'high' ? 'red' : 'red';
+        medicalResult.json.risk_level = collaborationResult.consensus.final_risk_level;
+        medicalResult.json.need_hospital_visit = collaborationResult.consensus.final_hospital_visit;
+      }
+    } catch (err) {
+      console.error('협진 시스템 오류:', err);
+      onLogReceived({
+        agent: 'Collaborative System',
+        role: '협진 검토팀',
+        icon: '🤝',
+        type: 'collaboration',
+        content: '협진 검토를 진행했으나 일부 단계를 건너뛰었습니다. 기본 진단으로 진행합니다.',
+        timestamp: Date.now()
+      });
+    }
+
+    await new Promise(resolve => setTimeout(resolve, 800));
+
+    // 협진팀 → 치료 계획실 이관
+    onLogReceived({
+      agent: 'Collaborative System',
+      role: '협진 검토팀',
+      icon: '🤝',
+      type: 'collaboration',
+      content: '협진 검토를 완료했습니다. 치료 계획팀에 최종 소견을 전달합니다.',
+      timestamp: Date.now()
+    });
+
+    await new Promise(resolve => setTimeout(resolve, 600));
 
     // 5. Data Agent - 치료 계획 수립실
     onLogReceived({
@@ -289,11 +362,11 @@ export const runMultiAgentDiagnosis = async (petData, symptomData, onLogReceived
       timestamp: Date.now()
     });
 
-    // 최종 진단서 생성
+    // 최종 진단서 생성 (협진 결과 포함)
     const medicalLog = opsResult.json.medical_log;
     const ownerSheet = opsResult.json.owner_friendly_diagnosis_sheet;
     const healthFlags = convertHealthFlagsFormat(triageResult?.health_flags || medicalLog.health_flags || {});
-    
+
     const finalDiagnosis = {
       id: Date.now().toString(),
       created_at: Date.now(),
@@ -302,7 +375,7 @@ export const runMultiAgentDiagnosis = async (petData, symptomData, onLogReceived
       diagnosis: medicalLog.possible_diseases?.[0]?.name_kor || '일반 건강 이상',
       probability: medicalLog.possible_diseases?.[0]?.probability || 0.6,
       riskLevel: medicalLog.risk_level || 'moderate',
-      emergency: medicalLog.risk_level === 'emergency' ? 'high' : 
+      emergency: medicalLog.risk_level === 'emergency' ? 'high' :
                  medicalLog.risk_level === 'high' ? 'high' :
                  medicalLog.risk_level === 'moderate' ? 'medium' : 'low',
       actions: ownerSheet.immediate_home_actions || [],
@@ -317,7 +390,21 @@ export const runMultiAgentDiagnosis = async (petData, symptomData, onLogReceived
       // 추가 정보
       ownerSheet: ownerSheet,
       hospitalPacket: opsResult.json.hospital_previsit_packet,
-      carePlan: careResult.json
+      carePlan: careResult.json,
+      // 협진 정보
+      collaboration: collaborationResult ? {
+        consensus_reached: collaborationResult.consensus.consensus_reached,
+        confidence_score: collaborationResult.consensus.confidence_score,
+        discrepancies_found: collaborationResult.discrepancy_analysis.discrepancy_count,
+        models_consulted: [
+          'Claude Sonnet (Medical Agent)',
+          'Claude Sonnet (Triage Engine)',
+          'Claude Sonnet (Senior Reviewer)',
+          collaborationResult.second_opinion ? 'GPT-4o (Second Opinion)' : null
+        ].filter(Boolean),
+        final_recommendation: collaborationResult.consensus.collaborative_notes.reviewer_opinion,
+        resolution_notes: collaborationResult.consensus.discrepancy_resolution
+      } : null
     };
 
     return {
