@@ -10,14 +10,38 @@ export const onAuthStateChange = authService.onAuthStateChange;
 // 로그아웃
 export const clearAuthSession = authService.logout;
 
-// 현재 세션 (호환성 유지 - 실제로는 Firebase auth 사용)
-export const getAuthSession = () => {
+// 현재 세션 (Firestore 데이터 포함)
+export const getAuthSession = async () => {
   const user = authService.getCurrentUser();
-  return user ? {
-    uid: user.uid,
-    email: user.email,
-    displayName: user.displayName
-  } : null;
+  if (!user) return null;
+
+  try {
+    // Firestore에서 사용자 정보 가져오기
+    const userDoc = await userService.getUser(user.uid);
+    const userData = userDoc.data || {};
+
+    return {
+      uid: user.uid,
+      email: user.email,
+      displayName: user.displayName || userData.displayName,
+      photoURL: user.photoURL,
+      userMode: userData.userMode || 'guardian',
+      roles: userData.roles || [],
+      defaultClinicId: userData.defaultClinicId || null
+    };
+  } catch (error) {
+    console.error('세션 정보 로드 실패:', error);
+    // Firestore 실패 시 기본 정보만 반환
+    return {
+      uid: user.uid,
+      email: user.email,
+      displayName: user.displayName,
+      photoURL: user.photoURL,
+      userMode: 'guardian',
+      roles: [],
+      defaultClinicId: null
+    };
+  }
 };
 
 // 로그인 화면
@@ -308,6 +332,10 @@ export function LoginScreen({ onLogin, onGoToRegister, onSkipLogin }) {
         ) : (
           /* 이메일 로그인 폼 */
           <form onSubmit={handleSubmit} className="space-y-3">
+            <div className="text-center mb-4">
+              <h3 className="text-lg font-bold text-slate-800">이메일 로그인</h3>
+              <p className="text-xs text-slate-500 mt-1">이메일과 비밀번호를 입력하세요</p>
+            </div>
             <div>
               <input
                 type="email"
@@ -342,13 +370,16 @@ export function LoginScreen({ onLogin, onGoToRegister, onSkipLogin }) {
                 '로그인'
               )}
             </button>
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-center pt-2">
               <button
                 type="button"
-                onClick={() => setShowEmailForm(false)}
+                onClick={() => {
+                  setShowEmailForm(false);
+                  setError('');
+                }}
                 className="text-slate-500 text-sm hover:text-slate-700"
               >
-                ← 뒤로
+                ← 다른 방법으로 로그인
               </button>
               <button
                 type="button"
@@ -356,9 +387,19 @@ export function LoginScreen({ onLogin, onGoToRegister, onSkipLogin }) {
                   setShowPasswordReset(true);
                   setError('');
                 }}
-                className="text-sky-600 text-sm hover:underline"
+                className="text-sky-600 text-sm hover:underline font-medium"
               >
                 비밀번호 찾기
+              </button>
+            </div>
+            <div className="text-center pt-2 border-t border-slate-200 mt-4">
+              <span className="text-slate-500 text-sm">계정이 없으신가요? </span>
+              <button
+                type="button"
+                onClick={onGoToRegister}
+                className="text-sky-600 font-bold text-sm hover:underline"
+              >
+                회원가입
               </button>
             </div>
           </form>
@@ -407,16 +448,18 @@ export function LoginScreen({ onLogin, onGoToRegister, onSkipLogin }) {
           </div>
         )}
 
-        {/* 회원가입 링크 */}
-        <div className="mt-8 text-center">
-          <span className="text-slate-500 text-sm">계정이 없으신가요? </span>
-          <button
-            onClick={onGoToRegister}
-            className="text-sky-600 font-bold text-sm hover:underline"
-          >
-            회원가입
-          </button>
-        </div>
+        {/* 회원가입 링크 - 이메일 폼이 열려있지 않을 때만 표시 */}
+        {!showEmailForm && !showPasswordReset && (
+          <div className="mt-8 text-center">
+            <span className="text-slate-500 text-sm">계정이 없으신가요? </span>
+            <button
+              onClick={onGoToRegister}
+              className="text-sky-600 font-bold text-sm hover:underline"
+            >
+              회원가입
+            </button>
+          </div>
+        )}
 
         {/* 테스트용 바로 입장 버튼 */}
         {onSkipLogin && (
