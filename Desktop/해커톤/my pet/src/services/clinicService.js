@@ -5,11 +5,15 @@ import {
   doc,
   getDoc,
   getDocs,
+  setDoc,
+  addDoc,
+  updateDoc,
   query,
   where,
   orderBy,
   limit,
-  Timestamp
+  Timestamp,
+  serverTimestamp
 } from 'firebase/firestore';
 
 // ============================================
@@ -478,6 +482,150 @@ export async function getClinicStats(clinicId) {
   }
 }
 
+// ============================================
+// 병원 등록 관련 (회원가입 시 사용)
+// ============================================
+
+/**
+ * 새 병원 생성
+ * @param {Object} clinicData - 병원 정보
+ * @returns {Promise<Object>} 생성된 병원 정보
+ */
+export async function createClinic(clinicData) {
+  try {
+    const clinicRef = await addDoc(collection(db, 'clinics'), {
+      name: clinicData.name,
+      address: clinicData.address || null,
+      phone: clinicData.phone || null,
+      licenseNumber: clinicData.licenseNumber || null,
+      verified: false,
+      isActive: true,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    });
+
+    return {
+      success: true,
+      clinicId: clinicRef.id
+    };
+  } catch (error) {
+    console.error('병원 생성 실패:', error);
+    return { success: false, error };
+  }
+}
+
+/**
+ * 병원 스태프 등록
+ * @param {string} clinicId - 병원 ID
+ * @param {string} userId - 사용자 ID
+ * @param {string} role - 역할 (director, vet, nurse, staff)
+ * @returns {Promise<Object>} 등록 결과
+ */
+export async function addClinicStaff(clinicId, userId, role = 'director') {
+  try {
+    const staffRef = await addDoc(collection(db, 'clinicStaff'), {
+      clinicId,
+      userId,
+      role,
+      isActive: true,
+      joinedAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    });
+
+    return {
+      success: true,
+      staffId: staffRef.id
+    };
+  } catch (error) {
+    console.error('스태프 등록 실패:', error);
+    return { success: false, error };
+  }
+}
+
+/**
+ * 병원 회원가입 시 전체 설정
+ * - 병원 생성
+ * - 스태프로 등록 (원장)
+ * - 사용자 정보 업데이트 (roles, defaultClinicId)
+ * @param {string} userId - 사용자 ID
+ * @param {Object} clinicInfo - 병원 정보
+ * @returns {Promise<Object>} 결과
+ */
+export async function setupClinicForNewUser(userId, clinicInfo) {
+  try {
+    // 1. 병원 생성
+    const clinicResult = await createClinic(clinicInfo);
+    if (!clinicResult.success) {
+      throw new Error('병원 생성 실패');
+    }
+
+    const clinicId = clinicResult.clinicId;
+
+    // 2. 사용자를 병원 스태프(원장)로 등록
+    const staffResult = await addClinicStaff(clinicId, userId, 'director');
+    if (!staffResult.success) {
+      throw new Error('스태프 등록 실패');
+    }
+
+    // 3. 사용자 정보 업데이트 (roles, defaultClinicId)
+    await updateDoc(doc(db, 'users', userId), {
+      roles: [{ clinicId, role: 'director' }],
+      defaultClinicId: clinicId,
+      updatedAt: serverTimestamp()
+    });
+
+    return {
+      success: true,
+      clinicId,
+      staffId: staffResult.staffId
+    };
+  } catch (error) {
+    console.error('병원 설정 실패:', error);
+    return { success: false, error };
+  }
+}
+
+/**
+ * 기존 병원 사용자 마이그레이션
+ * - userMode가 'clinic'인데 clinicStaff 데이터가 없는 경우
+ * - users 컬렉션의 clinicInfo 또는 displayName을 사용하여 병원 생성
+ * @param {string} userId - 사용자 ID
+ * @param {Object} userData - 사용자 데이터 (userMode, clinicInfo 등)
+ * @returns {Promise<Object>} 마이그레이션 결과
+ */
+export async function migrateExistingClinicUser(userId, userData) {
+  try {
+    // 이미 clinicStaff 데이터가 있는지 확인
+    const existingClinics = await getUserClinics(userId);
+    if (existingClinics.length > 0) {
+      console.log('이미 clinicStaff 데이터 존재:', existingClinics.length);
+      return { success: true, alreadyMigrated: true, clinics: existingClinics };
+    }
+
+    // clinicInfo가 users 컬렉션에 있는지 확인
+    const clinicInfo = userData.clinicInfo || {
+      name: userData.displayName ? `${userData.displayName}의 병원` : '내 병원',
+      address: null,
+      phone: null,
+      licenseNumber: null
+    };
+
+    console.log('기존 병원 사용자 마이그레이션 시작:', userId, clinicInfo);
+
+    // setupClinicForNewUser 호출하여 데이터 생성
+    const result = await setupClinicForNewUser(userId, clinicInfo);
+
+    if (result.success) {
+      console.log('마이그레이션 완료:', result.clinicId);
+    }
+
+    return result;
+  } catch (error) {
+    console.error('기존 병원 사용자 마이그레이션 실패:', error);
+    return { success: false, error };
+  }
+}
+
 export default {
   getUserClinics,
   getClinicInfo,
@@ -489,5 +637,9 @@ export default {
   getPatientDetail,
   getClinicResults,
   getUpcomingVaccinations,
-  getClinicStats
+  getClinicStats,
+  createClinic,
+  addClinicStaff,
+  setupClinicForNewUser,
+  migrateExistingClinicUser
 };

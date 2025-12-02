@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { authService } from '../services/firebaseAuth';
 import { loginWithKakao, handleKakaoRedirectResult } from '../services/kakaoAuth';
 import { userService } from '../services/firestore';
+import { setupClinicForNewUser } from '../services/clinicService';
 
 // Firebase 인증 상태 변경 리스너 export
 export const onAuthStateChange = authService.onAuthStateChange;
@@ -552,39 +553,46 @@ export function RegisterScreen({ onRegister, onGoToLogin }) {
     setLoading(true);
     setError('');
 
-    // Firebase로 회원가입
+    // Firebase로 회원가입 (userMode도 전달)
     const result = await authService.register(
       formData.email,
       formData.password,
-      formData.name
+      formData.name,
+      formData.userMode // userMode 전달
     );
 
     if (result.success) {
-      // Firestore에 추가 사용자 정보 저장
+      // Firestore에 추가 사용자 정보 저장 (병원 정보 등 추가 필드)
       try {
-        const userData = {
-          email: formData.email,
-          displayName: formData.name,
+        const additionalData = {
           phone: formData.phone || null,
           gender: formData.gender || null,
           ageGroup: formData.birthYear || null,
-          userMode: formData.userMode,
-          agreeMarketing: formData.agreeMarketing,
-          createdAt: new Date().toISOString()
+          agreeMarketing: formData.agreeMarketing
         };
 
-        // 병원 모드일 경우 추가 정보 저장
+        // 병원 모드일 경우: clinics 및 clinicStaff 컬렉션에 데이터 생성
         if (formData.userMode === 'clinic') {
-          userData.clinicInfo = {
+          const clinicInfo = {
             name: formData.clinicName,
             address: formData.clinicAddress || null,
             phone: formData.clinicPhone || null,
-            licenseNumber: formData.licenseNumber || null,
-            verified: false // 병원 인증 상태 (추후 관리자 승인)
+            licenseNumber: formData.licenseNumber || null
           };
+
+          // 병원 생성 및 스태프 등록
+          const setupResult = await setupClinicForNewUser(result.user.uid, clinicInfo);
+
+          if (setupResult.success) {
+            additionalData.defaultClinicId = setupResult.clinicId;
+            additionalData.roles = [{ clinicId: setupResult.clinicId, role: 'director' }];
+          } else {
+            console.warn('병원 설정 실패:', setupResult.error);
+          }
         }
 
-        await userService.saveUser(result.user.uid, userData);
+        // 추가 정보만 업데이트 (기본 정보는 authService.register에서 이미 저장됨)
+        await userService.saveUser(result.user.uid, additionalData);
       } catch (firestoreError) {
         console.warn('Firestore 추가 정보 저장 실패:', firestoreError);
       }
