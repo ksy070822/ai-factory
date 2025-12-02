@@ -938,8 +938,17 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
   };
 
   return (
-    <div className="min-h-screen bg-slate-100">
-    <div className="min-h-screen bg-gradient-to-b from-sky-50 to-white pb-20 max-w-lg mx-auto shadow-xl">
+    <div className="min-h-screen bg-gradient-to-br from-slate-200 via-sky-100 to-blue-200 md:flex md:items-center md:justify-center md:p-8">
+      {/* 모바일 프레임 (PC에서만 보임) */}
+      <div className="hidden md:block fixed inset-0 pointer-events-none">
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-200 via-sky-100 to-blue-200"></div>
+      </div>
+
+      <div className="relative md:w-[430px] md:h-[932px] md:rounded-[3rem] md:shadow-2xl md:border-8 md:border-gray-800 overflow-hidden">
+        {/* 노치 (PC에서만) */}
+        <div className="hidden md:block absolute top-0 left-1/2 -translate-x-1/2 w-32 h-7 bg-gray-800 rounded-b-2xl z-50"></div>
+
+        <div className="h-full overflow-y-auto overflow-x-hidden bg-gradient-to-b from-sky-50 to-white pb-20">
       {/* Header - 회사명 가운데 정렬 */}
       <header className="bg-gradient-to-r from-sky-500 to-blue-600 text-white px-4 py-4 shadow-lg">
         <div className="flex items-center justify-center gap-2">
@@ -1222,7 +1231,8 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
           </>
         )}
       </div>
-    </div>
+        </div>
+      </div>
     </div>
   );
 }
