@@ -14,10 +14,11 @@ const MEDICATION_FEEDBACK_KEY = 'petMedical_medicationFeedback';
  * - 환자 기록 타임라인
  */
 export function ClinicAdmin({ onBack, onLogout, onModeSwitch, onHome }) {
-  const [activeTab, setActiveTab] = useState('today'); // today, packets, patients, settings
+  const [activeTab, setActiveTab] = useState('today'); // today, schedule, monthly, records, settings
   const [bookings, setBookings] = useState([]);
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [showResultModal, setShowResultModal] = useState(false);
+  const [selectedDay, setSelectedDay] = useState(null);
   const [clinicInfo, setClinicInfo] = useState({
     name: '행복한 동물병원',
     doctorName: '김수의',
@@ -82,7 +83,7 @@ export function ClinicAdmin({ onBack, onLogout, onModeSwitch, onHome }) {
   return (
     <div className="min-h-screen bg-slate-50">
       {/* 헤더 */}
-      <div className="bg-white border-b border-slate-100">
+      <div className="bg-white border-b border-slate-200">
         <div className="flex items-center justify-between px-4 py-4">
           <button onClick={onBack} className="text-slate-600">
             <span className="text-sm">← 돌아가기</span>
@@ -129,14 +130,13 @@ export function ClinicAdmin({ onBack, onLogout, onModeSwitch, onHome }) {
       </div>
 
       {/* 탭 네비게이션 */}
-      <div className="bg-white border-b border-slate-100 sticky top-0 z-10 overflow-x-auto">
+      <div className="bg-white border-b border-slate-200 sticky top-0 z-10 overflow-x-auto scrollbar-hide">
         <div className="flex min-w-max">
           {[
             { id: 'today', label: '오늘 예약', icon: 'calendar_today' },
-            { id: 'monthly', label: '이번달', icon: 'calendar_month' },
             { id: 'schedule', label: '진료 스케줄', icon: 'schedule' },
-            { id: 'packets', label: '사전 문진', icon: 'description' },
-            { id: 'patients', label: '환자 관리', icon: 'folder_shared' },
+            { id: 'monthly', label: '이번달', icon: 'calendar_month' },
+            { id: 'records', label: '환자 기록', icon: 'folder_shared' },
             { id: 'settings', label: '설정', icon: 'settings' },
           ].map(tab => (
             <button
@@ -172,9 +172,17 @@ export function ClinicAdmin({ onBack, onLogout, onModeSwitch, onHome }) {
           />
         )}
 
-        {activeTab === 'monthly' && (
-          <MonthlyBookings
+        {activeTab === 'schedule' && (
+          <WeeklySchedule
             bookings={bookings}
+          />
+        )}
+
+        {activeTab === 'monthly' && (
+          <MonthlyCalendar
+            bookings={bookings}
+            selectedDay={selectedDay}
+            onSelectDay={setSelectedDay}
             onSelectBooking={(b) => {
               setSelectedBooking(b);
             }}
@@ -182,21 +190,8 @@ export function ClinicAdmin({ onBack, onLogout, onModeSwitch, onHome }) {
           />
         )}
 
-        {activeTab === 'schedule' && (
-          <TodaySchedule
-            bookings={bookings}
-          />
-        )}
-
-        {activeTab === 'packets' && (
-          <PreVisitPackets
-            bookings={bookings.filter(b => b.diagnosisId || b.aiDiagnosis)}
-            onViewDetails={setSelectedBooking}
-          />
-        )}
-
-        {activeTab === 'patients' && (
-          <PatientManagement
+        {activeTab === 'records' && (
+          <PatientRecords
             bookings={bookings}
           />
         )}
@@ -234,18 +229,7 @@ export function ClinicAdmin({ onBack, onLogout, onModeSwitch, onHome }) {
   );
 }
 
-// 요약 카드 컴포넌트
-function SummaryCard({ icon, label, value, color }) {
-  return (
-    <div className={`${color} rounded-xl p-3 text-center`}>
-      <span className="material-symbols-outlined text-white/80 text-lg">{icon}</span>
-      <p className="text-2xl font-bold text-white">{value}</p>
-      <p className="text-xs text-white/80">{label}</p>
-    </div>
-  );
-}
-
-// 오늘 예약 탭
+// 오늘 예약 탭 - 개선된 UI
 function TodayBookings({ bookings, allBookings, onSelectBooking, onUpdateStatus, onCompleteVisit }) {
   const today = new Date().toISOString().split('T')[0];
 
@@ -276,10 +260,10 @@ function TodayBookings({ bookings, allBookings, onSelectBooking, onUpdateStatus,
       </h2>
 
       {sortedBookings.map((booking) => (
-        <BookingCard
+        <EnhancedBookingCard
           key={booking.id}
           booking={booking}
-          onClick={() => onSelectBooking(booking)}
+          onSelectBooking={onSelectBooking}
           onConfirm={() => onUpdateStatus(booking.id, 'confirmed')}
           onComplete={() => onCompleteVisit(booking)}
         />
@@ -288,150 +272,459 @@ function TodayBookings({ bookings, allBookings, onSelectBooking, onUpdateStatus,
   );
 }
 
-// 예약 카드 컴포넌트
-function BookingCard({ booking, onClick, onConfirm, onComplete }) {
+// 개선된 예약 카드 컴포넌트
+function EnhancedBookingCard({ booking, onSelectBooking, onConfirm, onComplete }) {
   const statusInfo = getBookingStatusInfo(booking.status);
+  const petProfile = booking.petProfile || {};
+  const petEmoji = petProfile.species === 'cat' ? '🐈' : '🐕';
 
   return (
-    <div
-      className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden cursor-pointer hover:shadow-md transition"
-      onClick={onClick}
-    >
-      <div className="p-4">
-        <div className="flex items-start justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-full bg-sky-100 flex items-center justify-center text-xl">
-              🐾
-            </div>
-            <div>
-              <p className="font-bold text-slate-800">{booking.petName || '이름 없음'}</p>
-              <p className="text-sm text-slate-500">
-                {booking.time || '시간 미정'} · {booking.hospital?.name || '병원 정보 없음'}
-              </p>
-            </div>
-          </div>
-          <span className={`px-2 py-1 rounded text-xs font-medium ${statusInfo.color}`}>
-            {statusInfo.label}
-          </span>
+    <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100">
+      {/* 헤더 */}
+      <div className="flex items-start justify-between mb-3">
+        <div className="text-lg font-bold text-slate-900">{booking.time || '시간 미정'}</div>
+        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${statusInfo.color}`}>
+          {statusInfo.label}
+        </span>
+      </div>
+
+      {/* 반려동물 정보 */}
+      <div className="flex items-center gap-3 mb-3">
+        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-sky-400 to-violet-400 flex items-center justify-center text-2xl">
+          {petEmoji}
         </div>
-
-        {booking.message && (
-          <p className="mt-3 text-sm text-slate-600 bg-slate-50 rounded-lg p-2">
-            💬 {booking.message}
+        <div className="flex-1">
+          <h3 className="text-base font-semibold text-slate-900">
+            {booking.petName} {petProfile.breed && `(${petProfile.breed}, ${petProfile.age || '나이 미상'})`}
+          </h3>
+          <p className="text-sm text-slate-500">
+            보호자: {booking.ownerName || '정보 없음'} · {booking.ownerPhone || '연락처 없음'}
           </p>
-        )}
-
-        {/* 빠른 액션 버튼 */}
-        <div className="mt-3 flex gap-2" onClick={(e) => e.stopPropagation()}>
-          {booking.status === 'pending' && (
-            <button
-              onClick={onConfirm}
-              className="flex-1 py-2.5 bg-green-500 text-white text-sm font-bold rounded-xl hover:bg-green-600 transition"
-            >
-              예약 확정
-            </button>
-          )}
-          {(booking.status === 'confirmed' || booking.status === 'pending') && (
-            <button
-              onClick={onComplete}
-              className="flex-1 py-2.5 bg-sky-500 text-white text-sm font-bold rounded-xl hover:bg-sky-600 transition"
-            >
-              진료 완료
-            </button>
-          )}
         </div>
       </div>
 
-      {/* AI 진단 정보 표시 */}
-      {booking.diagnosisId && (
-        <div className="px-4 py-2 bg-amber-50 border-t border-amber-100 flex items-center gap-2">
-          <span className="text-xs text-amber-700">✨ AI 사전 진단 정보 있음</span>
+      {/* 증상 */}
+      {booking.message && (
+        <div className="bg-slate-50 rounded-lg p-3 mb-3">
+          <div className="text-xs text-slate-500 mb-1">증상</div>
+          <div className="text-sm text-slate-900">{booking.message}</div>
+        </div>
+      )}
+
+      {/* 정보 버튼 */}
+      <div className="grid grid-cols-3 gap-2 mb-3">
+        <button
+          onClick={() => onSelectBooking(booking)}
+          className={`p-2 rounded-lg text-xs font-semibold transition flex flex-col items-center gap-1 ${
+            booking.diagnosisId || booking.aiDiagnosis
+              ? 'bg-purple-50 border border-purple-200 text-purple-700 hover:bg-purple-100'
+              : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
+          }`}
+        >
+          <span className="material-symbols-outlined text-lg">smart_toy</span>
+          사전 문진
+        </button>
+        <button
+          onClick={() => onSelectBooking(booking)}
+          className="p-2 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-50 transition flex flex-col items-center gap-1"
+        >
+          <span className="material-symbols-outlined text-lg">description</span>
+          상세보기
+        </button>
+        <button
+          onClick={() => alert('과거 기록 보기 기능')}
+          className="p-2 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-50 transition flex flex-col items-center gap-1"
+        >
+          <span className="material-symbols-outlined text-lg">history</span>
+          과거 기록
+        </button>
+      </div>
+
+      {/* 액션 버튼 */}
+      <div className="grid grid-cols-2 gap-2">
+        {booking.status === 'pending' ? (
+          <button
+            onClick={(e) => { e.stopPropagation(); onConfirm(); }}
+            className="py-2.5 bg-sky-500 text-white text-sm font-bold rounded-lg hover:bg-sky-600 transition flex items-center justify-center gap-1"
+          >
+            <span className="material-symbols-outlined text-lg">check_circle</span>
+            예약 확정
+          </button>
+        ) : (
+          <button
+            className="py-2.5 bg-slate-100 text-slate-500 text-sm font-semibold rounded-lg cursor-default flex items-center justify-center gap-1"
+          >
+            <span className="material-symbols-outlined text-lg">check_circle</span>
+            예약 확정됨
+          </button>
+        )}
+        <button
+          onClick={(e) => { e.stopPropagation(); onComplete(); }}
+          className="py-2.5 bg-sky-500 text-white text-sm font-bold rounded-lg hover:bg-sky-600 transition flex items-center justify-center gap-1"
+        >
+          <span className="material-symbols-outlined text-lg">play_arrow</span>
+          진료 시작
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// 주간 스케줄 탭 - 타임라인 UI
+function WeeklySchedule({ bookings }) {
+  const today = new Date();
+  const currentWeekStart = new Date(today);
+  currentWeekStart.setDate(today.getDate() - today.getDay());
+
+  // 이번 주 날짜 목록 생성
+  const weekDays = Array.from({ length: 7 }, (_, i) => {
+    const date = new Date(currentWeekStart);
+    date.setDate(currentWeekStart.getDate() + i);
+    return date;
+  });
+
+  // 날짜별로 예약 그룹화
+  const bookingsByDate = {};
+  bookings.forEach(booking => {
+    if (!bookingsByDate[booking.date]) {
+      bookingsByDate[booking.date] = [];
+    }
+    bookingsByDate[booking.date].push(booking);
+  });
+
+  const weekDayNames = ['일', '월', '화', '수', '목', '금', '토'];
+  const todayStr = today.toISOString().split('T')[0];
+
+  return (
+    <div className="space-y-4">
+      <div className="section-title">📋 주간 진료 스케줄</div>
+
+      {/* Week Selector */}
+      <div className="bg-white rounded-xl p-4 shadow-sm">
+        <div className="flex items-center justify-between">
+          <button className="bg-slate-100 p-2 rounded-lg hover:bg-slate-200 transition">
+            <span className="material-symbols-outlined text-slate-600">chevron_left</span>
+          </button>
+          <div className="text-center">
+            <div className="font-bold text-slate-900">
+              {weekDays[0].getMonth() + 1}월 {weekDays[0].getDate()}일 - {weekDays[6].getMonth() + 1}월 {weekDays[6].getDate()}일
+            </div>
+            <div className="text-xs text-slate-500 mt-1">이번 주</div>
+          </div>
+          <button className="bg-slate-100 p-2 rounded-lg hover:bg-slate-200 transition">
+            <span className="material-symbols-outlined text-slate-600">chevron_right</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Daily Schedule Cards - 오늘과 내일만 표시 */}
+      {weekDays.slice(0, 2).map((date, idx) => {
+        const dateStr = date.toISOString().split('T')[0];
+        const dayBookings = (bookingsByDate[dateStr] || [])
+          .filter(b => b.status !== 'cancelled')
+          .sort((a, b) => (a.time || '').localeCompare(b.time || ''));
+        const isToday = dateStr === todayStr;
+
+        return (
+          <div key={dateStr} className="mb-6">
+            {/* 날짜 헤더 */}
+            <div className="flex items-center gap-3 mb-3">
+              <div className={`flex flex-col items-center rounded-xl p-2 min-w-[3.5rem] shadow-md ${
+                isToday
+                  ? 'bg-gradient-to-br from-sky-500 to-sky-600 text-white'
+                  : 'bg-white border-2 border-slate-200 text-slate-900'
+              }`}>
+                <div className={`text-xs font-semibold ${isToday ? 'opacity-90' : 'text-slate-500'}`}>
+                  {weekDayNames[date.getDay()]}
+                </div>
+                <div className="text-2xl font-bold">{date.getDate()}</div>
+              </div>
+              <div>
+                <div className="font-bold text-slate-900">
+                  {date.getMonth() + 1}월 {date.getDate()}일 ({weekDayNames[date.getDay()]})
+                </div>
+                <div className="text-sm text-slate-500">
+                  {isToday ? '오늘' : '내일'} · {dayBookings.length}건
+                </div>
+              </div>
+            </div>
+
+            {/* Timeline */}
+            <div className="relative pl-[4.25rem]">
+              {/* Timeline Line */}
+              <div className="absolute left-7 top-0 bottom-0 w-0.5 bg-gradient-to-b from-sky-200 to-sky-300"></div>
+
+              {/* Timeline Items */}
+              <div className="space-y-3">
+                {dayBookings.map((booking, i) => {
+                  const statusBg = booking.status === 'confirmed'
+                    ? 'bg-gradient-to-br from-green-50 to-emerald-50 border-green-200'
+                    : 'bg-gradient-to-br from-amber-50 to-yellow-50 border-amber-200';
+                  const statusText = booking.status === 'confirmed' ? '확정' : '대기';
+                  const statusColor = booking.status === 'confirmed' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700';
+                  const petEmoji = (booking.petProfile?.species === 'cat') ? '🐈' : '🐕';
+
+                  return (
+                    <div key={booking.id} className="relative">
+                      {/* Timeline Dot */}
+                      <div className={`absolute left-[-2.5rem] top-2 w-3 h-3 rounded-full border-2 border-white shadow-md ${
+                        booking.status === 'confirmed' ? 'bg-sky-500' : 'bg-amber-500'
+                      }`}></div>
+
+                      {/* Booking Card */}
+                      <div className={`${statusBg} border rounded-xl p-3.5 transition-all hover:shadow-md hover:translate-x-1`}>
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="font-bold text-slate-900 text-lg">{booking.time}</span>
+                          <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${statusColor}`}>
+                            {statusText}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-xl shadow-sm">
+                            {petEmoji}
+                          </div>
+                          <div className="text-sm">
+                            <span className="font-semibold text-slate-900">{booking.petName}</span>
+                            <span className="text-slate-500"> · {booking.petProfile?.breed || '품종 미상'}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+
+                {dayBookings.length === 0 && (
+                  <div className="text-center py-8 text-slate-400">
+                    <span className="material-symbols-outlined text-3xl mb-2 block">event_busy</span>
+                    예약이 없습니다
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+      })}
+
+      {/* 나머지 주 요약 */}
+      <div className="bg-white rounded-xl p-4 shadow-sm">
+        <div className="flex items-center gap-2 text-sm text-slate-600">
+          <span className="material-symbols-outlined text-lg">info</span>
+          <span>이후 일정: 5건의 예약이 있습니다</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// 월간 캘린더 탭
+function MonthlyCalendar({ bookings, selectedDay, onSelectDay, onSelectBooking, onUpdateStatus }) {
+  const now = new Date();
+  const currentMonth = now.getMonth();
+  const currentYear = now.getFullYear();
+  const today = now.getDate();
+
+  // 이번달 첫날과 마지막날
+  const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+  const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+
+  // 날짜별 예약 수 계산
+  const bookingsByDate = {};
+  bookings.forEach(booking => {
+    const bookingDate = new Date(booking.date);
+    if (bookingDate.getMonth() === currentMonth && bookingDate.getFullYear() === currentYear) {
+      const day = bookingDate.getDate();
+      bookingsByDate[day] = (bookingsByDate[day] || 0) + 1;
+    }
+  });
+
+  // 선택된 날짜의 예약 목록
+  const selectedDateStr = selectedDay ? `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(selectedDay).padStart(2, '0')}` : null;
+  const selectedDayBookings = selectedDateStr
+    ? bookings.filter(b => b.date === selectedDateStr)
+    : [];
+
+  return (
+    <div className="space-y-4">
+      {/* 캘린더 헤더 */}
+      <div className="bg-gradient-to-br from-sky-50 to-blue-50 rounded-2xl p-6 shadow-md">
+        <div className="flex items-center justify-between mb-4">
+          <button className="bg-white p-2 rounded-lg hover:bg-sky-50 transition shadow-sm">
+            <span className="material-symbols-outlined text-sky-600">chevron_left</span>
+          </button>
+          <h2 className="text-xl font-bold text-sky-900">
+            {currentYear}년 {currentMonth + 1}월
+          </h2>
+          <button className="bg-white p-2 rounded-lg hover:bg-sky-50 transition shadow-sm">
+            <span className="material-symbols-outlined text-sky-600">chevron_right</span>
+          </button>
+        </div>
+
+        {/* 요일 헤더 */}
+        <div className="grid grid-cols-7 gap-1 mb-2">
+          {['일', '월', '화', '수', '목', '금', '토'].map((day, i) => (
+            <div key={day} className={`text-center text-sm font-bold py-2 ${
+              i === 0 ? 'text-red-600' : i === 6 ? 'text-blue-600' : 'text-sky-900'
+            }`}>
+              {day}
+            </div>
+          ))}
+        </div>
+
+        {/* 캘린더 그리드 */}
+        <div className="grid grid-cols-7 gap-1">
+          {/* 빈 셀 (첫날 이전) */}
+          {Array.from({ length: firstDay }, (_, i) => (
+            <div key={`empty-${i}`} className="aspect-square"></div>
+          ))}
+
+          {/* 날짜 셀 */}
+          {Array.from({ length: daysInMonth }, (_, i) => {
+            const day = i + 1;
+            const isToday = day === today;
+            const isSelected = day === selectedDay;
+            const count = bookingsByDate[day] || 0;
+            const dayOfWeek = (firstDay + i) % 7;
+            const isSunday = dayOfWeek === 0;
+            const isSaturday = dayOfWeek === 6;
+
+            let bgColor;
+            if (isSelected) {
+              bgColor = 'bg-gradient-to-br from-sky-500 to-sky-600 text-white shadow-md';
+            } else if (isToday) {
+              bgColor = 'bg-white border-2 border-sky-500 text-sky-600 shadow-sm';
+            } else if (count > 0) {
+              bgColor = 'bg-white/90 border border-slate-200 text-slate-900 shadow-sm';
+            } else {
+              bgColor = 'bg-white/30 text-slate-400';
+            }
+
+            return (
+              <button
+                key={day}
+                onClick={() => count > 0 && onSelectDay(day)}
+                className={`aspect-square rounded-xl flex flex-col items-center justify-center relative transition-all ${bgColor} ${
+                  count > 0 ? 'hover:scale-105 cursor-pointer' : 'cursor-default'
+                }`}
+              >
+                <span className={`text-sm font-bold ${
+                  isSelected || isToday || count > 0 ? '' : isSunday ? 'text-red-400' : isSaturday ? 'text-blue-400' : ''
+                }`}>
+                  {day}
+                </span>
+                {count > 0 && (
+                  <span className={`absolute bottom-1 px-1.5 py-0.5 rounded-full text-xs font-bold ${
+                    isSelected ? 'bg-white text-sky-600' : 'bg-gradient-to-r from-amber-500 to-orange-500 text-white'
+                  } shadow-sm`}>
+                    {count}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* 선택된 날짜의 예약 목록 */}
+      {selectedDay && selectedDayBookings.length > 0 && (
+        <div className="bg-white rounded-xl p-4 shadow-md border-2 border-sky-500">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-bold text-slate-900 flex items-center gap-2">
+              <span className="bg-gradient-to-r from-sky-500 to-sky-600 text-white px-3 py-1 rounded-lg shadow-sm">
+                {selectedDay}일
+              </span>
+              <span className="text-slate-600 text-sm">진료 일정</span>
+            </h3>
+            <button
+              onClick={() => onSelectDay(null)}
+              className="p-2 bg-slate-100 rounded-lg hover:bg-slate-200 transition"
+            >
+              <span className="material-symbols-outlined text-slate-600">close</span>
+            </button>
+          </div>
+
+          <div className="space-y-3">
+            {selectedDayBookings.map((booking) => {
+              const statusInfo = getBookingStatusInfo(booking.status);
+              const petEmoji = (booking.petProfile?.species === 'cat') ? '🐈' : '🐕';
+
+              return (
+                <div
+                  key={booking.id}
+                  className={`rounded-xl p-3 border transition-all cursor-pointer hover:shadow-md hover:translate-x-1 ${
+                    booking.status === 'confirmed'
+                      ? 'bg-gradient-to-br from-green-50 to-emerald-50 border-green-200'
+                      : 'bg-gradient-to-br from-amber-50 to-yellow-50 border-amber-200'
+                  }`}
+                  onClick={() => onSelectBooking(booking)}
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="font-bold text-slate-900">{booking.time}</span>
+                    <span className={`px-2 py-1 rounded-full text-xs font-bold ${statusInfo.color}`}>
+                      {statusInfo.label}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2.5 mb-2">
+                    <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-xl shadow-sm">
+                      {petEmoji}
+                    </div>
+                    <div className="flex-1">
+                      <div className="font-semibold text-slate-900 text-sm">
+                        {booking.petName}{' '}
+                        <span className="font-normal text-slate-500">
+                          · {booking.petProfile?.breed || '품종 미상'}
+                        </span>
+                      </div>
+                      <div className="text-xs text-slate-500">
+                        보호자: {booking.ownerName || '정보 없음'}
+                      </div>
+                    </div>
+                  </div>
+                  {booking.message && (
+                    <div className="bg-white rounded-lg p-2 text-xs text-slate-600">
+                      <span className="font-semibold">증상:</span> {booking.message}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {selectedDay && selectedDayBookings.length === 0 && (
+        <div className="bg-white rounded-xl p-8 text-center shadow-sm">
+          <span className="material-symbols-outlined text-5xl text-slate-300 mb-2 block">event_busy</span>
+          <p className="text-slate-500">{selectedDay}일에는 예약이 없습니다</p>
+          <button
+            onClick={() => onSelectDay(null)}
+            className="mt-4 bg-slate-100 px-4 py-2 rounded-lg text-slate-600 text-sm font-medium hover:bg-slate-200 transition"
+          >
+            닫기
+          </button>
+        </div>
+      )}
+
+      {!selectedDay && (
+        <div className="bg-white rounded-xl p-4 shadow-sm">
+          <div className="flex items-center gap-2 text-sm text-slate-600">
+            <span className="material-symbols-outlined text-lg">info</span>
+            <span>날짜를 클릭하면 진료 일정을 확인할 수 있습니다</span>
+          </div>
         </div>
       )}
     </div>
   );
 }
 
-// 사전 문진 탭
-function PreVisitPackets({ bookings, onViewDetails }) {
-  if (bookings.length === 0) {
-    return (
-      <div className="text-center py-12">
-        <div className="text-5xl mb-3">📋</div>
-        <p className="text-slate-500">AI 사전 진단 정보가 없습니다</p>
-        <p className="text-sm text-slate-400 mt-1">
-          보호자가 AI 진단을 받고 예약하면 여기에 표시됩니다
-        </p>
-      </div>
-    );
-  }
-
-  // AI 진단 데이터 가져오기
-  const getDiagnosisData = (diagnosisId) => {
-    try {
-      const diagnoses = JSON.parse(localStorage.getItem('petMedical_diagnoses') || '[]');
-      return diagnoses.find(d => d.id === diagnosisId);
-    } catch {
-      return null;
-    }
-  };
-
-  return (
-    <div className="space-y-3">
-      <h2 className="font-bold text-slate-800">
-        AI 사전 문진표 ({bookings.length}건)
-      </h2>
-
-      {bookings.map((booking) => {
-        const diagnosis = getDiagnosisData(booking.diagnosisId);
-        return (
-          <div
-            key={booking.id}
-            className="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 cursor-pointer hover:shadow-md transition"
-            onClick={() => onViewDetails(booking)}
-          >
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="font-bold text-slate-800">{booking.petName}</p>
-                <p className="text-sm text-slate-500">
-                  예약일: {booking.date} {booking.time}
-                </p>
-              </div>
-              <span className="text-slate-400">→</span>
-            </div>
-
-            {diagnosis && (
-              <div className="mt-3 p-3 bg-sky-50 rounded-xl">
-                <p className="text-sm font-bold text-sky-800">AI 예비 진단</p>
-                <p className="text-sm text-slate-600 mt-1">
-                  {diagnosis.diagnosis?.primary || diagnosis.diagnosis || '진단 정보 없음'}
-                </p>
-                {diagnosis.symptoms && (
-                  <div className="flex flex-wrap gap-1 mt-2">
-                    {diagnosis.symptoms.slice(0, 3).map((s, i) => (
-                      <span key={i} className="px-2 py-1 bg-white text-slate-600 text-xs rounded">
-                        {s}
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
-// 환자 관리 탭
-function PatientManagement({ bookings }) {
+// 환자 기록 탭 - 개선된 UI
+function PatientRecords({ bookings }) {
   // 고유한 환자(펫) 목록 추출
   const uniquePets = bookings.reduce((acc, b) => {
     if (b.petId && !acc.find(p => p.petId === b.petId)) {
       acc.push({
         petId: b.petId,
         petName: b.petName,
+        petProfile: b.petProfile,
         visitCount: bookings.filter(x => x.petId === b.petId).length,
         lastVisit: bookings.filter(x => x.petId === b.petId).sort((a, b) =>
           new Date(b.date) - new Date(a.date)
@@ -444,7 +737,7 @@ function PatientManagement({ bookings }) {
   if (uniquePets.length === 0) {
     return (
       <div className="text-center py-12">
-        <div className="text-5xl mb-3">🐾</div>
+        <div className="text-5xl mb-3">📂</div>
         <p className="text-slate-500">등록된 환자가 없습니다</p>
       </div>
     );
@@ -453,278 +746,115 @@ function PatientManagement({ bookings }) {
   return (
     <div className="space-y-3">
       <h2 className="font-bold text-slate-800">
-        환자 목록 ({uniquePets.length}마리)
+        📂 환자 기록 관리
       </h2>
 
       {uniquePets.map((pet) => (
-        <div
-          key={pet.petId}
-          className="bg-white rounded-2xl shadow-sm border border-slate-100 p-4"
-        >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-sky-100 flex items-center justify-center text-lg">
-                🐾
-              </div>
-              <div>
-                <p className="font-bold text-slate-800">{pet.petName}</p>
-                <p className="text-xs text-slate-500">
-                  방문 {pet.visitCount}회 · 최근 {pet.lastVisit || '기록 없음'}
-                </p>
-              </div>
-            </div>
-            <button className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition">
-              <span className="material-symbols-outlined">folder_open</span>
-            </button>
-          </div>
-        </div>
+        <PatientRecordCard key={pet.petId} pet={pet} />
       ))}
     </div>
   );
 }
 
-// 이번달 예약 탭
-function MonthlyBookings({ bookings, onSelectBooking, onUpdateStatus }) {
-  const now = new Date();
-  const currentMonth = now.getMonth();
-  const currentYear = now.getFullYear();
+// 환자 기록 카드 컴포넌트
+function PatientRecordCard({ pet }) {
+  const petEmoji = pet.petProfile?.species === 'cat' ? '🐈' : '🐕';
 
-  // 이번달 예약만 필터링
-  const monthlyBookings = bookings.filter(b => {
-    const bookingDate = new Date(b.date);
-    return bookingDate.getMonth() === currentMonth && bookingDate.getFullYear() === currentYear;
-  });
+  // 로컬 스토리지에서 진료 기록 가져오기
+  const clinicResults = JSON.parse(localStorage.getItem(CLINIC_RESULTS_KEY) || '[]');
+  const ourRecords = clinicResults.filter(r => r.petId === pet.petId);
 
-  // 날짜별로 그룹화
-  const groupedByDate = monthlyBookings.reduce((acc, booking) => {
-    const date = booking.date;
-    if (!acc[date]) {
-      acc[date] = [];
-    }
-    acc[date].push(booking);
-    return acc;
-  }, {});
-
-  // 날짜순 정렬
-  const sortedDates = Object.keys(groupedByDate).sort();
-
-  const formatDateLabel = (dateStr) => {
-    const date = new Date(dateStr);
-    const today = new Date().toISOString().split('T')[0];
-    const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0];
-
-    if (dateStr === today) return '오늘';
-    if (dateStr === tomorrow) return '내일';
-
-    return date.toLocaleDateString('ko-KR', {
-      month: 'long',
-      day: 'numeric',
-      weekday: 'short'
-    });
-  };
-
-  if (monthlyBookings.length === 0) {
-    return (
-      <div className="text-center py-12">
-        <span className="material-symbols-outlined text-5xl text-slate-300 mb-3 block">
-          calendar_month
-        </span>
-        <p className="text-slate-500">이번달 예약이 없습니다</p>
-      </div>
-    );
-  }
+  // 가상의 보호자 제공 기록 (실제로는 API나 로컬 스토리지에서 가져와야 함)
+  const providerRecords = [];
 
   return (
-    <div className="space-y-4">
-      <h2 className="font-bold text-slate-800 flex items-center gap-2">
-        <span className="material-symbols-outlined text-emerald-500">calendar_month</span>
-        {currentMonth + 1}월 예약 현황 ({monthlyBookings.length}건)
-      </h2>
-
-      {/* 월간 요약 */}
-      <div className="grid grid-cols-4 gap-2 mb-4">
-        <div className="bg-amber-50 rounded-lg p-2 text-center">
-          <p className="text-lg font-bold text-amber-600">
-            {monthlyBookings.filter(b => b.status === 'pending').length}
-          </p>
-          <p className="text-xs text-amber-700">대기</p>
+    <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100">
+      {/* 반려동물 정보 */}
+      <div className="flex items-center gap-3 mb-4">
+        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-sky-400 to-violet-400 flex items-center justify-center text-2xl">
+          {petEmoji}
         </div>
-        <div className="bg-green-50 rounded-lg p-2 text-center">
-          <p className="text-lg font-bold text-green-600">
-            {monthlyBookings.filter(b => b.status === 'confirmed').length}
+        <div className="flex-1">
+          <h3 className="font-bold text-slate-900">
+            {pet.petName} ({pet.petProfile?.breed || '품종 미상'}, {pet.petProfile?.age || '나이 미상'})
+          </h3>
+          <p className="text-sm text-slate-500">
+            방문 {pet.visitCount}회 · 최근 {pet.lastVisit || '기록 없음'}
           </p>
-          <p className="text-xs text-green-700">확정</p>
-        </div>
-        <div className="bg-sky-50 rounded-lg p-2 text-center">
-          <p className="text-lg font-bold text-sky-600">
-            {monthlyBookings.filter(b => b.status === 'completed').length}
-          </p>
-          <p className="text-xs text-sky-700">완료</p>
-        </div>
-        <div className="bg-red-50 rounded-lg p-2 text-center">
-          <p className="text-lg font-bold text-red-600">
-            {monthlyBookings.filter(b => b.status === 'cancelled').length}
-          </p>
-          <p className="text-xs text-red-700">취소</p>
         </div>
       </div>
 
-      {/* 날짜별 예약 목록 */}
-      {sortedDates.map(date => (
-        <div key={date} className="space-y-2">
-          <div className="flex items-center gap-2 sticky top-16 bg-slate-100 py-2 z-5">
-            <span className="material-symbols-outlined text-slate-400 text-sm">event</span>
-            <span className="text-sm font-medium text-slate-600">{formatDateLabel(date)}</span>
-            <span className="text-xs text-slate-400">({groupedByDate[date].length}건)</span>
+      {/* 우리 병원 기록 */}
+      <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-4 border border-green-200 mb-3">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center">
+              🏥
+            </div>
+            <span className="font-bold text-green-800 text-sm">우리 병원</span>
           </div>
-
-          {groupedByDate[date]
-            .sort((a, b) => (a.time || '').localeCompare(b.time || ''))
-            .map(booking => {
-              const statusInfo = getBookingStatusInfo(booking.status);
-              return (
-                <div
-                  key={booking.id}
-                  className="bg-white rounded-xl shadow-sm p-3 cursor-pointer hover:shadow-md transition"
-                  onClick={() => onSelectBooking(booking)}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-lg">
-                        🐾
-                      </div>
-                      <div>
-                        <p className="font-semibold text-slate-800 text-sm">{booking.petName || '이름 없음'}</p>
-                        <p className="text-xs text-slate-500">{booking.time || '시간 미정'}</p>
-                      </div>
-                    </div>
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusInfo.color}`}>
-                      {statusInfo.label}
-                    </span>
-                  </div>
+          <span className="bg-green-500 text-white px-2.5 py-1 rounded-full text-xs font-bold">
+            {ourRecords.length}건
+          </span>
+        </div>
+        {ourRecords.length > 0 ? (
+          <>
+            <div className="text-sm text-green-700 mb-3 space-y-1">
+              {ourRecords.slice(0, 2).map((record, i) => (
+                <div key={i}>
+                  • {new Date(record.createdAt).toLocaleDateString('ko-KR')} {record.diagnosis}
                 </div>
-              );
-            })}
-        </div>
-      ))}
-    </div>
-  );
-}
-
-// 오늘 진료 스케줄 탭
-function TodaySchedule({ bookings }) {
-  const today = new Date().toISOString().split('T')[0];
-  const todayBookings = bookings.filter(b => b.date === today && b.status !== 'cancelled');
-
-  // 시간대별 스케줄 생성 (9시~18시)
-  const timeSlots = [];
-  for (let hour = 9; hour <= 18; hour++) {
-    const timeStr = `${hour.toString().padStart(2, '0')}:00`;
-    const halfTimeStr = `${hour.toString().padStart(2, '0')}:30`;
-
-    const slotBookings = todayBookings.filter(b => {
-      if (!b.time) return false;
-      const bookingHour = parseInt(b.time.split(':')[0]);
-      const bookingMinute = parseInt(b.time.split(':')[1] || 0);
-      return bookingHour === hour && bookingMinute < 30;
-    });
-
-    const halfSlotBookings = todayBookings.filter(b => {
-      if (!b.time) return false;
-      const bookingHour = parseInt(b.time.split(':')[0]);
-      const bookingMinute = parseInt(b.time.split(':')[1] || 0);
-      return bookingHour === hour && bookingMinute >= 30;
-    });
-
-    timeSlots.push({ time: timeStr, bookings: slotBookings });
-    timeSlots.push({ time: halfTimeStr, bookings: halfSlotBookings });
-  }
-
-  const currentTime = new Date();
-  const currentHour = currentTime.getHours();
-  const currentMinute = currentTime.getMinutes();
-
-  return (
-    <div className="space-y-4">
-      <h2 className="font-bold text-slate-800 flex items-center gap-2">
-        <span className="material-symbols-outlined text-emerald-500">schedule</span>
-        오늘의 진료 스케줄
-      </h2>
-
-      {/* 현재 시간 표시 */}
-      <div className="bg-emerald-50 rounded-lg p-3 flex items-center gap-2">
-        <span className="material-symbols-outlined text-emerald-600">access_time</span>
-        <span className="text-emerald-700 font-medium">
-          현재 시간: {currentHour.toString().padStart(2, '0')}:{currentMinute.toString().padStart(2, '0')}
-        </span>
-      </div>
-
-      {/* 타임라인 */}
-      <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-        {timeSlots.map((slot, idx) => {
-          const slotHour = parseInt(slot.time.split(':')[0]);
-          const slotMinute = parseInt(slot.time.split(':')[1]);
-          const isPast = slotHour < currentHour || (slotHour === currentHour && slotMinute < currentMinute);
-          const isCurrent = slotHour === currentHour &&
-            ((slotMinute === 0 && currentMinute < 30) || (slotMinute === 30 && currentMinute >= 30));
-
-          return (
-            <div
-              key={slot.time}
-              className={`flex border-b border-slate-100 last:border-b-0 ${
-                isCurrent ? 'bg-emerald-50' : isPast ? 'bg-slate-50' : ''
-              }`}
-            >
-              {/* 시간 */}
-              <div className={`w-16 py-3 px-2 text-center border-r border-slate-100 ${
-                isCurrent ? 'text-emerald-600 font-bold' : isPast ? 'text-slate-400' : 'text-slate-600'
-              }`}>
-                <span className="text-sm">{slot.time}</span>
-              </div>
-
-              {/* 예약 내용 */}
-              <div className="flex-1 py-2 px-3">
-                {slot.bookings.length > 0 ? (
-                  <div className="space-y-1">
-                    {slot.bookings.map(booking => {
-                      const statusInfo = getBookingStatusInfo(booking.status);
-                      return (
-                        <div
-                          key={booking.id}
-                          className={`flex items-center justify-between p-2 rounded-lg ${
-                            booking.status === 'completed' ? 'bg-slate-100' :
-                            booking.status === 'confirmed' ? 'bg-emerald-100' : 'bg-amber-100'
-                          }`}
-                        >
-                          <div className="flex items-center gap-2">
-                            <span className="text-lg">🐾</span>
-                            <span className="font-medium text-sm text-slate-800">{booking.petName}</span>
-                          </div>
-                          <span className={`px-2 py-0.5 rounded-full text-xs ${statusInfo.color}`}>
-                            {statusInfo.label}
-                          </span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                ) : (
-                  <div className={`text-sm ${isPast ? 'text-slate-300' : 'text-slate-400'}`}>
-                    -
-                  </div>
-                )}
-              </div>
+              ))}
             </div>
-          );
-        })}
+            <button className="w-full bg-white border-2 border-green-500 text-green-700 py-2.5 rounded-xl font-bold text-sm hover:bg-green-50 transition flex items-center justify-center gap-2 shadow-sm">
+              <span className="material-symbols-outlined">send</span>
+              보호자에게 보내기
+            </button>
+          </>
+        ) : (
+          <div className="text-sm text-green-600 text-center py-2">
+            진료 기록이 없습니다
+          </div>
+        )}
       </div>
 
-      {/* 예약 없음 안내 */}
-      {todayBookings.length === 0 && (
-        <div className="text-center py-8 text-slate-500">
-          <span className="material-symbols-outlined text-4xl text-slate-300 mb-2 block">event_busy</span>
-          오늘 예정된 진료가 없습니다
+      {/* 보호자 제공 기록 */}
+      <div className={`rounded-xl p-4 border mb-3 ${
+        providerRecords.length > 0
+          ? 'bg-gradient-to-br from-amber-50 to-yellow-50 border-amber-200'
+          : 'bg-gradient-to-br from-slate-50 to-slate-100 border-slate-200 border-dashed'
+      }`}>
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-2">
+            <div className={`w-8 h-8 bg-white rounded-lg flex items-center justify-center ${
+              providerRecords.length === 0 && 'opacity-50'
+            }`}>
+              📥
+            </div>
+            <span className={`font-bold text-sm ${
+              providerRecords.length > 0 ? 'text-amber-800' : 'text-slate-500'
+            }`}>
+              보호자 제공
+            </span>
+          </div>
+          {providerRecords.length > 0 && (
+            <span className="bg-amber-500 text-white px-2.5 py-1 rounded-full text-xs font-bold">
+              {providerRecords.length}건
+            </span>
+          )}
         </div>
-      )}
+        <div className={`text-sm text-center py-2 ${
+          providerRecords.length > 0 ? 'text-amber-700' : 'text-slate-400'
+        }`}>
+          타병원 기록이 없습니다
+        </div>
+      </div>
+
+      {/* 통합 타임라인 버튼 */}
+      <button className="w-full bg-gradient-to-r from-purple-500 to-violet-500 text-white py-3 rounded-xl font-bold text-sm hover:from-purple-600 hover:to-violet-600 transition flex items-center justify-center gap-2 shadow-md">
+        <span className="material-symbols-outlined text-xl">timeline</span>
+        통합 타임라인 보기
+      </button>
     </div>
   );
 }
@@ -743,7 +873,7 @@ function ClinicSettings({ clinicInfo, onUpdate }) {
     <div className="space-y-4">
       <h2 className="font-bold text-slate-800 flex items-center gap-2">
         <span className="material-symbols-outlined text-slate-500">settings</span>
-        병원 설정
+        ⚙️ 병원 설정
       </h2>
 
       <div className="bg-white rounded-xl shadow-sm p-4 space-y-4">
@@ -754,7 +884,7 @@ function ClinicSettings({ clinicInfo, onUpdate }) {
               type="text"
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
-              className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-400"
+              className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-400"
             />
           ) : (
             <p className="text-slate-800">{clinicInfo.name}</p>
@@ -768,7 +898,7 @@ function ClinicSettings({ clinicInfo, onUpdate }) {
               type="text"
               value={form.doctorName}
               onChange={(e) => setForm({ ...form, doctorName: e.target.value })}
-              className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-400"
+              className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-400"
             />
           ) : (
             <p className="text-slate-800">{clinicInfo.doctorName}</p>
@@ -785,7 +915,7 @@ function ClinicSettings({ clinicInfo, onUpdate }) {
             </button>
             <button
               onClick={handleSave}
-              className="flex-1 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition"
+              className="flex-1 py-2 bg-sky-500 text-white rounded-lg hover:bg-sky-600 transition"
             >
               저장
             </button>
@@ -866,14 +996,14 @@ function BookingDetailModal({ booking, onClose, onUpdateStatus, onStartVisit }) 
 
         <div className="p-4 space-y-4">
           {/* 예약 정보 헤더 */}
-          <div className="bg-emerald-50 rounded-xl p-4">
+          <div className="bg-sky-50 rounded-xl p-4">
             <div className="flex items-center gap-3">
               <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center text-3xl shadow-sm">
                 {petProfile.species === 'cat' ? '🐱' : '🐕'}
               </div>
               <div className="flex-1">
-                <p className="font-bold text-lg text-emerald-800">{booking.petName}</p>
-                <p className="text-sm text-emerald-600">
+                <p className="font-bold text-lg text-sky-800">{booking.petName}</p>
+                <p className="text-sm text-sky-600">
                   예약일: {booking.date} {booking.time}
                 </p>
                 <span className={`inline-block mt-1 px-2 py-0.5 rounded-full text-xs font-medium ${getBookingStatusInfo(booking.status).color}`}>
@@ -1157,7 +1287,7 @@ function BookingDetailModal({ booking, onClose, onUpdateStatus, onStartVisit }) 
                   onUpdateStatus(booking.id, 'confirmed');
                   onClose();
                 }}
-                className="flex-1 py-3 bg-emerald-500 text-white font-semibold rounded-xl hover:bg-emerald-600 transition"
+                className="flex-1 py-3 bg-sky-500 text-white font-semibold rounded-xl hover:bg-sky-600 transition"
               >
                 예약 확정
               </button>
@@ -1313,7 +1443,7 @@ function ClinicResultModal({ booking, onClose, onSave }) {
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-2">
               <span className="flex items-center gap-2">
-                <span className="material-symbols-outlined text-lg text-emerald-500">medication</span>
+                <span className="material-symbols-outlined text-lg text-sky-500">medication</span>
                 처방약
               </span>
             </label>
@@ -1409,9 +1539,9 @@ function ClinicResultModal({ booking, onClose, onSave }) {
           </div>
 
           {/* 안내 문구 */}
-          <div className="bg-emerald-50 rounded-xl p-3 flex items-start gap-2">
-            <span className="material-symbols-outlined text-emerald-500 text-lg">info</span>
-            <p className="text-sm text-emerald-700">
+          <div className="bg-sky-50 rounded-xl p-3 flex items-start gap-2">
+            <span className="material-symbols-outlined text-sky-500 text-lg">info</span>
+            <p className="text-sm text-sky-700">
               저장하면 보호자 앱에 진료 결과가 자동으로 전송됩니다.
               처방약 정보는 보호자가 효과/부작용을 기록할 수 있습니다.
             </p>
@@ -1427,7 +1557,7 @@ function ClinicResultModal({ booking, onClose, onSave }) {
             </button>
             <button
               onClick={handleSubmit}
-              className="flex-1 py-3 bg-emerald-500 text-white font-semibold rounded-xl hover:bg-emerald-600 transition flex items-center justify-center gap-2"
+              className="flex-1 py-3 bg-sky-500 text-white font-semibold rounded-xl hover:bg-sky-600 transition flex items-center justify-center gap-2"
             >
               <span className="material-symbols-outlined">save</span>
               저장하기
@@ -1586,13 +1716,13 @@ function MedicationHistorySection({ petId }) {
 function getBookingStatusInfo(status) {
   switch (status) {
     case 'confirmed':
-      return { label: '예약 확정', color: 'bg-green-100 text-green-700' };
+      return { label: '확정', color: 'bg-green-100 text-green-700' };
     case 'cancelled':
-      return { label: '예약 취소', color: 'bg-red-100 text-red-700' };
+      return { label: '취소', color: 'bg-red-100 text-red-700' };
     case 'completed':
-      return { label: '진료 완료', color: 'bg-slate-100 text-slate-700' };
+      return { label: '완료', color: 'bg-slate-100 text-slate-700' };
     default:
-      return { label: '확인 대기', color: 'bg-amber-100 text-amber-700' };
+      return { label: '대기', color: 'bg-amber-100 text-amber-700' };
   }
 }
 
@@ -1605,6 +1735,13 @@ style.textContent = `
   }
   .animate-slide-up {
     animation: slide-up 0.3s ease-out;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
 `;
 document.head.appendChild(style);
