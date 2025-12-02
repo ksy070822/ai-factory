@@ -2076,6 +2076,20 @@ ${userQuestion}
     }
   };
 
+  // 에이전트별 색상 테마
+  const getAgentColor = (type) => {
+    const colors = {
+      cs: { bg: '#EFF6FF', icon: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)', border: '#BFDBFE' },
+      info: { bg: '#F0FDF4', icon: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', border: '#BBF7D0' },
+      medical: { bg: '#F5F3FF', icon: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)', border: '#DDD6FE' },
+      triage: { bg: '#FEF2F2', icon: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)', border: '#FECACA' },
+      data: { bg: '#FFF7ED', icon: 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)', border: '#FED7AA' },
+      care: { bg: '#ECFEFF', icon: 'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)', border: '#A5F3FC' },
+      summary: { bg: '#F8FAFC', icon: 'linear-gradient(135deg, #64748b 0%, #475569 100%)', border: '#E2E8F0' }
+    };
+    return colors[type] || colors.cs;
+  };
+
   // 에이전트 룸 정의 (카드 형태 UI용) - 병원 분위기 반영
   const agentRooms = [
     { id: 'cs', name: '접수 · 예약 센터', icon: '🏥', role: 'Front Desk', agentKey: 'CS Agent', description: '진료 접수 및 안내' },
@@ -2170,6 +2184,7 @@ ${userQuestion}
         {messages.map((msg, index) => {
           const isUserMessage = msg.agent === '사용자' || msg.isUser;
           const isSystemMessage = msg.type === 'system';
+          const agentColors = getAgentColor(msg.type);
 
           // 시스템 메시지 (에이전트 간 전환 메시지 등)
           if (isSystemMessage) {
@@ -2205,7 +2220,7 @@ ${userQuestion}
                   height: '36px',
                   minWidth: '36px',
                   borderRadius: '50%',
-                  background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
+                  background: agentColors.icon,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -2239,13 +2254,14 @@ ${userQuestion}
                 <div style={{
                   background: isUserMessage
                     ? 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)'
-                    : 'white',
+                    : agentColors.bg,
                   color: isUserMessage ? 'white' : '#1e293b',
                   borderRadius: isUserMessage ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
                   padding: '12px 16px',
                   fontSize: '14px',
                   lineHeight: '1.6',
                   boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+                  border: !isUserMessage ? `1px solid ${agentColors.border}` : 'none',
                   wordBreak: 'break-word'
                 }}>
                   {msg.content.split('\n').map((line, lineIdx) => (
@@ -2256,6 +2272,65 @@ ${userQuestion}
                       {line}
                     </div>
                   ))}
+
+                  {/* 질문 옵션 버튼 */}
+                  {msg.isQuestion && msg.questionData && !msg.answered && (
+                    <div style={{
+                      marginTop: '12px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '6px'
+                    }}>
+                      {msg.questionData.options.map((option, optIdx) => (
+                        <button
+                          key={optIdx}
+                          onClick={() => {
+                            // 보호자 응답 추가
+                            setMessages(prev => {
+                              const updated = [...prev];
+                              const msgIndex = updated.findIndex(m => m.timestamp === msg.timestamp);
+                              if (msgIndex !== -1) {
+                                updated[msgIndex] = { ...updated[msgIndex], answered: true };
+                              }
+                              return updated;
+                            });
+
+                            // 응답 메시지 추가
+                            setMessages(prev => [...prev, {
+                              agent: '사용자',
+                              role: '보호자',
+                              icon: '👤',
+                              type: 'user',
+                              content: option,
+                              isUser: true,
+                              timestamp: Date.now()
+                            }]);
+                          }}
+                          style={{
+                            padding: '10px 14px',
+                            borderRadius: '8px',
+                            border: '1px solid #cbd5e1',
+                            background: 'white',
+                            color: '#1e293b',
+                            fontSize: '13px',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s',
+                            textAlign: 'left'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.target.style.background = '#f1f5f9';
+                            e.target.style.borderColor = '#94a3b8';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.target.style.background = 'white';
+                            e.target.style.borderColor = '#cbd5e1';
+                          }}
+                        >
+                          {option}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
                 {/* 타임스탬프 */}
