@@ -1,4 +1,4 @@
-// Information Agent - Gemini Flash (빠른 증상 수집 + 질문 생성)
+// Information Agent - GPT-4o Vision (이미지 기반 증상 분석 + 정보 수집)
 import { COMMON_CONTEXT } from './commonContext';
 import { getApiKey, API_KEY_TYPES } from '../apiKeyManager';
 
@@ -108,9 +108,9 @@ const getDefaultQuestions = (symptomData) => {
   };
 };
 
-// 보호자 답변 분석
+// 보호자 답변 분석 - GPT-4o Vision (이미지 분석 포함)
 export const analyzeOwnerResponse = async (petData, symptomData, ownerResponses, csSummary) => {
-  const apiKey = getApiKey(API_KEY_TYPES.GEMINI);
+  const apiKey = getApiKey(API_KEY_TYPES.OPENAI);
 
   const combinedSymptoms = `${symptomData.symptomText || ''}\n\n[보호자 추가 답변]\n${ownerResponses.map((r, i) => `Q${i+1}: ${r.question}\nA${i+1}: ${r.answer}`).join('\n')}`;
 
@@ -123,20 +123,34 @@ export const analyzeOwnerResponse = async (petData, symptomData, ownerResponses,
         severity_hint: 'medium',
         possible_categories: ['일반 질환'],
         owner_responses_summary: ownerResponses.map(r => r.answer).join(', '),
-        notes_for_medical_agent: `보호자 답변을 바탕으로 추가 정보가 수집되었습니다. ${ownerResponses.length}개의 질문에 답변을 받았습니다.`
+        notes_for_medical_agent: `보호자 답변을 바탕으로 추가 정보가 수집되었습니다. ${ownerResponses.length}개의 질문에 답변을 받았습니다.`,
+        visual_findings: null
       },
       message: `보호자님 답변 감사합니다.\n\n📋 수집된 정보를 정리했습니다.\n👨‍⚕️ 담당 수의사 선생님께 진료 의뢰드립니다.`
     };
   }
 
-  const prompt = `${COMMON_CONTEXT}
+  const systemPrompt = `${COMMON_CONTEXT}
 
-당신은 "Information Agent (증상 사전 상담실)"입니다.
+당신은 "Information Agent (증상 사전 상담실)"이며 GPT-4o Vision을 활용하여 이미지 기반 증상 분석을 수행합니다.
 
 [역할]
 - 보호자의 초기 증상 설명과 추가 질문에 대한 답변을 종합하여 정보를 구조화합니다.
+- 제공된 이미지가 있다면 시각적으로 관찰 가능한 증상을 분석합니다.
 - Medical Agent가 진단에 활용할 수 있도록 핵심 정보를 정리합니다.
 
+[출력 형식 - JSON ONLY]
+{
+  "symptom_keywords": ["증상 키워드 1", "증상 키워드 2"],
+  "body_part_focus": ["귀", "피부", "소화기" 등 관련 부위],
+  "severity_hint": "low | medium | high",
+  "possible_categories": ["질환 카테고리 1", "질환 카테고리 2"],
+  "owner_responses_summary": "보호자 답변 요약 (한국어 2-3문장)",
+  "notes_for_medical_agent": "Medical Agent가 참고할 핵심 포인트 (한국어 3-4문장)",
+  "visual_findings": "이미지에서 발견된 시각적 소견 (이미지가 있을 경우, 한국어 2-3문장)"
+}`;
+
+  const userPrompt = `
 반려동물 정보:
 - 이름: ${petData.petName}
 - 종류: ${petData.species === 'dog' ? '개' : '고양이'}
@@ -146,49 +160,62 @@ CS Agent 요약:
 ${JSON.stringify(csSummary, null, 2)}
 
 [보호자 증상 설명 및 답변]
-${combinedSymptoms}
-
-[출력 형식 - JSON ONLY]
-{
-  "symptom_keywords": ["증상 키워드 1", "증상 키워드 2"],
-  "body_part_focus": ["귀", "피부", "소화기" 등 관련 부위],
-  "severity_hint": "low | medium | high",
-  "possible_categories": ["질환 카테고리 1", "질환 카테고리 2"],
-  "owner_responses_summary": "보호자 답변 요약 (한국어 2-3문장)",
-  "notes_for_medical_agent": "Medical Agent가 참고할 핵심 포인트 (한국어 3-4문장)"
-}`;
+${combinedSymptoms}`;
 
   try {
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: {
-            temperature: 0.3,
-            maxOutputTokens: 1024,
-          }
-        })
-      }
-    );
+    // GPT-4o Vision 메시지 구성 (이미지 포함 가능)
+    const messageContent = [
+      { type: 'text', text: userPrompt }
+    ];
 
-    if (!response.ok) throw new Error('API 오류');
+    // 이미지가 있으면 추가
+    if (symptomData.images && symptomData.images.length > 0) {
+      for (const imageUrl of symptomData.images.slice(0, 3)) { // 최대 3개
+        messageContent.push({
+          type: 'image_url',
+          image_url: { url: imageUrl }
+        });
+      }
+    }
+
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o',
+        messages: [
+          {
+            role: 'system',
+            content: systemPrompt
+          },
+          {
+            role: 'user',
+            content: messageContent
+          }
+        ],
+        temperature: 0.3,
+        max_tokens: 1024
+      })
+    });
+
+    if (!response.ok) throw new Error(`OpenAI API 오류: ${response.status}`);
 
     const data = await response.json();
-    const text = data.candidates[0].content.parts[0].text;
+    const text = data.choices[0].message.content;
     const jsonMatch = text.match(/\{[\s\S]*\}/);
 
     if (jsonMatch) {
       const content = JSON.parse(jsonMatch[0]);
       return {
         json: content,
-        message: `보호자님 답변 감사합니다.\n\n📋 ${content.owner_responses_summary}\n\n${content.notes_for_medical_agent}\n\n👨‍⚕️ 담당 수의사 선생님께 진료 의뢰드립니다.`
+        message: `보호자님 답변 감사합니다.\n\n📋 ${content.owner_responses_summary}\n\n${content.visual_findings ? `🔍 [이미지 분석] ${content.visual_findings}\n\n` : ''}${content.notes_for_medical_agent}\n\n👨‍⚕️ 담당 수의사 선생님께 진료 의뢰드립니다.`
       };
     }
   } catch (error) {
-    console.error('답변 분석 오류:', error);
+    console.error('GPT-4o Vision 분석 오류:', error);
   }
 
   // Fallback
@@ -199,7 +226,8 @@ ${combinedSymptoms}
       severity_hint: 'medium',
       possible_categories: ['일반 질환'],
       owner_responses_summary: ownerResponses.map(r => r.answer).join(', '),
-      notes_for_medical_agent: '보호자 답변을 바탕으로 추가 정보가 수집되었습니다.'
+      notes_for_medical_agent: '보호자 답변을 바탕으로 추가 정보가 수집되었습니다.',
+      visual_findings: null
     },
     message: `보호자님 답변 감사합니다.\n\n📋 수집된 정보를 정리했습니다.\n👨‍⚕️ 담당 수의사 선생님께 진료 의뢰드립니다.`
   };
