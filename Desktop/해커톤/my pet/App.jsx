@@ -216,26 +216,26 @@ const PET_CHARACTERS = {
 
 // 동물 종류 옵션
 const SPECIES_OPTIONS = [
-  { id: 'dog', label: '강아지', emoji: '🐕', icon: '/ai-factory/icon/no-bg/dog.png' },
-  { id: 'cat', label: '고양이', emoji: '🐈', icon: '/ai-factory/icon/no-bg/cat.png' },
-  { id: 'rabbit', label: '토끼', emoji: '🐰', icon: '/ai-factory/icon/no-bg/rabbit.png' },
-  { id: 'hamster', label: '햄스터', emoji: '🐹', icon: '/ai-factory/icon/no-bg/hamster.png' },
-  { id: 'bird', label: '새', emoji: '🦜', icon: '/ai-factory/icon/no-bg/bird.png' },
-  { id: 'hedgehog', label: '고슴도치', emoji: '🦔', icon: '/ai-factory/icon/no-bg/hedgehog.png' },
-  { id: 'reptile', label: '파충류', emoji: '🦎', icon: '/ai-factory/icon/no-bg/reptile.png' },
-  { id: 'other', label: '기타', emoji: '🐾', icon: '/ai-factory/icon/no-bg/etc.png' },
+  { id: 'dog', label: '강아지', emoji: '🐕', icon: '/icon/no-bg/dog.png' },
+  { id: 'cat', label: '고양이', emoji: '🐈', icon: '/icon/no-bg/cat.png' },
+  { id: 'rabbit', label: '토끼', emoji: '🐰', icon: '/icon/no-bg/rabbit.png' },
+  { id: 'hamster', label: '햄스터', emoji: '🐹', icon: '/icon/no-bg/hamster.png' },
+  { id: 'bird', label: '새', emoji: '🦜', icon: '/icon/no-bg/bird.png' },
+  { id: 'hedgehog', label: '고슴도치', emoji: '🦔', icon: '/icon/no-bg/hedgehog.png' },
+  { id: 'reptile', label: '파충류', emoji: '🦎', icon: '/icon/no-bg/reptile.png' },
+  { id: 'other', label: '기타', emoji: '🐾', icon: '/icon/no-bg/etc.png' },
 ];
 
 // 동물 종류별 메인 캐릭터 이미지 (프로필 배너용)
 const MAIN_CHARACTER_IMAGES = {
-  dog: '/ai-factory/icon/main-image/dog_main-removebg-preview.png',
-  cat: '/ai-factory/icon/main-image/Cat_main-removebg-preview.png',
-  rabbit: '/ai-factory/icon/main-image/rabbit_main-removebg-preview.png',
-  hamster: '/ai-factory/icon/main-image/hamster_main-removebg-preview.png',
-  bird: '/ai-factory/icon/main-image/bird_main-removebg-preview.png',
-  hedgehog: '/ai-factory/icon/main-image/hedgehog_main-removebg-preview.png',
-  reptile: '/ai-factory/icon/main-image/reptile_main-removebg-preview.png',
-  other: '/ai-factory/icon/main-image/etc_main-removebg-preview.png'
+  dog: '/icon/main-image/dog_main-removebg-preview.png',
+  cat: '/icon/main-image/Cat_main-removebg-preview.png',
+  rabbit: '/icon/main-image/rabbit_main-removebg-preview.png',
+  hamster: '/icon/main-image/hamster_main-removebg-preview.png',
+  bird: '/icon/main-image/bird_main-removebg-preview.png',
+  hedgehog: '/icon/main-image/hedgehog_main-removebg-preview.png',
+  reptile: '/icon/main-image/reptile_main-removebg-preview.png',
+  other: '/icon/main-image/etc_main-removebg-preview.png'
 };
 
 // 개/고양이 대표 품종 목록
@@ -941,8 +941,8 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-200 via-sky-100 to-blue-200">
-      {/* PC 레이아웃 (lg 이상) - 좌측 모바일 미리보기 + 우측 확장 뷰 */}
-      <div className="hidden lg:flex min-h-screen p-8 gap-8">
+      {/* PC 레이아웃 (임시 비활성화) */}
+      <div className="hidden">
         {/* 좌측: 모바일 화면 미리보기 */}
         <div className="flex-shrink-0 flex items-center justify-center">
           <div className="relative w-[430px] h-[932px] rounded-[3rem] shadow-2xl border-8 border-gray-800 overflow-hidden bg-white">
@@ -1000,9 +1000,9 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
                         <div className="flex-1 flex flex-col justify-between py-1">
                           <div>
                             <p className="text-base font-bold text-gray-800 whitespace-nowrap">AI 전문 의료진이,</p>
-                            <p className="text-base font-bold text-gray-800 whitespace-nowrap">24시간 {petData.petName}를 지켜줄게요 ❤️</p>
+                            <p className="text-base font-bold text-gray-800 whitespace-nowrap">24시간 {petData?.petName || petData?.name || '반려동물'}를 지켜줄게요 ❤️</p>
                             <p className="text-sm text-sky-700 font-semibold mt-1 whitespace-nowrap">
-                              오늘도 든든한 {petData.petName} 케어 시작!
+                              오늘도 든든한 {petData?.petName || petData?.name || '반려동물'} 케어 시작!
                             </p>
                           </div>
 
@@ -1049,7 +1049,7 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
                         </div>
                         <div className="flex-1">
                           <h3 className="text-gray-800 font-bold text-base">AI 건강 문진</h3>
-                          <p className="text-gray-600 text-xs">{petData.petName} 건강기록 주요알림</p>
+                          <p className="text-gray-600 text-xs">{petData?.petName || petData?.name || '반려동물'} 건강기록 주요알림</p>
                         </div>
                       </div>
                       <button
@@ -1065,7 +1065,7 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
                       <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center gap-2">
                           <span className="text-lg">🔔</span>
-                          <h3 className="text-base font-bold text-gray-800">{petData.petName} 케어 주요알림</h3>
+                          <h3 className="text-base font-bold text-gray-800">{petData?.petName || petData?.name || '반려동물'} 케어 주요알림</h3>
                         </div>
                         <button
                           onClick={() => onNavigate('records')}
@@ -1304,7 +1304,7 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
                               : 'bg-gradient-to-r from-sky-500 to-blue-600 text-white hover:shadow-lg'
                           }`}
                         >
-                          {careSaved ? '저장 완료!' : `오늘 ${petData.petName} 케어 완료`}
+                          {careSaved ? '저장 완료!' : `오늘 ${petData?.petName || petData?.name || '반려동물'} 케어 완료`}
                         </button>
                       </div>
                     </div>
@@ -1316,8 +1316,8 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
         </main>
       </div>
 
-      {/* 태블릿/모바일 레이아웃 (lg 미만) */}
-      <div className="lg:hidden md:flex md:items-center md:justify-center md:p-8 md:min-h-screen">
+      {/* 메인 레이아웃 (모든 화면) */}
+      <div className="md:flex md:items-center md:justify-center md:p-8 md:min-h-screen">
         {/* 모바일 프레임 (태블릿에서만 보임) */}
         <div className="hidden md:block fixed inset-0 pointer-events-none">
           <div className="absolute inset-0 bg-gradient-to-br from-slate-200 via-sky-100 to-blue-200"></div>
@@ -1328,8 +1328,8 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
           <div className="hidden md:block absolute top-0 left-1/2 -translate-x-1/2 w-32 h-7 bg-gray-800 rounded-b-2xl z-50"></div>
 
           <div className="h-full overflow-y-auto overflow-x-hidden bg-gradient-to-b from-sky-50 to-white pb-20">
-      {/* Header - 회사명 가운데 정렬 */}
-      <header className="bg-gradient-to-r from-sky-500 to-blue-600 text-white px-4 py-4 shadow-lg">
+      {/* Header - 회사명 가운데 정렬, 노치 영역 확보 */}
+      <header className="bg-gradient-to-r from-sky-500 to-blue-600 text-white px-4 pt-10 md:pt-12 pb-4 shadow-lg">
         <div className="flex items-center justify-center gap-2">
           <div className="w-9 h-9 bg-white rounded-lg flex items-center justify-center shadow-md flex-shrink-0">
             <span className="text-xl">🐾</span>
@@ -1379,9 +1379,9 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
                 <div className="flex-1 flex flex-col justify-between py-1">
                   <div>
                     <p className="text-base font-bold text-gray-800 whitespace-nowrap">AI 전문 의료진이,</p>
-                    <p className="text-base font-bold text-gray-800 whitespace-nowrap">24시간 {petData.petName}를 지켜줄게요 ❤️</p>
+                    <p className="text-base font-bold text-gray-800 whitespace-nowrap">24시간 {petData?.petName || petData?.name || '반려동물'}를 지켜줄게요 ❤️</p>
                     <p className="text-sm text-sky-700 font-semibold mt-1 whitespace-nowrap">
-                      오늘도 든든한 {petData.petName} 케어 시작!
+                      오늘도 든든한 {petData?.petName || petData?.name || '반려동물'} 케어 시작!
                     </p>
                   </div>
 
@@ -1428,7 +1428,7 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
                 </div>
                 <div className="flex-1">
                   <h3 className="text-gray-800 font-bold text-base">AI 건강 문진</h3>
-                  <p className="text-gray-600 text-xs">{petData.petName} 건강기록 주요알림</p>
+                  <p className="text-gray-600 text-xs">{petData?.petName || petData?.name || '반려동물'} 건강기록 주요알림</p>
                 </div>
               </div>
               <button
@@ -1444,7 +1444,7 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
                   <span className="text-lg">🔔</span>
-                  <h3 className="text-base font-bold text-gray-800">{petData.petName} 케어 주요알림</h3>
+                  <h3 className="text-base font-bold text-gray-800">{petData?.petName || petData?.name || '반려동물'} 케어 주요알림</h3>
                 </div>
                 <button
                   onClick={() => onNavigate('records')}
@@ -1653,7 +1653,7 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
                     : 'bg-gradient-to-r from-sky-500 to-blue-600 text-white hover:shadow-lg'
                 }`}
               >
-                {careSaved ? '저장 완료!' : `오늘 ${petData.petName} 케어 완료`}
+                {careSaved ? '저장 완료!' : `오늘 ${petData?.petName || petData?.name || '반려동물'} 케어 완료`}
               </button>
             </div>
           </>
@@ -2309,7 +2309,7 @@ function MultiAgentDiagnosis({ petData, symptomData, onComplete, onBack, onDiagn
             role: '상담 간호사',
             icon: '💬',
             type: 'cs',
-            content: `안녕하세요, ${petData.petName} 보호자님.\n\n접수 완료했습니다.\n\n환자 정보:\n• 이름: ${petData.petName}\n• 종류: ${getSpeciesDisplayName(petData.species)}\n• 품종: ${petData.breed || '미등록'}\n\n증상:\n${symptomText}\n${hasImages ? `\n사진 ${symptomData.images.length}장 확인 완료\n` : ''}\n→ Information Agent에게 전달합니다.`
+            content: `안녕하세요, ${petData?.petName || petData?.name || '반려동물'} 보호자님.\n\n접수 완료했습니다.\n\n환자 정보:\n• 이름: ${petData?.petName || petData?.name || '미상'}\n• 종류: ${getSpeciesDisplayName(petData.species)}\n• 품종: ${petData.breed || '미등록'}\n\n증상:\n${symptomText}\n${hasImages ? `\n사진 ${symptomData.images.length}장 확인 완료\n` : ''}\n→ Information Agent에게 전달합니다.`
           },
           {
             agent: 'Information Agent',
@@ -2346,7 +2346,7 @@ function MultiAgentDiagnosis({ petData, symptomData, onComplete, onBack, onDiagn
                   id: Date.now().toString(),
                   created_at: Date.now(),
                   petId: petData.id,
-                  petName: petData.petName,
+                  petName: petData?.petName || petData?.name || '미상',
                   symptom: symptomText
                 };
                 setDiagnosisResult(finalDiagnosis);
@@ -2452,7 +2452,7 @@ function MultiAgentDiagnosis({ petData, symptomData, onComplete, onBack, onDiagn
     // 진단서 저장
     const savedDiagnosis = {
       petId: petData.id,
-      petName: petData.petName,
+      petName: petData?.petName || petData?.name || '미상',
       symptom: symptomText,
       images: hasImages ? symptomData.images.length : 0,
       conversationHistory: conversationHistory,
@@ -2568,7 +2568,7 @@ function MultiAgentDiagnosis({ petData, symptomData, onComplete, onBack, onDiagn
 - 검증되지 않은 민간요법은 제안하지 마세요.`;
 
       const userPrompt = `[반려동물 정보]
-- 이름: ${petData.petName}
+- 이름: ${petData?.petName || petData?.name || '미상'}
 - 종류: ${getSpeciesDisplayName(petData.species)}
 - 품종: ${petData.breed || '미등록'}
 - 나이: ${petData.age || '미등록'}세
@@ -3710,7 +3710,7 @@ function HomeTreatmentGuide({ petData, diagnosisResult, onBack }) {
           <div className="pet-info-card">
             <span className="pet-icon-large">{petData.species === 'dog' ? '🐕' : '🐈'}</span>
             <div>
-              <h2>{petData.petName}의 치료 가이드</h2>
+              <h2>{petData?.petName || petData?.name || '반려동물'}의 치료 가이드</h2>
               {diagnosisResult && (
                 <p className="diagnosis-summary">{diagnosisResult.diagnosis}</p>
               )}
@@ -4740,16 +4740,14 @@ function App() {
         </div>
       )}
 
-      {/* 하단 탭 네비게이션 - 보호자 모드에서만 표시, AI문진에서도 표시, PC에서는 숨김 */}
+      {/* 하단 탭 네비게이션 - 보호자 모드에서만 표시 */}
       {userMode === 'guardian' && currentTab && (!currentView || currentView === 'ai-consultation') && (
-        <div className="lg:hidden">
-          <BottomTabNavigation
-            currentTab={currentTab}
-            onTabChange={handleTabChange}
-            onModeSwitch={() => handleModeSwitch('clinic')}
-            showModeSwitch={!!currentUser}
-          />
-        </div>
+        <BottomTabNavigation
+          currentTab={currentTab}
+          onTabChange={handleTabChange}
+          onModeSwitch={() => handleModeSwitch('clinic')}
+          showModeSwitch={!!currentUser}
+        />
       )}
         </>
       )}
