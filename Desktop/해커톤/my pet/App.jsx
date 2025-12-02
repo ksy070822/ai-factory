@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import './App.css'
 import { runMultiAgentDiagnosis } from './src/services/ai/agentOrchestrator'
 import { MyPage } from './src/components/MyPage'
@@ -28,8 +28,19 @@ import { getApiKey, API_KEY_TYPES } from './src/services/apiKeyManager'
 import { LoginScreen, RegisterScreen, getAuthSession, clearAuthSession } from './src/components/Auth'
 import { OCRUpload } from './src/components/OCRUpload'
 import { ClinicAdmin } from './src/components/ClinicAdmin'
+<<<<<<< HEAD
 import { seedGuardianData, seedClinicData } from './src/utils/seedTestDataUtils'
 import { auth } from './src/lib/firebase'
+=======
+import { ClinicDashboard } from './src/components/ClinicDashboard'
+import { AICareConsultation } from './src/components/AICareConsultation'
+import { getFAQContext } from './src/data/faqData'
+import { diagnosisService, bookingService, petService } from './src/services/firestore'
+import { getUserClinics } from './src/services/clinicService'
+
+// 테스트 데이터 시드 유틸리티 (브라우저 콘솔에서 window.seedGuardianData, window.seedClinicData 사용 가능)
+import './src/utils/seedTestData'
+>>>>>>> 9bdfb635130de009bf8ca88f7364abcb59a3807d
 
 // ============ 로컬 스토리지 유틸리티 ============
 const STORAGE_KEY = 'petMedical_pets';
@@ -51,10 +62,32 @@ const getPetsForUser = (userId) => {
 };
 
 // 사용자별 반려동물 데이터 저장
-const savePetsForUser = (userId, pets) => {
+const savePetsForUser = async (userId, pets, newPetData = null) => {
   if (!userId) return;
   try {
     localStorage.setItem(getUserPetsKey(userId), JSON.stringify(pets));
+
+    // 새로운 반려동물이 추가된 경우 Firestore에도 저장
+    if (newPetData) {
+      try {
+        const result = await petService.addPet(userId, {
+          petName: newPetData.petName || newPetData.name,
+          species: newPetData.species || 'dog',
+          breed: newPetData.breed || '',
+          sex: newPetData.sex || '',
+          birthDate: newPetData.birthDate || null,
+          weight: newPetData.weight || null,
+          neutered: newPetData.neutered || false,
+          character: newPetData.character || null,
+          profileImage: newPetData.profileImage || null
+        });
+        if (result.success) {
+          console.log('반려동물 Firestore 저장 완료:', result.id);
+        }
+      } catch (firestoreError) {
+        console.warn('반려동물 Firestore 저장 실패 (로컬 저장은 완료):', firestoreError);
+      }
+    }
   } catch (error) {
     console.error('Failed to save pets:', error);
   }
@@ -78,21 +111,42 @@ const savePetsToStorage = (pets) => {
   }
 };
 
-const saveDiagnosisToStorage = (diagnosis) => {
+const saveDiagnosisToStorage = async (diagnosis, userId = null) => {
   try {
     // healthFlags가 없으면 계산해서 추가
     let diagnosisWithFlags = { ...diagnosis };
     if (!diagnosisWithFlags.healthFlags) {
       diagnosisWithFlags.healthFlags = mapDiagnosisToHealthFlags(diagnosis);
     }
-    
+
+    const diagnosisData = {
+      ...diagnosisWithFlags,
+      id: diagnosisWithFlags.id || Date.now().toString(),
+      date: new Date().toISOString()
+    };
+
+    // localStorage에도 저장 (오프라인 지원)
     const diagnoses = JSON.parse(localStorage.getItem(DIAGNOSIS_KEY) || '[]');
-    diagnoses.unshift({ 
-      ...diagnosisWithFlags, 
-      id: diagnosisWithFlags.id || Date.now().toString(), 
-      date: new Date().toISOString() 
-    });
+    diagnoses.unshift(diagnosisData);
     localStorage.setItem(DIAGNOSIS_KEY, JSON.stringify(diagnoses));
+
+    // Firestore에 저장 (userId가 있으면)
+    try {
+      const firestoreData = {
+        ...diagnosisData,
+        userId: userId || diagnosisData.userId || null,
+        petId: diagnosisData.petId || null,
+        symptom: diagnosisData.symptom || diagnosisData.description || '',
+        species: diagnosisData.species || 'dog',
+        created_at: new Date().toISOString()
+      };
+      const result = await diagnosisService.saveDiagnosis(firestoreData);
+      if (result.success) {
+        console.log('진단 결과 Firestore 저장 완료:', result.id);
+      }
+    } catch (firestoreError) {
+      console.warn('Firestore 저장 실패 (로컬 저장은 완료):', firestoreError);
+    }
   } catch (error) {
     console.error('Failed to save diagnosis:', error);
   }
@@ -288,7 +342,7 @@ function ProfileRegistration({ onComplete, userId }) {
       if (userId) {
         const pets = getPetsForUser(userId);
         pets.push(newPet);
-        savePetsForUser(userId, pets);
+        savePetsForUser(userId, pets, newPet); // newPet을 Firestore에도 저장
       } else {
         // 호환성 유지
         const pets = getPetsFromStorage();
@@ -840,9 +894,13 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Header */}
-      <div className="bg-white px-4 py-6 border-b border-slate-100">
-        <h1 className="text-xl font-bold text-slate-900">환영합니다!</h1>
-        <p className="text-sm text-slate-500 mt-1">반려동물을 등록하고 AI 건강 관리를 시작하세요</p>
+      <div className="bg-gradient-to-r from-sky-500 to-blue-600 px-4 py-6">
+        <div className="flex items-center gap-2 mb-2">
+          <span className="text-3xl">🐾</span>
+          <span className="text-white text-xl font-bold">PetMedical.AI</span>
+        </div>
+        <h1 className="text-lg font-bold text-white">{petData?.petName || petData?.name || '보호자'}님 입장하셨습니다</h1>
+        <p className="text-sm text-sky-100 mt-1">AI 기반 반려동물 건강 관리 서비스</p>
       </div>
 
       <div className="px-4 pt-4 pb-24">
@@ -1593,10 +1651,15 @@ const generateAIQuestion = (symptomText, conversationHistory) => {
 };
 
 // ============ 멀티에이전트 진료 (핵심!) ============
-function MultiAgentDiagnosis({ petData, symptomData, onComplete, onBack, onDiagnosisResult }) {
+function MultiAgentDiagnosis({ petData, symptomData, onComplete, onBack, onDiagnosisResult, currentUser }) {
   const [messages, setMessages] = useState([]);
   const [currentStep, setCurrentStep] = useState(0);
   const [showResult, setShowResult] = useState(false);
+  const [expandedRooms, setExpandedRooms] = useState({
+    medical: true,  // 전문진료실 - 기본 펼침
+    triage: true,   // 응급도판정실 - 기본 펼침
+    care: true      // 처방약물관리실 - 기본 펼침
+  }); // 완료된 룸의 상세보기 확장 상태
   const [diagnosisResult, setDiagnosisResult] = useState(null);
   const [isProcessing, setIsProcessing] = useState(true);
   const [userInput, setUserInput] = useState('');
@@ -1604,7 +1667,22 @@ function MultiAgentDiagnosis({ petData, symptomData, onComplete, onBack, onDiagn
   const [waitingForAnswer, setWaitingForAnswer] = useState(false); // AI 질문 대기 중
   const [conversationHistory, setConversationHistory] = useState([]);
   const [showDiagnosisReport, setShowDiagnosisReport] = useState(false); // 진단서 표시 여부
-  
+  const messagesEndRef = useRef(null); // 자동 스크롤을 위한 ref
+
+  // 보호자 응답 관련 상태
+  const [guardianQuestions, setGuardianQuestions] = useState([]); // 현재 질문들
+  const [guardianResponses, setGuardianResponses] = useState({}); // 보호자 응답
+  const [isWaitingForGuardian, setIsWaitingForGuardian] = useState(false); // 보호자 응답 대기 중
+  const [additionalComment, setAdditionalComment] = useState(''); // 추가 코멘트
+  const guardianResolveRef = useRef(null); // Promise resolve 함수 저장
+
+  // 자동 스크롤: 메시지가 추가될 때마다 맨 아래로 스크롤
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages]);
+
   useEffect(() => {
     let isMounted = true; // 컴포넌트 마운트 상태 추적
     
@@ -1614,21 +1692,46 @@ function MultiAgentDiagnosis({ petData, symptomData, onComplete, onBack, onDiagn
         setMessages([]);
         setCurrentStep(0);
 
+        // 보호자 응답 대기 콜백 함수
+        const handleWaitForGuardianResponse = (questions) => {
+          return new Promise((resolve) => {
+            if (!isMounted) {
+              resolve({});
+              return;
+            }
+            setGuardianQuestions(questions);
+            setGuardianResponses({});
+            setIsWaitingForGuardian(true);
+            setAdditionalComment('');
+            guardianResolveRef.current = resolve;
+          });
+        };
+
         // 실제 AI API 호출
         const result = await runMultiAgentDiagnosis(
           petData,
           symptomData,
           (log) => {
             if (!isMounted) return; // 컴포넌트가 언마운트되었으면 무시
-            
-            // 중복 메시지 방지: 같은 에이전트의 "진행 중..." 메시지가 있으면 제거
+
+            // 질문 단계 메시지는 별도 처리 (UI에 표시하지 않음)
+            if (log.isQuestionPhase) {
+              return;
+            }
+
+            // 모든 메시지를 유지하되, 완전히 동일한 중복 메시지만 제거
             setMessages(prev => {
-              const filtered = prev.filter(msg => 
-                !(msg.agent === log.agent && msg.content.includes('중...') && log.content !== msg.content)
+              // 완전히 동일한 메시지(같은 에이전트, 같은 내용)인 경우만 제거
+              const isDuplicate = prev.some(msg =>
+                msg.agent === log.agent && msg.content === log.content
               );
-              
-              // 새 메시지 추가
-              return [...filtered, {
+
+              if (isDuplicate) {
+                return prev; // 중복이면 추가하지 않음
+              }
+
+              // 새 메시지 추가 (기존 메시지 모두 유지)
+              return [...prev, {
                 agent: log.agent,
                 role: log.role,
                 icon: log.icon,
@@ -1638,7 +1741,8 @@ function MultiAgentDiagnosis({ petData, symptomData, onComplete, onBack, onDiagn
               }];
             });
             setCurrentStep(prev => prev + 1);
-          }
+          },
+          handleWaitForGuardianResponse
         );
         
         if (!isMounted) return; // 컴포넌트가 언마운트되었으면 무시
@@ -1651,7 +1755,7 @@ function MultiAgentDiagnosis({ petData, symptomData, onComplete, onBack, onDiagn
           setChatMode(true);
           
           // 진단서 저장
-          saveDiagnosisToStorage(result.finalDiagnosis);
+          saveDiagnosisToStorage(result.finalDiagnosis, currentUser?.uid);
           
           // 부모 컴포넌트에 진단 결과 전달
           if (onDiagnosisResult) {
@@ -1716,7 +1820,7 @@ function MultiAgentDiagnosis({ petData, symptomData, onComplete, onBack, onDiagn
                 setShowResult(true);
                 setIsProcessing(false);
                 setChatMode(true);
-                saveDiagnosisToStorage(finalDiagnosis);
+                saveDiagnosisToStorage(finalDiagnosis, currentUser?.uid);
                 if (onDiagnosisResult) {
                   onDiagnosisResult(finalDiagnosis);
                 }
@@ -1735,6 +1839,78 @@ function MultiAgentDiagnosis({ petData, symptomData, onComplete, onBack, onDiagn
     };
   }, [petData?.id, symptomData?.symptomText]); // 의존성 배열 최적화
 
+  // 보호자 응답 선택 핸들러
+  const handleGuardianOptionSelect = (questionId, option, isMultiple) => {
+    setGuardianResponses(prev => {
+      if (isMultiple) {
+        const currentSelections = prev[questionId] || [];
+        if (currentSelections.includes(option)) {
+          // 이미 선택된 경우 제거
+          return { ...prev, [questionId]: currentSelections.filter(o => o !== option) };
+        } else {
+          // 없음 선택시 다른 옵션 제거
+          if (option === '없음') {
+            return { ...prev, [questionId]: ['없음'] };
+          }
+          // 다른 옵션 선택시 없음 제거
+          const filtered = currentSelections.filter(o => o !== '없음');
+          return { ...prev, [questionId]: [...filtered, option] };
+        }
+      } else {
+        return { ...prev, [questionId]: option };
+      }
+    });
+  };
+
+  // 보호자 응답 제출 핸들러
+  const handleGuardianResponseSubmit = () => {
+    // 모든 질문에 답변했는지 확인
+    const allAnswered = guardianQuestions.every(q => {
+      const response = guardianResponses[q.id];
+      if (q.type === 'multiple') {
+        return response && response.length > 0;
+      }
+      return response && response.length > 0;
+    });
+
+    if (!allAnswered) {
+      alert('모든 질문에 답변해 주세요.');
+      return;
+    }
+
+    // 추가 코멘트가 있으면 응답에 추가
+    const finalResponses = {
+      ...guardianResponses,
+      additionalComment: additionalComment.trim() || ''
+    };
+
+    // 보호자 응답 메시지를 채팅에 추가
+    const responsesSummary = guardianQuestions.map(q => {
+      const response = guardianResponses[q.id];
+      const responseText = Array.isArray(response) ? response.join(', ') : response;
+      return `• ${q.question}\n  → ${responseText}`;
+    }).join('\n\n');
+
+    setMessages(prev => [...prev, {
+      agent: '사용자',
+      role: '보호자',
+      icon: '👤',
+      type: 'user',
+      content: `📝 증상 문진 응답\n\n${responsesSummary}${additionalComment ? `\n\n💬 추가 정보: ${additionalComment}` : ''}`,
+      isUser: true,
+      timestamp: Date.now()
+    }]);
+
+    // Promise resolve 호출하여 진행 재개
+    if (guardianResolveRef.current) {
+      guardianResolveRef.current(finalResponses);
+      guardianResolveRef.current = null;
+    }
+
+    setIsWaitingForGuardian(false);
+    setGuardianQuestions([]);
+  };
+
   const showFinalDiagnosis = (analysis, symptomText, hasImages) => {
     setDiagnosisResult(analysis);
     setShowResult(true);
@@ -1749,8 +1925,8 @@ function MultiAgentDiagnosis({ petData, symptomData, onComplete, onBack, onDiagn
       conversationHistory: conversationHistory,
       ...analysis
     };
-    saveDiagnosisToStorage(savedDiagnosis);
-    
+    saveDiagnosisToStorage(savedDiagnosis, currentUser?.uid);
+
     // 부모 컴포넌트에 진단 결과 전달
     if (onDiagnosisResult) {
       onDiagnosisResult(analysis);
@@ -1832,10 +2008,10 @@ function MultiAgentDiagnosis({ petData, symptomData, onComplete, onBack, onDiagn
     setIsProcessing(true);
 
     try {
-      // Gemini API를 직접 사용하여 질문에 답변
-      const apiKey = getApiKey(API_KEY_TYPES.GEMINI);
+      // Claude API를 사용하여 질문에 답변 (더 정확한 수의학 답변)
+      const apiKey = getApiKey(API_KEY_TYPES.ANTHROPIC);
       if (!apiKey) {
-        throw new Error('Gemini API 키가 설정되지 않았습니다. 마이페이지 > API 설정에서 키를 입력해주세요.');
+        throw new Error('Claude API 키가 설정되지 않았습니다. 마이페이지 > API 설정에서 키를 입력해주세요.');
       }
 
       // 진단 결과에서 상세 정보 추출
@@ -1847,10 +2023,18 @@ function MultiAgentDiagnosis({ petData, symptomData, onComplete, onBack, onDiagn
       const immediateActions = ownerSheet.immediate_home_actions || actions;
       const thingsToAvoid = ownerSheet.things_to_avoid || [];
       const monitoringGuide = ownerSheet.monitoring_guide || [];
+      const carePlan = diagnosisResult.carePlan || {};
+      const followUpGuide = carePlan.follow_up_guide || {};
 
-      const prompt = `당신은 전문 수의사입니다. 반려동물 보호자의 질문에 대해 정확하고 친절하게 답변해주세요.
+      const systemPrompt = `당신은 경력 10년 이상의 전문 수의사입니다. 반려동물 보호자의 질문에 대해 정확하고 친절하게 답변해주세요.
 
-[반려동물 정보]
+중요 원칙:
+- 경미한 증상은 홈케어를 우선 권장하고, 무조건 병원 방문을 권하지 마세요.
+- 구체적이고 실용적인 조언을 제공하세요 (예: 어떤 음식을 얼마나, 구체적인 케어 방법)
+- 증상이 악화되는 경우에만 병원 방문을 안내하세요.
+- 검증되지 않은 민간요법은 제안하지 마세요.`;
+
+      const userPrompt = `[반려동물 정보]
 - 이름: ${petData.petName}
 - 종류: ${petData.species === 'dog' ? '개' : '고양이'}
 - 품종: ${petData.breed || '미등록'}
@@ -1862,6 +2046,7 @@ ${petData.weight ? `- 체중: ${petData.weight}kg` : ''}
 - 위험도: ${riskLevel}
 - 응급도: ${diagnosisResult.triage_level || 'yellow'}
 - Triage Score: ${diagnosisResult.triage_score || 'N/A'}/5
+- 병원 방문 필요 여부: ${carePlan.hospital_needed ? '필요' : '홈케어로 충분'}
 
 [권장 조치사항]
 ${immediateActions.length > 0 ? immediateActions.map((a, i) => `${i + 1}. ${a}`).join('\n') : '추가 조치사항 없음'}
@@ -1872,54 +2057,60 @@ ${thingsToAvoid.length > 0 ? thingsToAvoid.map((a, i) => `${i + 1}. ${a}`).join(
 [관찰 포인트]
 ${monitoringGuide.length > 0 ? monitoringGuide.map((a, i) => `${i + 1}. ${a}`).join('\n') : '없음'}
 
+[재진료 안내]
+- 홈케어 기간: ${followUpGuide.home_care_duration || '2~3일간 관찰'}
+- 병원 방문 조건: ${followUpGuide.condition_for_hospital || '증상 악화 시'}
+
 ${careGuide ? `[케어 가이드]\n${careGuide}` : ''}
+${getFAQContext(userQuestion, petData.species)}
 
 [보호자 질문]
 ${userQuestion}
 
 위 질문에 대해 다음을 포함하여 답변해주세요:
-1. 질문에 대한 구체적이고 실용적인 답변
+1. 질문에 대한 구체적이고 실용적인 답변 (참고 FAQ가 있다면 해당 내용을 기반으로)
 2. 현재 진단 결과와 연관된 조언
 3. 구체적인 실행 방법 (예: 음식 추천, 케어 방법, 주의사항)
-4. 필요시 병원 방문 시점 안내
+4. 필요시에만 병원 방문 시점 안내 (경미한 경우 홈케어 우선)
 
-답변은 친절하고 이해하기 쉽게 작성하되, 전문적이고 정확해야 합니다. 추측이나 검증되지 않은 정보는 제공하지 마세요.`;
+답변은 친절하고 이해하기 쉽게 작성하되, 전문적이고 정확해야 합니다. 2-3문장으로 핵심만 간결하게 답변하세요.`;
 
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: {
-              temperature: 0.7,
-              topK: 40,
-              topP: 0.95,
-              maxOutputTokens: 1024,
-            }
-          })
-        }
-      );
+      const response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01',
+          'anthropic-dangerous-direct-browser-access': 'true'
+        },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 1024,
+          system: systemPrompt,
+          messages: [
+            { role: 'user', content: userPrompt }
+          ]
+        })
+      });
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        console.error('Gemini API 오류:', response.status, errorData);
-        throw new Error(`API 호출 실패: ${response.status}`);
+        console.error('Claude API 오류:', response.status, errorData);
+        throw new Error(`API 호출 실패: ${response.status} - ${errorData.error?.message || '알 수 없는 오류'}`);
       }
 
       const data = await response.json();
-      
-      if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
+
+      if (!data.content || !data.content[0] || !data.content[0].text) {
         throw new Error('API 응답 형식 오류');
       }
 
-      const answer = data.candidates[0].content.parts[0].text;
-      
+      const answer = data.content[0].text;
+
       if (!answer || answer.trim().length === 0) {
         throw new Error('빈 답변을 받았습니다');
       }
-      
+
       setMessages(prev => [...prev, {
         agent: 'Veterinarian Agent',
         role: '전문 수의사',
@@ -1965,7 +2156,60 @@ ${userQuestion}
       setIsProcessing(false);
     }
   };
-  
+
+  // 사용자 메시지 전송 핸들러
+  const handleSendMessage = async () => {
+    if (!userInput.trim()) return;
+
+    // 진단이 완료된 경우 기존 handleUserQuestion 사용
+    if (diagnosisResult && !isProcessing) {
+      handleUserQuestion();
+      return;
+    }
+
+    // 진단 진행 중일 때는 메시지만 추가
+    const userMessage = userInput.trim();
+    setMessages(prev => [...prev, {
+      agent: '사용자',
+      role: '보호자',
+      icon: '👤',
+      type: 'user',
+      content: userMessage,
+      isUser: true,
+      timestamp: Date.now()
+    }]);
+
+    setUserInput('');
+
+    // 진단 진행 중이면 간단한 안내 메시지 추가
+    if (isProcessing) {
+      setTimeout(() => {
+        setMessages(prev => [...prev, {
+          agent: 'CS Agent',
+          role: '접수 · 예약 센터',
+          icon: '🏥',
+          type: 'cs',
+          content: '네, 보호자님. 증상 정보 감사합니다. AI 의료진이 모든 정보를 종합하여 정밀 진단을 진행하고 있습니다. 조금만 기다려주세요!',
+          timestamp: Date.now()
+        }]);
+      }, 500);
+    }
+  };
+
+  // 에이전트별 색상 테마
+  const getAgentColor = (type) => {
+    const colors = {
+      cs: { bg: '#EFF6FF', icon: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)', border: '#BFDBFE' },
+      info: { bg: '#F0FDF4', icon: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', border: '#BBF7D0' },
+      medical: { bg: '#F5F3FF', icon: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)', border: '#DDD6FE' },
+      triage: { bg: '#FEF2F2', icon: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)', border: '#FECACA' },
+      data: { bg: '#FFF7ED', icon: 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)', border: '#FED7AA' },
+      care: { bg: '#ECFEFF', icon: 'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)', border: '#A5F3FC' },
+      summary: { bg: '#F8FAFC', icon: 'linear-gradient(135deg, #64748b 0%, #475569 100%)', border: '#E2E8F0' }
+    };
+    return colors[type] || colors.cs;
+  };
+
   // 에이전트 룸 정의 (카드 형태 UI용) - 병원 분위기 반영
   const agentRooms = [
     { id: 'cs', name: '접수 · 예약 센터', icon: '🏥', role: 'Front Desk', agentKey: 'CS Agent', description: '진료 접수 및 안내' },
@@ -2029,14 +2273,17 @@ ${userQuestion}
         <p>AI 의료진이 {petData.petName}를 진료합니다</p>
       </div>
 
-      {/* 에이전트 룸 카드 UI */}
-      <div className="agent-rooms-container" style={{
+      {/* 채팅창 UI */}
+      <div className="chat-messages-container" style={{
         padding: '16px',
         display: 'flex',
         flexDirection: 'column',
         gap: '12px',
-        maxHeight: 'calc(100vh - 300px)',
-        overflowY: 'auto'
+        maxHeight: 'calc(100vh - 400px)',
+        overflowY: 'auto',
+        background: '#f8fafc',
+        borderRadius: '12px',
+        margin: '0 16px'
       }}>
         {messages.length === 0 && isProcessing && (
           <div className="initial-loading" style={{
@@ -2053,261 +2300,521 @@ ${userQuestion}
           </div>
         )}
 
-        {messages.length > 0 && agentRooms.map((room, index) => {
-          const status = getAgentRoomStatus(room);
-          const roomMessages = getAgentRoomMessages(room);
-          const isActive = status === 'processing' || status === 'completed';
+        {/* 채팅 메시지 리스트 */}
+        {messages.map((msg, index) => {
+          const isUserMessage = msg.agent === '사용자' || msg.isUser;
+          const isSystemMessage = msg.type === 'system';
+          const agentColors = getAgentColor(msg.type);
 
-          // 아직 시작 안된 룸은 숨김
-          if (status === 'pending' && index > 0) {
-            const prevRoom = agentRooms[index - 1];
-            const prevStatus = getAgentRoomStatus(prevRoom);
-            if (prevStatus === 'pending') return null;
+          // 시스템 메시지 (에이전트 간 전환 메시지 등)
+          if (isSystemMessage) {
+            return (
+              <div key={index} style={{
+                textAlign: 'center',
+                padding: '8px 16px',
+                margin: '4px 0',
+                fontSize: '12px',
+                color: '#64748b',
+                fontWeight: '500'
+              }}>
+                {msg.content}
+              </div>
+            );
           }
 
           return (
             <div
-              key={room.id}
-              className={`agent-room-card ${status}`}
+              key={index}
               style={{
-                background: status === 'completed' ? 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)' :
-                           status === 'processing' ? 'linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)' :
-                           '#f8fafc',
-                borderRadius: '16px',
-                padding: '16px',
-                border: status === 'completed' ? '2px solid #22c55e' :
-                        status === 'processing' ? '2px solid #3b82f6' :
-                        '1px solid #e2e8f0',
-                boxShadow: status === 'processing' ? '0 4px 12px rgba(59, 130, 246, 0.15)' :
-                          status === 'completed' ? '0 2px 8px rgba(34, 197, 94, 0.1)' :
-                          '0 1px 3px rgba(0,0,0,0.05)',
-                transition: 'all 0.3s ease',
-                opacity: status === 'pending' ? 0.5 : 1
+                display: 'flex',
+                flexDirection: isUserMessage ? 'row-reverse' : 'row',
+                gap: '8px',
+                alignItems: 'flex-start',
+                marginBottom: '8px'
               }}
             >
-              {/* 카드 헤더 */}
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-                marginBottom: isActive && roomMessages.length > 0 ? '12px' : '0'
-              }}>
-                {/* 아이콘 */}
+              {/* 에이전트 아이콘 */}
+              {!isUserMessage && (
                 <div style={{
-                  width: '48px',
-                  height: '48px',
-                  borderRadius: '12px',
-                  background: status === 'completed' ? '#22c55e' :
-                             status === 'processing' ? '#3b82f6' :
-                             '#94a3b8',
+                  width: '36px',
+                  height: '36px',
+                  minWidth: '36px',
+                  borderRadius: '50%',
+                  background: agentColors.icon,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontSize: '24px',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                  fontSize: '18px',
+                  boxShadow: '0 2px 6px rgba(0,0,0,0.1)'
                 }}>
-                  {room.icon}
+                  {msg.icon || '🏥'}
                 </div>
+              )}
 
-                {/* 텍스트 */}
-                <div style={{ flex: 1 }}>
+              {/* 메시지 말풍선 */}
+              <div style={{
+                maxWidth: '70%',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '4px'
+              }}>
+                {/* 에이전트 이름 / 역할 */}
+                {!isUserMessage && (
                   <div style={{
-                    fontSize: '16px',
-                    fontWeight: '700',
-                    color: '#1e293b',
-                    marginBottom: '2px'
+                    fontSize: '11px',
+                    color: '#64748b',
+                    fontWeight: '600',
+                    paddingLeft: '12px'
                   }}>
-                    {room.name}
+                    {msg.role || msg.agent}
                   </div>
-                  <div style={{
-                    fontSize: '12px',
-                    color: status === 'completed' ? '#16a34a' : status === 'processing' ? '#2563eb' : '#64748b',
-                    fontWeight: '500'
-                  }}>
-                    {room.role}
-                  </div>
-                  {room.description && (
-                    <div style={{
-                      fontSize: '11px',
-                      color: '#94a3b8',
-                      marginTop: '2px'
-                    }}>
-                      {room.description}
-                    </div>
-                  )}
-                </div>
+                )}
 
-                {/* 상태 표시 */}
+                {/* 메시지 내용 */}
                 <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px'
+                  background: isUserMessage
+                    ? 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)'
+                    : agentColors.bg,
+                  color: isUserMessage ? 'white' : '#1e293b',
+                  borderRadius: isUserMessage ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
+                  padding: '12px 16px',
+                  fontSize: '14px',
+                  lineHeight: '1.6',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+                  border: !isUserMessage ? `1px solid ${agentColors.border}` : 'none',
+                  wordBreak: 'break-word'
                 }}>
-                  {status === 'completed' && (
-                    <div style={{
-                      background: '#22c55e',
-                      color: 'white',
-                      padding: '4px 12px',
-                      borderRadius: '20px',
-                      fontSize: '12px',
-                      fontWeight: '600',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '4px'
+                  {msg.content.split('\n').map((line, lineIdx) => (
+                    <div key={lineIdx} style={{
+                      marginBottom: line ? '4px' : '0',
+                      whiteSpace: 'pre-wrap'
                     }}>
-                      <span>✓</span> 완료
+                      {line}
                     </div>
-                  )}
-                  {status === 'processing' && (
+                  ))}
+
+                  {/* 질문 옵션 버튼 */}
+                  {msg.isQuestion && msg.questionData && !msg.answered && (
                     <div style={{
-                      background: '#3b82f6',
-                      color: 'white',
-                      padding: '4px 12px',
-                      borderRadius: '20px',
-                      fontSize: '12px',
-                      fontWeight: '600',
+                      marginTop: '12px',
                       display: 'flex',
-                      alignItems: 'center',
+                      flexDirection: 'column',
                       gap: '6px'
                     }}>
-                      <div className="typing-dots" style={{ display: 'flex', gap: '3px' }}>
-                        <div style={{
-                          width: '4px',
-                          height: '4px',
-                          borderRadius: '50%',
-                          background: 'white',
-                          animation: 'pulse 1s infinite',
-                          animationDelay: '0s'
-                        }}></div>
-                        <div style={{
-                          width: '4px',
-                          height: '4px',
-                          borderRadius: '50%',
-                          background: 'white',
-                          animation: 'pulse 1s infinite',
-                          animationDelay: '0.2s'
-                        }}></div>
-                        <div style={{
-                          width: '4px',
-                          height: '4px',
-                          borderRadius: '50%',
-                          background: 'white',
-                          animation: 'pulse 1s infinite',
-                          animationDelay: '0.4s'
-                        }}></div>
-                      </div>
-                      진행중
+                      {msg.questionData.options.map((option, optIdx) => (
+                        <button
+                          key={optIdx}
+                          onClick={() => {
+                            // 보호자 응답 추가
+                            setMessages(prev => {
+                              const updated = [...prev];
+                              const msgIndex = updated.findIndex(m => m.timestamp === msg.timestamp);
+                              if (msgIndex !== -1) {
+                                updated[msgIndex] = { ...updated[msgIndex], answered: true };
+                              }
+                              return updated;
+                            });
+
+                            // 응답 메시지 추가
+                            setMessages(prev => [...prev, {
+                              agent: '사용자',
+                              role: '보호자',
+                              icon: '👤',
+                              type: 'user',
+                              content: option,
+                              isUser: true,
+                              timestamp: Date.now()
+                            }]);
+                          }}
+                          style={{
+                            padding: '10px 14px',
+                            borderRadius: '8px',
+                            border: '1px solid #cbd5e1',
+                            background: 'white',
+                            color: '#1e293b',
+                            fontSize: '13px',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s',
+                            textAlign: 'left'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.target.style.background = '#f1f5f9';
+                            e.target.style.borderColor = '#94a3b8';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.target.style.background = 'white';
+                            e.target.style.borderColor = '#cbd5e1';
+                          }}
+                        >
+                          {option}
+                        </button>
+                      ))}
                     </div>
                   )}
-                  {status === 'pending' && (
-                    <div style={{
-                      background: '#e2e8f0',
-                      color: '#64748b',
-                      padding: '4px 12px',
-                      borderRadius: '20px',
-                      fontSize: '12px',
-                      fontWeight: '600'
-                    }}>
-                      대기중
-                    </div>
-                  )}
+                </div>
+
+                {/* 타임스탬프 */}
+                <div style={{
+                  fontSize: '10px',
+                  color: '#94a3b8',
+                  paddingLeft: isUserMessage ? '0' : '12px',
+                  paddingRight: isUserMessage ? '12px' : '0',
+                  textAlign: isUserMessage ? 'right' : 'left'
+                }}>
+                  {new Date(msg.timestamp || Date.now()).toLocaleTimeString('ko-KR', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}
                 </div>
               </div>
 
-              {/* 대화 내용 (모든 메시지 표시) */}
-              {isActive && roomMessages.length > 0 && (
+              {/* 사용자 아이콘 */}
+              {isUserMessage && (
                 <div style={{
+                  width: '36px',
+                  height: '36px',
+                  minWidth: '36px',
+                  borderRadius: '50%',
+                  background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
                   display: 'flex',
-                  flexDirection: 'column',
-                  gap: '8px'
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '18px',
+                  boxShadow: '0 2px 6px rgba(0,0,0,0.1)'
                 }}>
-                  {roomMessages.map((msg, msgIdx) => {
-                    const isUserMessage = msg.agent === '사용자';
-                    return (
-                      <div
-                        key={msgIdx}
-                        style={{
-                          background: isUserMessage ? 'linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%)' : 'rgba(255,255,255,0.85)',
-                          borderRadius: '12px',
-                          padding: '10px 14px',
-                          fontSize: '14px',
-                          color: '#334155',
-                          lineHeight: '1.6',
-                          borderLeft: isUserMessage ? '3px solid #0ea5e9' : '3px solid #22c55e',
-                          boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
-                        }}
-                      >
-                        {isUserMessage && (
-                          <div style={{
-                            fontSize: '11px',
-                            color: '#0369a1',
-                            fontWeight: '600',
-                            marginBottom: '4px'
-                          }}>
-                            👤 보호자
-                          </div>
-                        )}
-                        {msg.content.split('\n').map((line, lineIdx) => (
-                          <div key={lineIdx} style={{ marginBottom: line ? '4px' : '0' }}>{line}</div>
-                        ))}
-                      </div>
-                    );
-                  })}
+                  👤
                 </div>
               )}
             </div>
           );
         })}
 
-        {/* 진행 중 표시 */}
+        {/* 타이핑 인디케이터 */}
         {isProcessing && messages.length > 0 && (
           <div style={{
-            textAlign: 'center',
-            padding: '12px',
-            color: '#64748b',
-            fontSize: '14px'
+            display: 'flex',
+            gap: '8px',
+            alignItems: 'flex-start',
+            marginBottom: '8px'
           }}>
-            <span>AI 에이전트들이 협업하여 진료 중입니다...</span>
+            <div style={{
+              width: '36px',
+              height: '36px',
+              minWidth: '36px',
+              borderRadius: '50%',
+              background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '18px',
+              boxShadow: '0 2px 6px rgba(0,0,0,0.1)'
+            }}>
+              💭
+            </div>
+            <div style={{
+              background: 'white',
+              borderRadius: '16px 16px 16px 4px',
+              padding: '16px 20px',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
+            }}>
+              <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+                <div style={{
+                  width: '8px',
+                  height: '8px',
+                  borderRadius: '50%',
+                  background: '#6366f1',
+                  animation: 'pulse 1.4s infinite',
+                  animationDelay: '0s'
+                }}></div>
+                <div style={{
+                  width: '8px',
+                  height: '8px',
+                  borderRadius: '50%',
+                  background: '#6366f1',
+                  animation: 'pulse 1.4s infinite',
+                  animationDelay: '0.2s'
+                }}></div>
+                <div style={{
+                  width: '8px',
+                  height: '8px',
+                  borderRadius: '50%',
+                  background: '#6366f1',
+                  animation: 'pulse 1.4s infinite',
+                  animationDelay: '0.4s'
+                }}></div>
+              </div>
+            </div>
           </div>
         )}
+
+        {/* 보호자 응답 폼 */}
+        {isWaitingForGuardian && guardianQuestions.length > 0 && (
+          <div style={{
+            background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)',
+            borderRadius: '16px',
+            padding: '20px',
+            margin: '12px 0',
+            border: '2px solid #0ea5e9',
+            boxShadow: '0 4px 12px rgba(14, 165, 233, 0.15)'
+          }}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              marginBottom: '16px'
+            }}>
+              <span style={{ fontSize: '24px' }}>📋</span>
+              <div>
+                <h3 style={{ margin: 0, fontSize: '16px', fontWeight: '700', color: '#0369a1' }}>
+                  증상 문진
+                </h3>
+                <p style={{ margin: '4px 0 0', fontSize: '13px', color: '#0284c7' }}>
+                  정확한 진단을 위해 아래 질문에 답변해 주세요
+                </p>
+              </div>
+            </div>
+
+            {guardianQuestions.map((question, qIndex) => {
+              const isMultiple = question.type === 'multiple';
+              const currentResponse = guardianResponses[question.id] || (isMultiple ? [] : '');
+
+              return (
+                <div key={question.id} style={{
+                  marginBottom: '20px',
+                  padding: '16px',
+                  background: 'white',
+                  borderRadius: '12px',
+                  boxShadow: '0 2px 6px rgba(0,0,0,0.06)'
+                }}>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    gap: '8px',
+                    marginBottom: '12px'
+                  }}>
+                    <span style={{
+                      background: '#0ea5e9',
+                      color: 'white',
+                      width: '24px',
+                      height: '24px',
+                      borderRadius: '50%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '12px',
+                      fontWeight: '700',
+                      flexShrink: 0
+                    }}>
+                      {qIndex + 1}
+                    </span>
+                    <div>
+                      <p style={{
+                        margin: 0,
+                        fontSize: '14px',
+                        fontWeight: '600',
+                        color: '#1e293b'
+                      }}>
+                        {question.question}
+                      </p>
+                      {isMultiple && (
+                        <span style={{
+                          fontSize: '11px',
+                          color: '#64748b',
+                          marginTop: '4px',
+                          display: 'block'
+                        }}>
+                          복수 선택 가능
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  <div style={{
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    gap: '8px'
+                  }}>
+                    {question.options.map((option, optIndex) => {
+                      const isSelected = isMultiple
+                        ? currentResponse.includes(option)
+                        : currentResponse === option;
+
+                      return (
+                        <button
+                          key={optIndex}
+                          onClick={() => handleGuardianOptionSelect(question.id, option, isMultiple)}
+                          style={{
+                            padding: '10px 16px',
+                            borderRadius: '20px',
+                            border: isSelected ? '2px solid #0ea5e9' : '2px solid #e2e8f0',
+                            background: isSelected ? 'linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%)' : 'white',
+                            color: isSelected ? 'white' : '#475569',
+                            fontSize: '13px',
+                            fontWeight: isSelected ? '600' : '500',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s ease',
+                            boxShadow: isSelected ? '0 2px 8px rgba(14, 165, 233, 0.3)' : 'none'
+                          }}
+                        >
+                          {isSelected && <span style={{ marginRight: '4px' }}>✓</span>}
+                          {option}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
+
+            {/* 추가 코멘트 입력 */}
+            <div style={{
+              marginBottom: '16px',
+              padding: '16px',
+              background: 'white',
+              borderRadius: '12px',
+              boxShadow: '0 2px 6px rgba(0,0,0,0.06)'
+            }}>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                marginBottom: '10px'
+              }}>
+                <span style={{ fontSize: '16px' }}>💬</span>
+                <p style={{
+                  margin: 0,
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  color: '#1e293b'
+                }}>
+                  추가로 알려주실 내용이 있나요? (선택사항)
+                </p>
+              </div>
+              <textarea
+                value={additionalComment}
+                onChange={(e) => setAdditionalComment(e.target.value)}
+                placeholder="예: 어제 산책 중에 풀을 많이 먹었어요 / 최근 사료를 바꿨어요 등"
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  borderRadius: '8px',
+                  border: '1px solid #e2e8f0',
+                  fontSize: '14px',
+                  minHeight: '80px',
+                  resize: 'vertical',
+                  fontFamily: 'inherit',
+                  boxSizing: 'border-box'
+                }}
+              />
+            </div>
+
+            {/* 제출 버튼 */}
+            <button
+              onClick={handleGuardianResponseSubmit}
+              style={{
+                width: '100%',
+                padding: '14px',
+                borderRadius: '12px',
+                border: 'none',
+                background: 'linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%)',
+                color: 'white',
+                fontSize: '15px',
+                fontWeight: '700',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                boxShadow: '0 4px 12px rgba(14, 165, 233, 0.3)',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              <span>답변 제출하고 진료 계속하기</span>
+              <span style={{ fontSize: '18px' }}>→</span>
+            </button>
+          </div>
+        )}
+
+        {/* 자동 스크롤을 위한 참조 지점 */}
+        <div ref={messagesEndRef} />
       </div>
 
-        {chatMode && (
-          <div className="chat-input-container">
-            <div className="chat-input-wrapper">
-              <input
-                type="text"
-                value={userInput}
-                onChange={(e) => setUserInput(e.target.value)}
-                onKeyPress={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    if (waitingForAnswer) {
-                      handleUserMessage();
-                    } else {
-                      handleUserQuestion();
-                    }
-                  }
-                }}
-                placeholder={waitingForAnswer ? "AI 의사의 질문에 답변해주세요..." : "궁금한 점을 물어보세요..."}
-                className="chat-input"
-                disabled={isProcessing}
-              />
-              <button
-                onClick={waitingForAnswer ? handleUserMessage : handleUserQuestion}
-                disabled={!userInput.trim() || isProcessing}
-                className="chat-send-btn"
-              >
-                {waitingForAnswer ? '답변하기' : '질문하기'}
-              </button>
-            </div>
-            {!waitingForAnswer && (
-              <div className="chat-hint">
-                💡 AI 의사에게 질문하거나, 추가 증상을 설명할 수 있습니다
-              </div>
-            )}
+      {/* 메시지 입력창 */}
+      {!showResult && !isWaitingForGuardian && (
+        <div style={{
+          padding: '16px',
+          borderTop: '1px solid #e2e8f0',
+          background: 'white',
+          position: 'sticky',
+          bottom: 0,
+          zIndex: 10
+        }}>
+          <div style={{
+            display: 'flex',
+            gap: '8px',
+            alignItems: 'center',
+            maxWidth: '100%',
+            margin: '0 auto'
+          }}>
+            <input
+              type="text"
+              value={userInput}
+              onChange={(e) => setUserInput(e.target.value)}
+              onKeyPress={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey && userInput.trim()) {
+                  e.preventDefault();
+                  handleSendMessage();
+                }
+              }}
+              placeholder={isProcessing ? "AI가 진단 중입니다..." : "추가 질문이나 증상을 입력하세요..."}
+              disabled={isProcessing}
+              style={{
+                flex: 1,
+                padding: '12px 16px',
+                borderRadius: '24px',
+                border: '2px solid #e2e8f0',
+                fontSize: '14px',
+                outline: 'none',
+                transition: 'border-color 0.2s',
+                background: isProcessing ? '#f1f5f9' : 'white'
+              }}
+              onFocus={(e) => e.target.style.borderColor = '#6366f1'}
+              onBlur={(e) => e.target.style.borderColor = '#e2e8f0'}
+            />
+            <button
+              onClick={handleSendMessage}
+              disabled={isProcessing || !userInput.trim()}
+              style={{
+                width: '44px',
+                height: '44px',
+                borderRadius: '50%',
+                border: 'none',
+                background: (isProcessing || !userInput.trim())
+                  ? '#cbd5e1'
+                  : 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
+                color: 'white',
+                fontSize: '18px',
+                cursor: (isProcessing || !userInput.trim()) ? 'not-allowed' : 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: (isProcessing || !userInput.trim()) ? 'none' : '0 2px 8px rgba(99, 102, 241, 0.3)',
+                transition: 'all 0.2s'
+              }}
+            >
+              ➤
+            </button>
           </div>
-        )}
+          <div style={{
+            fontSize: '11px',
+            color: '#94a3b8',
+            marginTop: '8px',
+            textAlign: 'center'
+          }}>
+            궁금한 점이 있으시면 언제든 질문해주세요
+          </div>
+        </div>
+      )}
 
       {showResult && diagnosisResult && (
         <div className="diagnosis-result">
@@ -2389,37 +2896,34 @@ ${userQuestion}
               </div>
             )}
 
-            <div className="action-buttons">
-              <button className="action-btn primary" onClick={() => onComplete('treatment')}>
+            <div className="action-buttons" style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', justifyContent: 'center', padding: '16px' }}>
+              <button
+                className="action-btn primary"
+                onClick={() => onComplete('treatment')}
+                style={{ flex: '1 1 45%', minWidth: '140px', padding: '14px 16px', borderRadius: '12px', fontWeight: '600' }}
+              >
                 🏠 직접 치료하기
               </button>
-              <button className="action-btn secondary" onClick={async () => {
-                // 병원 패킷 생성
-                try {
-                  const packet = await generateHospitalPacket(petData, diagnosisResult, symptomData);
-                  // 패킷을 상태에 저장하거나 바로 표시
-                  alert('병원 진단 패킷이 생성되었습니다!\n\n병원 예약 화면에서 확인할 수 있습니다.');
-                  onComplete('hospital');
-                } catch (err) {
-                  console.error('패킷 생성 오류:', err);
-                  onComplete('hospital');
-                }
-              }}>
+              <button
+                className="action-btn secondary"
+                onClick={() => onComplete('hospital')}
+                style={{ flex: '1 1 45%', minWidth: '140px', padding: '14px 16px', borderRadius: '12px', fontWeight: '600' }}
+              >
                 🏥 병원 예약하기
               </button>
-              <button className="action-btn highlight" onClick={() => setShowDiagnosisReport(true)}>
+              <button
+                className="action-btn highlight"
+                onClick={() => setShowDiagnosisReport(true)}
+                style={{ flex: '1 1 100%', minWidth: '140px', padding: '14px 16px', borderRadius: '12px', fontWeight: '600' }}
+              >
                 📄 진단서 보기
               </button>
-              {chatMode && (
-                <button className="action-btn outline" onClick={() => {
-                  setChatMode(false);
-                  setShowResult(true);
-                }}>
-                  💬 대화 계속하기
-                </button>
-              )}
-              <button className="action-btn outline" onClick={() => onComplete('dashboard')}>
-                📋 대시보드로
+              <button
+                className="action-btn outline"
+                onClick={() => onComplete('home')}
+                style={{ flex: '1 1 100%', padding: '12px 16px', borderRadius: '12px', fontWeight: '500', background: '#f1f5f9', color: '#475569' }}
+              >
+                🏠 홈으로
               </button>
             </div>
           </div>
@@ -2465,17 +2969,26 @@ function DiagnosisResultView({ petData, diagnosisResult, symptomData, onGoToTrea
   const emergencyInfo = getEmergencyInfo(diagnosisResult?.emergency);
 
   return (
-    <div className="diagnosis-result-view">
-      <div className="result-view-header">
-        <button className="back-btn" onClick={onBack}>←</button>
-        <h1>📋 진단 결과</h1>
+    <div className="diagnosis-result-view" style={{ minHeight: '100vh', background: '#f8fafc' }}>
+      {/* PetMedical.AI 브랜드 헤더 */}
+      <div style={{ background: 'linear-gradient(135deg, #0ea5e9, #3b82f6)', padding: '16px 20px', color: 'white' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <button onClick={onBack} style={{ background: 'rgba(255,255,255,0.2)', border: 'none', borderRadius: '8px', padding: '8px 12px', color: 'white', cursor: 'pointer' }}>
+            ← 뒤로
+          </button>
+          <div style={{ textAlign: 'center' }}>
+            <p style={{ fontSize: '10px', opacity: 0.9, margin: 0 }}>🐾 PetMedical.AI</p>
+            <h1 style={{ fontSize: '18px', fontWeight: 'bold', margin: '4px 0 0' }}>AI 진단 결과</h1>
+          </div>
+          <div style={{ width: '60px' }}></div>
+        </div>
       </div>
 
-      <div className="result-view-content">
-        <div className="result-card-summary">
-          <div className="pet-info-mini">
-            <span className="pet-avatar">{petData?.species === 'cat' ? '🐱' : '🐕'}</span>
-            <span className="pet-name">{petData?.name || '반려동물'}</span>
+      <div className="result-view-content" style={{ padding: '16px' }}>
+        <div className="result-card-summary" style={{ background: 'white', borderRadius: '16px', padding: '20px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
+          <div className="pet-info-mini" style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+            <span className="pet-avatar" style={{ fontSize: '32px' }}>{petData?.species === 'cat' ? '🐱' : '🐕'}</span>
+            <span className="pet-name" style={{ fontWeight: 'bold', fontSize: '18px' }}>{petData?.name || petData?.petName || '반려동물'}</span>
           </div>
 
           <div className="diagnosis-main-box">
@@ -2512,18 +3025,34 @@ function DiagnosisResultView({ petData, diagnosisResult, symptomData, onGoToTrea
           </div>
         </div>
 
-        <div className="result-view-actions">
-          <button className="action-btn highlight" onClick={() => setShowDiagnosisReport(true)}>
-            📄 진단서 보기
-          </button>
-          <button className="action-btn primary" onClick={onGoToTreatment}>
+        <div className="result-view-actions" style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', justifyContent: 'center', padding: '16px' }}>
+          <button
+            className="action-btn primary"
+            onClick={onGoToTreatment}
+            style={{ flex: '1 1 45%', minWidth: '140px', padding: '14px 16px', borderRadius: '12px', fontWeight: '600', background: 'linear-gradient(135deg, #f59e0b, #d97706)', color: 'white', border: 'none' }}
+          >
             🏠 직접 치료하기
           </button>
-          <button className="action-btn secondary" onClick={onGoToHospital}>
+          <button
+            className="action-btn secondary"
+            onClick={onGoToHospital}
+            style={{ flex: '1 1 45%', minWidth: '140px', padding: '14px 16px', borderRadius: '12px', fontWeight: '600', background: 'linear-gradient(135deg, #8b5cf6, #7c3aed)', color: 'white', border: 'none' }}
+          >
             🏥 병원 예약하기
           </button>
-          <button className="action-btn outline" onClick={onBack}>
-            📋 대시보드로
+          <button
+            className="action-btn highlight"
+            onClick={() => setShowDiagnosisReport(true)}
+            style={{ flex: '1 1 45%', minWidth: '140px', padding: '14px 16px', borderRadius: '12px', fontWeight: '600', background: 'linear-gradient(135deg, #ef4444, #dc2626)', color: 'white', border: 'none' }}
+          >
+            📄 진단서 보기
+          </button>
+          <button
+            className="action-btn outline"
+            onClick={onBack}
+            style={{ flex: '1 1 45%', minWidth: '140px', padding: '14px 16px', borderRadius: '12px', fontWeight: '600', background: '#f1f5f9', color: '#475569', border: '1px solid #e2e8f0' }}
+          >
+            🏠 홈으로
           </button>
         </div>
       </div>
@@ -2756,6 +3285,7 @@ function App() {
   const [authScreen, setAuthScreen] = useState('login'); // 'login', 'register', null (로그인됨)
   const [currentUser, setCurrentUser] = useState(null);
   const [userMode, setUserMode] = useState('guardian'); // 'guardian' or 'clinic'
+  const [hasClinicAccess, setHasClinicAccess] = useState(false); // 실제 병원 데이터 접근 가능 여부
 
   const [currentTab, setCurrentTab] = useState('care');
   const [currentView, setCurrentView] = useState(null); // 모달/서브 화면용
@@ -2771,11 +3301,11 @@ function App() {
     setUserMode(mode);
     setCurrentView(null);
     setCurrentTab('care');
-    // 세션에도 모드 저장
+    // userMode를 localStorage에 저장
+    localStorage.setItem('petMedical_userMode', mode);
     if (currentUser) {
       const updatedUser = { ...currentUser, userMode: mode };
       setCurrentUser(updatedUser);
-      localStorage.setItem('petMedical_auth', JSON.stringify(updatedUser));
     }
   };
 
@@ -2787,18 +3317,53 @@ function App() {
 
   useEffect(() => {
     // 기존 로그인 세션 확인
-    const savedSession = getAuthSession();
-    if (savedSession) {
-      setCurrentUser(savedSession);
-      setUserMode(savedSession.userMode || 'guardian');
-      setAuthScreen(null);
+    const loadSession = async () => {
+      const savedSession = await getAuthSession();
+      if (savedSession) {
+        setCurrentUser(savedSession);
 
-      // 로그인된 사용자의 반려동물 데이터 로드
-      const userPets = getPetsForUser(savedSession.uid);
-      setPets(userPets);
-      if (userPets.length > 0) {
-        setPetData(userPets[0]);
+        // 실제 병원 데이터가 있는지 확인
+        let mode = savedSession.userMode || 'guardian';
+        let clinicAccess = false;
+
+        if ((savedSession.roles && savedSession.roles.length > 0) || savedSession.defaultClinicId) {
+          try {
+            const userClinics = await getUserClinics(savedSession.uid);
+            clinicAccess = userClinics && userClinics.length > 0;
+
+            if (clinicAccess) {
+              mode = 'clinic';
+            } else {
+              console.warn('사용자에게 roles는 있지만 실제 병원 데이터가 없습니다. guardian 모드로 유지합니다.');
+            }
+          } catch (error) {
+            console.error('병원 정보 확인 실패:', error);
+            clinicAccess = false;
+          }
+        }
+
+        setHasClinicAccess(clinicAccess);
+
+        // localStorage에서 userMode 복원 (우선순위: localStorage > 자동감지 > 기본값)
+        // 단, 병원 모드로 전환하려면 실제 병원 데이터가 있어야 함
+        const savedUserMode = localStorage.getItem('petMedical_userMode');
+        if (savedUserMode === 'clinic' && !clinicAccess) {
+          console.warn('저장된 모드는 clinic이지만 병원 데이터가 없어 guardian 모드로 전환합니다.');
+          setUserMode('guardian');
+        } else {
+          setUserMode(savedUserMode || mode);
+        }
+
+        setAuthScreen(null);
+
+        // 로그인된 사용자의 반려동물 데이터 로드
+        const userPets = getPetsForUser(savedSession.uid);
+        setPets(userPets);
+        if (userPets.length > 0) {
+          setPetData(userPets[0]);
+        }
       }
+<<<<<<< HEAD
     }
     // 등록 화면 없이 바로 대시보드로 (등록은 마이페이지에서)
     setCurrentTab('care');
@@ -2827,13 +3392,44 @@ function App() {
     };
     console.log('💡 테스트 데이터 시드 함수가 등록되었습니다.');
     console.log('   사용법: const user = window.auth.currentUser; await window.seedGuardianData(user.uid, user.email);');
+=======
+      // 등록 화면 없이 바로 대시보드로 (등록은 마이페이지에서)
+      setCurrentTab('care');
+    };
+
+    loadSession();
+>>>>>>> 9bdfb635130de009bf8ca88f7364abcb59a3807d
   }, []);
 
   // 로그인 성공 핸들러
-  const handleLogin = (user) => {
+  const handleLogin = async (user) => {
+    // 실제 병원 데이터가 있는지 확인
+    let mode = user.userMode || 'guardian';
+    let clinicAccess = false;
+
+    if ((user.roles && user.roles.length > 0) || user.defaultClinicId) {
+      try {
+        const userClinics = await getUserClinics(user.uid);
+        clinicAccess = userClinics && userClinics.length > 0;
+
+        if (clinicAccess) {
+          mode = 'clinic';
+        } else {
+          console.warn('로그인: 사용자에게 roles는 있지만 실제 병원 데이터가 없습니다. guardian 모드로 유지합니다.');
+        }
+      } catch (error) {
+        console.error('병원 정보 확인 실패:', error);
+        clinicAccess = false;
+      }
+    }
+
+    setHasClinicAccess(clinicAccess);
     setCurrentUser(user);
-    setUserMode(user.userMode || 'guardian');
+    setUserMode(mode);
     setAuthScreen(null);
+
+    // userMode를 localStorage에 저장
+    localStorage.setItem('petMedical_userMode', mode);
 
     // 로그인한 사용자의 반려동물 데이터 로드
     const userPets = getPetsForUser(user.uid);
@@ -2846,9 +3442,30 @@ function App() {
   };
 
   // 회원가입 성공 핸들러
-  const handleRegister = (user) => {
+  const handleRegister = async (user) => {
+    // 실제 병원 데이터가 있는지 확인
+    let mode = user.userMode || 'guardian';
+    let clinicAccess = false;
+
+    if ((user.roles && user.roles.length > 0) || user.defaultClinicId) {
+      try {
+        const userClinics = await getUserClinics(user.uid);
+        clinicAccess = userClinics && userClinics.length > 0;
+
+        if (clinicAccess) {
+          mode = 'clinic';
+        } else {
+          console.warn('회원가입: 사용자에게 roles는 있지만 실제 병원 데이터가 없습니다. guardian 모드로 유지합니다.');
+        }
+      } catch (error) {
+        console.error('병원 정보 확인 실패:', error);
+        clinicAccess = false;
+      }
+    }
+
+    setHasClinicAccess(clinicAccess);
     setCurrentUser(user);
-    setUserMode(user.userMode || 'guardian');
+    setUserMode(mode);
     setAuthScreen(null);
 
     // 새 사용자는 데이터 초기화
@@ -2859,7 +3476,10 @@ function App() {
   // 로그아웃 핸들러
   const handleLogout = () => {
     clearAuthSession();
+    localStorage.removeItem('petMedical_userMode');
     setCurrentUser(null);
+    setUserMode('guardian');
+    setHasClinicAccess(false);
     setPets([]);
     setPetData(null);
     setAuthScreen('login');
@@ -2901,7 +3521,7 @@ function App() {
         createdAt: new Date().toISOString()
       };
 
-      savePetsForUser(guestUser.uid, [defaultPet]);
+      savePetsForUser(guestUser.uid, [defaultPet], defaultPet); // Firestore에도 저장
       setPets([defaultPet]);
       setPetData(defaultPet);
     }
@@ -2987,9 +3607,10 @@ function App() {
       {/* 플로팅 배경 효과 */}
       <FloatingBackground variant="default" />
 
-      {/* 병원 모드일 때 ClinicAdmin 표시 */}
-      {userMode === 'clinic' && !currentView && (
-        <ClinicAdmin
+      {/* 병원 모드일 때 ClinicDashboard 표시 */}
+      {userMode === 'clinic' && !currentView && currentUser && (
+        <ClinicDashboard
+          currentUser={currentUser}
           onBack={() => {
             // 보호자 모드로 전환
             handleModeSwitch('guardian');
@@ -3036,9 +3657,10 @@ function App() {
       )}
       
       {currentView === 'diagnosis' && petData && symptomData && (
-        <MultiAgentDiagnosis 
+        <MultiAgentDiagnosis
           petData={petData}
           symptomData={symptomData}
+          currentUser={currentUser}
           onComplete={(action) => handleDiagnosisComplete(action, lastDiagnosis)}
           onBack={() => setCurrentView('symptom-input')}
           onDiagnosisResult={(result) => setLastDiagnosis(result)}
@@ -3076,6 +3698,7 @@ function App() {
           petData={petData}
           diagnosis={lastDiagnosis || null}
           symptomData={symptomData || null}
+          currentUser={currentUser}
           onBack={() => {
             setCurrentView(null);
             setCurrentTab('care');
@@ -3125,6 +3748,12 @@ function App() {
           petData={petData}
           hospital={selectedHospital}
           onBack={() => {
+            setCurrentView(null);
+            setCurrentTab('care');
+            setSelectedHospital(null);
+            setHospitalPacket(null);
+          }}
+          onHome={() => {
             setCurrentView(null);
             setCurrentTab('care');
             setSelectedHospital(null);
@@ -3288,6 +3917,41 @@ function App() {
                 </p>
               </div>
             )}
+
+            {/* 병원 예약 버튼 - 병원에 가지 않은 AI 진단인 경우 표시 */}
+            {(!lastDiagnosis.visitedHospital) && (
+              <div className="bg-primary/5 rounded-lg p-4 border border-primary/20">
+                <h3 className="flex items-center gap-2 text-slate-900 font-bold mb-3">
+                  <span className="material-symbols-outlined text-primary">event_available</span>
+                  병원 예약
+                </h3>
+                <p className="text-slate-600 text-sm mb-4">
+                  AI 진단 결과를 바탕으로 가까운 동물병원에 예약하세요. 진단서가 자동으로 전송됩니다.
+                </p>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => {
+                      setSymptomData({ symptomText: lastDiagnosis.symptom || lastDiagnosis.description });
+                      setCurrentTab('hospital');
+                      setCurrentView(null);
+                    }}
+                    className="flex-1 py-3 bg-primary text-white font-bold rounded-lg hover:bg-primary/90 transition-colors flex items-center justify-center gap-2 shadow-lg shadow-primary/30"
+                  >
+                    <span className="material-symbols-outlined">local_hospital</span>
+                    병원 예약
+                  </button>
+                  <a
+                    href="https://service.kakaomobility.com/launch/kakaot"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex-1 py-3 bg-[#1E1B4B] text-white font-bold rounded-lg hover:bg-[#2d2a5a] transition-colors flex items-center justify-center gap-2"
+                  >
+                    <span className="text-[#FACC15] font-black text-lg">T</span>
+                    펫택시
+                  </a>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -3317,6 +3981,18 @@ function App() {
         />
       )}
 
+      {/* AI 케어 문진 화면 */}
+      {currentView === 'ai-consultation' && petData && (
+        <AICareConsultation
+          petData={petData}
+          onBack={() => {
+            setCurrentView(null);
+            setCurrentTab('care');
+          }}
+          onHome={handleGoHome}
+        />
+      )}
+
       {/* 병원 어드민 화면 */}
       {currentView === 'clinic-admin' && (
         <ClinicAdmin
@@ -3339,10 +4015,17 @@ function App() {
         <div className="main-content" style={{ paddingBottom: '80px' }}>
           {/* 내 동물 돌보기 탭 */}
           {currentTab === 'care' && petData && (
-            <Dashboard 
-              petData={petData} 
+            <Dashboard
+              petData={petData}
               pets={pets}
-              onNavigate={(view) => setCurrentView(view)}
+              onNavigate={(view) => {
+                // 'hospital', 'records'는 탭으로 이동
+                if (view === 'hospital' || view === 'records') {
+                  setCurrentTab(view);
+                } else {
+                  setCurrentView(view);
+                }
+              }}
               onSelectPet={handleSelectPet}
             />
           )}
@@ -3354,6 +4037,7 @@ function App() {
                 petData={petData}
                 diagnosis={lastDiagnosis || null}
                 symptomData={symptomData || null}
+                currentUser={currentUser}
                 onBack={() => setCurrentTab('care')}
                 onHome={handleGoHome}
                 onSelectHospital={async (hospital) => {
@@ -3396,6 +4080,7 @@ function App() {
                 setCurrentView('diagnosis-view');
               }}
               onOCR={() => setCurrentView('ocr')}
+              onHospitalBooking={() => setCurrentTab('hospital')}
             />
           )}
 
@@ -3503,7 +4188,7 @@ function App() {
           currentTab={currentTab}
           onTabChange={handleTabChange}
           onModeSwitch={() => handleModeSwitch('clinic')}
-          showModeSwitch={true}
+          showModeSwitch={currentUser && hasClinicAccess}
         />
       )}
         </>

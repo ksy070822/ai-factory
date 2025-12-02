@@ -43,27 +43,59 @@ const DUMMY_VISITS = [
   }
 ];
 
-// 더미 데이터 - 의약품
+// 더미 데이터 - 의약품 (모가 샘플 데이터 포함)
 const DUMMY_MEDICATIONS = [
   {
     id: 'med_1',
-    date: '2024-11-15',
-    medications: ['아포퀠정 16mg', '피부영양제', '소염연고'],
+    date: '2024-11-28',
+    medications: ['피부연고 (히드로코르티손)', '항히스타민제'],
     pharmacyName: '행복한동물병원',
-    daysSupply: '14일분',
-    status: 'effective'
-  },
-  {
-    id: 'med_2',
-    date: '2024-10-20',
-    medications: ['프로바이오틱스', '장영양제', '지사제'],
-    pharmacyName: '24시 강남동물의료센터',
     daysSupply: '7일분',
     status: 'effective'
   },
   {
+    id: 'med_2',
+    date: '2024-11-20',
+    medications: ['아목시실린 (항생제)', '소염진통제'],
+    pharmacyName: '24시 강남동물의료센터',
+    daysSupply: '5일분',
+    status: 'effective'
+  },
+  {
     id: 'med_3',
-    date: '2024-08-10',
+    date: '2024-11-15',
+    medications: ['감기약 (콧물/기침)', '면역강화제'],
+    pharmacyName: '행복한동물병원',
+    daysSupply: '3일분',
+    status: 'side_effect'
+  },
+  {
+    id: 'med_4',
+    date: '2024-11-10',
+    medications: ['귀연고 (항균)', '귀세정제'],
+    pharmacyName: '24시 강남동물의료센터',
+    daysSupply: '10일분',
+    status: 'effective'
+  },
+  {
+    id: 'med_5',
+    date: '2024-11-05',
+    medications: ['프로바이오틱스', '장영양제'],
+    pharmacyName: '행복한동물병원',
+    daysSupply: '14일분',
+    status: 'none'
+  },
+  {
+    id: 'med_6',
+    date: '2024-10-28',
+    medications: ['안연고 (항생제)', '인공눈물'],
+    pharmacyName: '24시 강남동물의료센터',
+    daysSupply: '7일분',
+    status: 'none'
+  },
+  {
+    id: 'med_7',
+    date: '2024-10-15',
     medications: ['넥스가드 스펙트라'],
     pharmacyName: '행복한동물병원',
     daysSupply: '1회분',
@@ -184,12 +216,12 @@ const DUMMY_VACCINATIONS = [
   }
 ];
 
-export function RecordsView({ petData, onBack, onViewDiagnosis, onOCR, onHome }) {
+export function RecordsView({ petData, onBack, onViewDiagnosis, onOCR, onHome, onHospitalBooking }) {
   const [activeTab, setActiveTab] = useState('visits'); // visits, medication, checkup, vaccination
   const [diagnoses, setDiagnoses] = useState([]);
   const [clinicResults, setClinicResults] = useState([]);
   const [medicationFeedback, setMedicationFeedback] = useState({});
-  const [useDummyData, setUseDummyData] = useState(false); // 더미데이터 사용 플래그 - 실제 서비스용 false
+  const [useDummyData, setUseDummyData] = useState(true); // 더미데이터 사용 플래그 - 샘플 데이터 표시
 
   // 진단 기록 로드
   useEffect(() => {
@@ -756,11 +788,14 @@ export function RecordsView({ petData, onBack, onViewDiagnosis, onOCR, onHome })
                 <div className="bg-surface-light rounded-lg p-4 shadow-soft">
                   <div className="flex justify-between items-start mb-2">
                     <div>
-                      <h4 className="text-slate-900 font-bold text-sm mb-1">종합백신</h4>
+                      <h4 className="text-slate-900 font-bold text-sm mb-1">종합백신 (DHPPL)</h4>
                       <p className="text-slate-500 text-xs">1년에 1번 접종이 권장됩니다.</p>
                     </div>
-                    <button className="px-3 py-1.5 bg-primary text-white rounded-lg text-xs font-medium hover:bg-primary/90 transition-colors">
-                      최저가 예약
+                    <button
+                      onClick={() => onHospitalBooking && onHospitalBooking()}
+                      className="px-3 py-1.5 bg-primary text-white rounded-lg text-xs font-medium hover:bg-primary/90 transition-colors"
+                    >
+                      지금 예약하기
                     </button>
                   </div>
                 </div>
@@ -770,8 +805,25 @@ export function RecordsView({ petData, onBack, onViewDiagnosis, onOCR, onHome })
                       <h4 className="text-slate-900 font-bold text-sm mb-1">심장사상충 예방약</h4>
                       <p className="text-slate-500 text-xs">1개월에 1번 접종이 권장됩니다.</p>
                     </div>
-                    <button className="px-3 py-1.5 bg-primary text-white rounded-lg text-xs font-medium hover:bg-primary/90 transition-colors">
-                      최저가 예약
+                    <button
+                      onClick={() => onHospitalBooking && onHospitalBooking()}
+                      className="px-3 py-1.5 bg-primary text-white rounded-lg text-xs font-medium hover:bg-primary/90 transition-colors"
+                    >
+                      지금 예약하기
+                    </button>
+                  </div>
+                </div>
+                <div className="bg-surface-light rounded-lg p-4 shadow-soft">
+                  <div className="flex justify-between items-start mb-2">
+                    <div>
+                      <h4 className="text-slate-900 font-bold text-sm mb-1">광견병 백신</h4>
+                      <p className="text-slate-500 text-xs">1년에 1번 접종 (법적 의무)</p>
+                    </div>
+                    <button
+                      onClick={() => onHospitalBooking && onHospitalBooking()}
+                      className="px-3 py-1.5 bg-primary text-white rounded-lg text-xs font-medium hover:bg-primary/90 transition-colors"
+                    >
+                      지금 예약하기
                     </button>
                   </div>
                 </div>

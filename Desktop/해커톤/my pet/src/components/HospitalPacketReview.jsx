@@ -2,6 +2,7 @@ import { useState } from 'react';
 
 export function HospitalPacketReview({ petData, diagnosis, hospital, hospitalPacket, onBack, onEdit, onSend, onSave }) {
   const [requestNote, setRequestNote] = useState('');
+  const [attachDiagnosis, setAttachDiagnosis] = useState(true); // AI 진단서 첨부 여부 (기본: 권장)
 
   // 보호자 요청사항을 패킷에 추가하는 함수
   const createFinalPacket = () => {
@@ -156,6 +157,24 @@ export function HospitalPacketReview({ petData, diagnosis, hospital, hospitalPac
           </div>
         </div>
 
+        {/* AI 진단명 (주요 질환) */}
+        {diagnosis.possible_diseases && diagnosis.possible_diseases.length > 0 && (
+          <div className="mb-6 rounded-xl bg-gradient-to-r from-violet-500 to-purple-600 p-4 text-white">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="material-symbols-outlined">diagnosis</span>
+              <span className="font-bold">AI 진단명</span>
+            </div>
+            <p className="text-2xl font-bold">
+              {diagnosis.possible_diseases[0]?.name || diagnosis.possible_diseases[0]}
+            </p>
+            {diagnosis.possible_diseases[0]?.probability && (
+              <p className="text-white/80 text-sm mt-1">
+                AI 예측 확률: {diagnosis.possible_diseases[0].probability}%
+              </p>
+            )}
+          </div>
+        )}
+
         {/* 방문 이유 & 증상 타임라인 */}
         {diagnosis.symptom && (
           <div className="mb-6 rounded-lg bg-surface-light p-4 shadow-soft">
@@ -226,15 +245,55 @@ export function HospitalPacketReview({ petData, diagnosis, hospital, hospitalPac
         <div className="mb-6 rounded-lg bg-surface-light p-4 shadow-soft">
           <h3 className="flex items-center gap-2 text-slate-900 text-lg font-bold leading-tight tracking-[-0.015em] pb-4 font-display">
             <span className="material-symbols-outlined text-secondary">edit_note</span>
-            <span>병원에 요청사항</span>
+            <span>병원에 전달할 메시지 (선택)</span>
           </h3>
           <textarea
             className="w-full rounded-lg border-slate-300 bg-slate-100 text-slate-900 focus:ring-primary focus:border-primary p-3 text-base"
-            rows="4"
-            placeholder="기본 혈액 검사와 복부 초음파를 요청합니다. 필요시 진통제 및 소염제 처치도 부탁드립니다."
+            rows="3"
+            placeholder="추가로 전달하고 싶은 내용이 있으면 입력해주세요"
             value={requestNote}
             onChange={(e) => setRequestNote(e.target.value)}
           />
+          <p className="text-xs text-slate-400 mt-2">※ AI 진단서가 함께 전송됩니다.</p>
+        </div>
+
+        {/* AI 진단서 첨부 옵션 */}
+        <div className="mb-6 rounded-xl border-2 border-sky-200 bg-sky-50 p-4">
+          <label className="flex items-start gap-3 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={attachDiagnosis}
+              onChange={(e) => setAttachDiagnosis(e.target.checked)}
+              className="w-5 h-5 mt-1 text-sky-500 rounded border-sky-300 focus:ring-sky-400"
+            />
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-sky-600 text-lg">📄</span>
+                <span className="font-bold text-slate-900">AI 사전 진단서 첨부</span>
+                <span className="px-2 py-0.5 bg-sky-500 text-white text-xs font-bold rounded-full">권장</span>
+              </div>
+              <p className="text-sm text-slate-600 mb-3">병원에서 사전에 진료 계획을 세울 수 있어요</p>
+
+              <div className="space-y-2 pl-1">
+                <div className="flex items-center gap-2 text-sm text-slate-700">
+                  <span className="text-green-500">✓</span>
+                  <span>반려동물 기본 정보</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-slate-700">
+                  <span className="text-green-500">✓</span>
+                  <span>증상 및 타임라인</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-slate-700">
+                  <span className="text-green-500">✓</span>
+                  <span>AI 감별진단 (Top 3 의심 질환)</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-slate-700">
+                  <span className="text-green-500">✓</span>
+                  <span>응급도 평가 및 권장 조치</span>
+                </div>
+              </div>
+            </div>
+          </label>
         </div>
       </div>
 
