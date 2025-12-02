@@ -4740,14 +4740,16 @@ function App() {
         </div>
       )}
 
-      {/* 하단 탭 네비게이션 - 보호자 모드에서만 표시, AI문진에서도 표시 */}
+      {/* 하단 탭 네비게이션 - 보호자 모드에서만 표시, AI문진에서도 표시, PC에서는 숨김 */}
       {userMode === 'guardian' && currentTab && (!currentView || currentView === 'ai-consultation') && (
-        <BottomTabNavigation
-          currentTab={currentTab}
-          onTabChange={handleTabChange}
-          onModeSwitch={() => handleModeSwitch('clinic')}
-          showModeSwitch={!!currentUser}
-        />
+        <div className="lg:hidden">
+          <BottomTabNavigation
+            currentTab={currentTab}
+            onTabChange={handleTabChange}
+            onModeSwitch={() => handleModeSwitch('clinic')}
+            showModeSwitch={!!currentUser}
+          />
+        </div>
       )}
         </>
       )}
