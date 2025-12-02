@@ -941,8 +941,8 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-200 via-sky-100 to-blue-200">
-      {/* PC 레이아웃 (lg 이상) - 좌측 모바일 미리보기 + 우측 확장 뷰 */}
-      <div className="hidden lg:flex min-h-screen p-8 gap-8">
+      {/* PC 레이아웃 (임시 비활성화) */}
+      <div className="hidden">
         {/* 좌측: 모바일 화면 미리보기 */}
         <div className="flex-shrink-0 flex items-center justify-center">
           <div className="relative w-[430px] h-[932px] rounded-[3rem] shadow-2xl border-8 border-gray-800 overflow-hidden bg-white">
@@ -1316,8 +1316,8 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
         </main>
       </div>
 
-      {/* 태블릿/모바일 레이아웃 (lg 미만) */}
-      <div className="lg:hidden md:flex md:items-center md:justify-center md:p-8 md:min-h-screen">
+      {/* 메인 레이아웃 (모든 화면) */}
+      <div className="md:flex md:items-center md:justify-center md:p-8 md:min-h-screen">
         {/* 모바일 프레임 (태블릿에서만 보임) */}
         <div className="hidden md:block fixed inset-0 pointer-events-none">
           <div className="absolute inset-0 bg-gradient-to-br from-slate-200 via-sky-100 to-blue-200"></div>
@@ -4740,16 +4740,14 @@ function App() {
         </div>
       )}
 
-      {/* 하단 탭 네비게이션 - 보호자 모드에서만 표시, AI문진에서도 표시, PC에서는 숨김 */}
+      {/* 하단 탭 네비게이션 - 보호자 모드에서만 표시 */}
       {userMode === 'guardian' && currentTab && (!currentView || currentView === 'ai-consultation') && (
-        <div className="lg:hidden">
-          <BottomTabNavigation
-            currentTab={currentTab}
-            onTabChange={handleTabChange}
-            onModeSwitch={() => handleModeSwitch('clinic')}
-            showModeSwitch={!!currentUser}
-          />
-        </div>
+        <BottomTabNavigation
+          currentTab={currentTab}
+          onTabChange={handleTabChange}
+          onModeSwitch={() => handleModeSwitch('clinic')}
+          showModeSwitch={!!currentUser}
+        />
       )}
         </>
       )}
