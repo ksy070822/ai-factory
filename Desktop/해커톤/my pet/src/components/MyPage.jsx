@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { clinicResultService } from '../services/firestore';
 
 const DIAGNOSIS_KEY = 'petMedical_diagnoses';
 const STORAGE_KEY = 'petMedical_pets';
@@ -109,6 +110,9 @@ export function MyPage({ onBack, onSelectPet, onViewDiagnosis, onAddPet, onClini
   const [bookings, setBookings] = useState([]);
   const [editingPet, setEditingPet] = useState(null);
   const [editFormData, setEditFormData] = useState(null);
+  const [clinicResults, setClinicResults] = useState([]);
+  const [selectedResult, setSelectedResult] = useState(null);
+  const [loadingResult, setLoadingResult] = useState(null);
 
   useEffect(() => {
     // 사용자별 데이터 로드
@@ -116,12 +120,50 @@ export function MyPage({ onBack, onSelectPet, onViewDiagnosis, onAddPet, onClini
       setPets(getPetsForUser(userId));
       setDiagnoses(getDiagnosesForUser(userId));
       setBookings(getBookingsForUser(userId));
+      loadAllClinicResults();
     } else {
       setPets(getPetsFromStorage());
       setDiagnoses(getDiagnosesFromStorage());
       setBookings(getBookingsFromStorage());
     }
   }, [userId]);
+
+  // 모든 반려동물의 병원 진료 결과 로드
+  const loadAllClinicResults = async () => {
+    const userPets = getPetsForUser(userId);
+    if (!userPets || userPets.length === 0) return;
+
+    try {
+      const allResults = [];
+      for (const pet of userPets) {
+        const result = await clinicResultService.getResultsByPet(pet.id);
+        if (result.success && result.data) {
+          allResults.push(...result.data);
+        }
+      }
+      setClinicResults(allResults);
+    } catch (error) {
+      console.error('진료 결과 로드 오류:', error);
+    }
+  };
+
+  // 진료 결과 조회 함수
+  const loadClinicResult = async (bookingId) => {
+    setLoadingResult(bookingId);
+    try {
+      const result = await clinicResultService.getResultByBooking(bookingId);
+      if (result.success && result.data) {
+        setSelectedResult(result.data);
+      } else {
+        alert('진료 결과를 찾을 수 없습니다.');
+      }
+    } catch (error) {
+      console.error('진료 결과 조회 오류:', error);
+      alert('진료 결과를 불러오는데 실패했습니다.');
+    } finally {
+      setLoadingResult(null);
+    }
+  };
 
   const formatDate = (timestamp) => {
     return new Date(timestamp).toLocaleDateString('ko-KR', {
@@ -610,6 +652,26 @@ export function MyPage({ onBack, onSelectPet, onViewDiagnosis, onAddPet, onClini
                         📞 병원 연락하기
                       </a>
                     )}
+
+                    {booking.status === 'completed' && (
+                      <button
+                        onClick={() => loadClinicResult(booking.id)}
+                        disabled={loadingResult === booking.id}
+                        className="w-full py-2 text-center bg-emerald-50 text-emerald-700 rounded-lg text-sm font-medium hover:bg-emerald-100 transition-colors disabled:opacity-50 flex items-center justify-center gap-1"
+                      >
+                        {loadingResult === booking.id ? (
+                          <>
+                            <span className="material-symbols-outlined text-sm animate-spin">progress_activity</span>
+                            로딩 중...
+                          </>
+                        ) : (
+                          <>
+                            <span className="material-symbols-outlined text-sm">description</span>
+                            진료 결과 보기
+                          </>
+                        )}
+                      </button>
+                    )}
                   </div>
                 );
               })}
@@ -620,60 +682,345 @@ export function MyPage({ onBack, onSelectPet, onViewDiagnosis, onAddPet, onClini
 
       {activeTab === 'records' && (
         <div className="px-4 pt-4 pb-40">
-          {diagnoses.length === 0 ? (
+          {diagnoses.length === 0 && clinicResults.length === 0 ? (
             <div className="text-center py-20">
               <div className="text-6xl mb-4">📋</div>
               <p className="text-slate-500 mb-2">아직 진료 기록이 없습니다</p>
-              <p className="text-slate-400 text-sm">AI 진료를 받으면 기록이 저장됩니다</p>
+              <p className="text-slate-400 text-sm">AI 진료를 받거나 병원 진료를 받으면 기록이 저장됩니다</p>
             </div>
           ) : (
             <div className="space-y-4">
-              {diagnoses.map(record => (
-                <div
-                  key={record.id}
-                  className="bg-surface-light rounded-lg p-4 shadow-soft cursor-pointer hover:shadow-md transition-all"
-                  onClick={() => onViewDiagnosis && onViewDiagnosis(record)}
-                >
-                  <div className="flex justify-between items-start mb-3">
-                    <div>
-                      <p className="text-slate-500 text-sm mb-1">{formatDate(record.created_at || record.date)}</p>
-                      <h3 className="text-slate-900 font-bold text-base mb-1 font-display">
-                        {record.petName || '반려동물'}
-                      </h3>
-                    </div>
-                    <div
-                      className="px-3 py-1 rounded-full text-xs font-bold text-white"
-                      style={{ backgroundColor: getRiskColor(record.riskLevel || record.emergency) }}
-                    >
-                      {getRiskLabel(record.riskLevel || record.emergency)}
-                    </div>
-                  </div>
-                  <div className="mb-2">
-                    <strong className="text-slate-700">진단:</strong>{' '}
-                    <span className="text-slate-600">
-                      {record.diagnosis || record.suspectedConditions?.[0]?.name || '일반 건강 이상'}
+              {/* 병원 진료 기록 */}
+              {clinicResults.length > 0 && (
+                <>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="material-symbols-outlined text-emerald-600">local_hospital</span>
+                    <h3 className="text-lg font-bold text-slate-900 font-display">병원 진료 기록</h3>
+                    <span className="bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full text-xs font-medium">
+                      {clinicResults.length}건
                     </span>
                   </div>
-                  {record.symptom && (
-                    <div className="mb-3">
-                      <strong className="text-slate-700">증상:</strong>{' '}
-                      <span className="text-slate-600">{record.symptom}</span>
-                    </div>
-                  )}
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onViewDiagnosis && onViewDiagnosis(record);
-                    }}
-                    className="text-primary text-sm font-medium flex items-center gap-1"
-                  >
-                    상세 보기
-                    <span className="material-symbols-outlined text-sm">arrow_forward_ios</span>
-                  </button>
-                </div>
-              ))}
+                  {clinicResults
+                    .sort((a, b) => {
+                      const dateA = a.visitDate || a.createdAt?.seconds * 1000 || 0;
+                      const dateB = b.visitDate || b.createdAt?.seconds * 1000 || 0;
+                      return new Date(dateB) - new Date(dateA);
+                    })
+                    .map((result) => (
+                      <div
+                        key={result.id}
+                        className="bg-emerald-50 border border-emerald-100 rounded-lg p-4 shadow-soft cursor-pointer hover:shadow-md transition-all"
+                        onClick={() => setSelectedResult(result)}
+                      >
+                        <div className="flex justify-between items-start mb-3">
+                          <div>
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="material-symbols-outlined text-sm text-emerald-600">local_hospital</span>
+                              <span className="text-emerald-700 text-xs font-medium">병원 진료</span>
+                            </div>
+                            <p className="text-slate-500 text-sm mb-1">
+                              {result.visitDate ? new Date(result.visitDate).toLocaleDateString('ko-KR', {
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric'
+                              }) : '날짜 미상'}
+                            </p>
+                            <h3 className="text-slate-900 font-bold text-base mb-1 font-display">
+                              {result.petName || '반려동물'}
+                            </h3>
+                            <p className="text-slate-600 text-sm">{result.hospitalName || '병원'}</p>
+                          </div>
+                          {result.triageScore && (
+                            <div className="flex gap-1">
+                              {[1, 2, 3, 4, 5].map(level => (
+                                <div
+                                  key={level}
+                                  className={`w-4 h-4 rounded ${
+                                    level <= result.triageScore
+                                      ? 'bg-red-500'
+                                      : 'bg-slate-200'
+                                  }`}
+                                />
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                        <div className="mb-2">
+                          <strong className="text-slate-700">진단:</strong>{' '}
+                          <span className="text-slate-600">
+                            {result.finalDiagnosis || '진단 내용 없음'}
+                          </span>
+                        </div>
+                        {result.medications && result.medications.length > 0 && (
+                          <div className="mb-3 flex items-center gap-2 text-sm text-slate-600">
+                            <span className="material-symbols-outlined text-sm text-blue-500">medication</span>
+                            <span>처방약 {result.medications.length}개</span>
+                          </div>
+                        )}
+                        {result.totalCost && (
+                          <div className="mb-3 flex items-center gap-2 text-sm text-slate-600">
+                            <span className="material-symbols-outlined text-sm text-amber-500">payments</span>
+                            <span className="font-medium">{result.totalCost.toLocaleString()}원</span>
+                          </div>
+                        )}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedResult(result);
+                          }}
+                          className="text-emerald-600 text-sm font-medium flex items-center gap-1"
+                        >
+                          상세 보기
+                          <span className="material-symbols-outlined text-sm">arrow_forward_ios</span>
+                        </button>
+                      </div>
+                    ))}
+                </>
+              )}
+
+              {/* AI 진단 기록 */}
+              {diagnoses.length > 0 && (
+                <>
+                  {clinicResults.length > 0 && <div className="h-6" />}
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="material-symbols-outlined text-primary">psychology</span>
+                    <h3 className="text-lg font-bold text-slate-900 font-display">AI 진단 기록</h3>
+                    <span className="bg-primary/10 text-primary px-2 py-0.5 rounded-full text-xs font-medium">
+                      {diagnoses.length}건
+                    </span>
+                  </div>
+                  {diagnoses
+                    .sort((a, b) => {
+                      const dateA = a.created_at || a.date || 0;
+                      const dateB = b.created_at || b.date || 0;
+                      return dateB - dateA;
+                    })
+                    .map(record => (
+                      <div
+                        key={record.id}
+                        className="bg-surface-light rounded-lg p-4 shadow-soft cursor-pointer hover:shadow-md transition-all"
+                        onClick={() => onViewDiagnosis && onViewDiagnosis(record)}
+                      >
+                        <div className="flex justify-between items-start mb-3">
+                          <div>
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="material-symbols-outlined text-sm text-primary">psychology</span>
+                              <span className="text-primary text-xs font-medium">AI 진단</span>
+                            </div>
+                            <p className="text-slate-500 text-sm mb-1">{formatDate(record.created_at || record.date)}</p>
+                            <h3 className="text-slate-900 font-bold text-base mb-1 font-display">
+                              {record.petName || '반려동물'}
+                            </h3>
+                          </div>
+                          <div
+                            className="px-3 py-1 rounded-full text-xs font-bold text-white"
+                            style={{ backgroundColor: getRiskColor(record.riskLevel || record.emergency) }}
+                          >
+                            {getRiskLabel(record.riskLevel || record.emergency)}
+                          </div>
+                        </div>
+                        <div className="mb-2">
+                          <strong className="text-slate-700">진단:</strong>{' '}
+                          <span className="text-slate-600">
+                            {record.diagnosis || record.suspectedConditions?.[0]?.name || '일반 건강 이상'}
+                          </span>
+                        </div>
+                        {record.symptom && (
+                          <div className="mb-3">
+                            <strong className="text-slate-700">증상:</strong>{' '}
+                            <span className="text-slate-600">{record.symptom}</span>
+                          </div>
+                        )}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onViewDiagnosis && onViewDiagnosis(record);
+                          }}
+                          className="text-primary text-sm font-medium flex items-center gap-1"
+                        >
+                          상세 보기
+                          <span className="material-symbols-outlined text-sm">arrow_forward_ios</span>
+                        </button>
+                      </div>
+                    ))}
+                </>
+              )}
             </div>
           )}
+        </div>
+      )}
+
+      {/* 진료 결과 모달 */}
+      {selectedResult && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            {/* 헤더 */}
+            <div className="sticky top-0 bg-white border-b border-slate-200 p-4 flex items-center justify-between">
+              <h3 className="text-xl font-bold text-slate-900 font-display">진료 결과서</h3>
+              <button
+                onClick={() => setSelectedResult(null)}
+                className="p-2 text-slate-500 hover:bg-slate-100 rounded-full"
+              >
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
+
+            {/* 내용 */}
+            <div className="p-6 space-y-6">
+              {/* 기본 정보 */}
+              <div className="bg-slate-50 rounded-lg p-4 space-y-2">
+                <div className="flex items-center gap-2 text-slate-700">
+                  <span className="material-symbols-outlined text-emerald-600">local_hospital</span>
+                  <span className="font-medium">{selectedResult.hospitalName || '병원'}</span>
+                </div>
+                {selectedResult.hospitalAddress && (
+                  <div className="flex items-start gap-2 text-sm text-slate-600">
+                    <span className="material-symbols-outlined text-sm">location_on</span>
+                    <span>{selectedResult.hospitalAddress}</span>
+                  </div>
+                )}
+                <div className="flex items-center gap-2 text-sm text-slate-600">
+                  <span className="material-symbols-outlined text-sm">calendar_today</span>
+                  <span>{selectedResult.visitDate ? new Date(selectedResult.visitDate).toLocaleDateString('ko-KR') : '날짜 미상'}</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-slate-600">
+                  <span className="material-symbols-outlined text-sm">pets</span>
+                  <span>{selectedResult.petName || '반려동물'}</span>
+                </div>
+              </div>
+
+              {/* 진단 결과 */}
+              <div>
+                <h4 className="text-lg font-bold text-slate-900 mb-3 flex items-center gap-2">
+                  <span className="material-symbols-outlined text-primary">diagnosis</span>
+                  최종 진단
+                </h4>
+                <div className="bg-primary/5 border border-primary/20 rounded-lg p-4">
+                  <p className="text-slate-900 font-medium text-lg">{selectedResult.finalDiagnosis || '진단 내용 없음'}</p>
+                  {selectedResult.triageScore && (
+                    <div className="mt-2 flex items-center gap-2">
+                      <span className="text-sm text-slate-600">응급도:</span>
+                      <div className="flex gap-1">
+                        {[1, 2, 3, 4, 5].map(level => (
+                          <div
+                            key={level}
+                            className={`w-6 h-6 rounded ${
+                              level <= selectedResult.triageScore
+                                ? 'bg-red-500'
+                                : 'bg-slate-200'
+                            }`}
+                          />
+                        ))}
+                      </div>
+                      <span className="text-sm font-medium text-slate-700">
+                        {selectedResult.triageScore}/5
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* 치료 내용 */}
+              {selectedResult.treatment && (
+                <div>
+                  <h4 className="text-lg font-bold text-slate-900 mb-3 flex items-center gap-2">
+                    <span className="material-symbols-outlined text-primary">healing</span>
+                    치료 내용
+                  </h4>
+                  <div className="bg-slate-50 rounded-lg p-4">
+                    <p className="text-slate-700 whitespace-pre-wrap">{selectedResult.treatment}</p>
+                  </div>
+                </div>
+              )}
+
+              {/* 처방약 */}
+              {selectedResult.medications && selectedResult.medications.length > 0 && (
+                <div>
+                  <h4 className="text-lg font-bold text-slate-900 mb-3 flex items-center gap-2">
+                    <span className="material-symbols-outlined text-primary">medication</span>
+                    처방약 ({selectedResult.medications.length}개)
+                  </h4>
+                  <div className="space-y-3">
+                    {selectedResult.medications.map((med, index) => (
+                      <div key={index} className="bg-blue-50 border border-blue-100 rounded-lg p-4">
+                        <div className="flex items-start justify-between mb-2">
+                          <h5 className="font-bold text-slate-900">{med.name}</h5>
+                          {med.days && (
+                            <span className="bg-blue-500 text-white text-xs px-2 py-1 rounded-full">
+                              {med.days}일분
+                            </span>
+                          )}
+                        </div>
+                        {med.dosage && (
+                          <p className="text-sm text-slate-700 mb-1">
+                            <span className="font-medium">용량:</span> {med.dosage}
+                          </p>
+                        )}
+                        {med.instructions && (
+                          <p className="text-sm text-slate-600">
+                            <span className="font-medium">복용법:</span> {med.instructions}
+                          </p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* 특이사항 */}
+              {selectedResult.doctorNote && (
+                <div>
+                  <h4 className="text-lg font-bold text-slate-900 mb-3 flex items-center gap-2">
+                    <span className="material-symbols-outlined text-primary">sticky_note_2</span>
+                    특이사항
+                  </h4>
+                  <div className="bg-amber-50 border border-amber-100 rounded-lg p-4">
+                    <p className="text-slate-700 whitespace-pre-wrap">{selectedResult.doctorNote}</p>
+                  </div>
+                </div>
+              )}
+
+              {/* 다음 방문일 */}
+              {selectedResult.nextVisitDate && (
+                <div className="bg-purple-50 border border-purple-100 rounded-lg p-4">
+                  <div className="flex items-center gap-2">
+                    <span className="material-symbols-outlined text-purple-600">event</span>
+                    <div>
+                      <p className="text-sm text-purple-700 font-medium">다음 방문 예정일</p>
+                      <p className="text-lg font-bold text-purple-900">
+                        {new Date(selectedResult.nextVisitDate).toLocaleDateString('ko-KR', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric',
+                          weekday: 'short'
+                        })}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* 진료비 */}
+              {selectedResult.totalCost && (
+                <div className="border-t border-slate-200 pt-4 flex items-center justify-between">
+                  <span className="text-lg font-bold text-slate-700">총 진료비</span>
+                  <span className="text-2xl font-bold text-primary">
+                    {selectedResult.totalCost.toLocaleString()}원
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* 푸터 */}
+            <div className="sticky bottom-0 bg-white border-t border-slate-200 p-4">
+              <button
+                onClick={() => setSelectedResult(null)}
+                className="w-full bg-primary text-white py-3 rounded-lg font-bold hover:bg-primary/90 transition-colors"
+              >
+                닫기
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
