@@ -238,6 +238,18 @@ const MAIN_CHARACTER_IMAGES = {
   other: '/icon/main-image/etc_main-removebg-preview.png'
 };
 
+// 동물 종류별 프로필 아이콘 이미지 (원형 배경 포함)
+const PROFILE_ICON_IMAGES = {
+  dog: '/icon/dog.png',
+  cat: '/icon/cat.png',
+  rabbit: '/icon/rabbit.png',
+  hamster: '/icon/hamster.png',
+  bird: '/icon/bird.png',
+  hedgehog: '/icon/hedgehog.png',
+  reptile: '/icon/reptile.png',
+  other: '/icon/etc.png'
+};
+
 // 개/고양이 대표 품종 목록
 const DOG_BREEDS = [
   '믹스견', '말티즈', '푸들', '포메라니안', '치와와', '시츄', '요크셔테리어',
@@ -639,7 +651,9 @@ function ProfileList({ pets, onSelectPet, onAddNew, onNavigate }) {
       <div className="pt-20 p-4 max-w-md mx-auto space-y-4">
         {pets.length === 0 ? (
           <div className="text-center py-20 animate-fade-in">
-            <div className="text-6xl mb-4">🐾</div>
+            <div className="w-24 h-24 mx-auto mb-4 rounded-full overflow-hidden">
+              <img src={PROFILE_ICON_IMAGES.other} alt="Pet" className="w-full h-full object-cover" />
+            </div>
             <h2 className="text-xl font-bold text-gray-900 mb-2">등록된 반려동물이 없습니다</h2>
             <p className="text-gray-500 mb-6">새 반려동물을 등록해주세요</p>
             <button 
@@ -657,8 +671,8 @@ function ProfileList({ pets, onSelectPet, onAddNew, onNavigate }) {
                 className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4 hover:shadow-md hover:border-teal-200 transition-all cursor-pointer"
                 onClick={() => onSelectPet(pet)}
               >
-                <div className="w-16 h-16 rounded-full bg-teal-100 flex items-center justify-center text-3xl">
-                  {pet.species === 'dog' ? '🐕' : '🐈'}
+                <div className="w-16 h-16 rounded-full overflow-hidden">
+                  <img src={PROFILE_ICON_IMAGES[pet.species] || PROFILE_ICON_IMAGES.other} alt={pet.petName} className="w-full h-full object-cover" />
                 </div>
                 <div className="flex-1">
                   <h3 className="font-bold text-gray-900 text-lg">{pet.petName}</h3>
@@ -954,8 +968,8 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
               {/* Header */}
               <header className="bg-gradient-to-r from-sky-500 to-blue-600 text-white px-4 py-4 shadow-lg">
                 <div className="flex items-center justify-center gap-2">
-                  <div className="w-9 h-9 bg-white rounded-lg flex items-center justify-center shadow-md flex-shrink-0">
-                    <span className="text-xl">🐾</span>
+                  <div className="w-9 h-9 bg-white rounded-lg flex items-center justify-center shadow-md flex-shrink-0 overflow-hidden">
+                    <img src={PROFILE_ICON_IMAGES[petData?.species] || PROFILE_ICON_IMAGES.other} alt="Pet" className="w-full h-full object-cover" />
                   </div>
                   <div className="text-center">
                     <h1 className="text-xl font-bold tracking-tight">PetMedical.AI</h1>
@@ -985,11 +999,11 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
                       <div className="absolute bottom-0 left-0 w-24 h-24 bg-blue-200/20 rounded-full blur-2xl"></div>
 
                       <div className="relative flex items-stretch gap-3">
-                        <div className="flex-shrink-0 w-24 h-36 bg-white/80 rounded-2xl shadow-md flex items-center justify-center overflow-hidden border-2 border-white">
+                        <div className="flex-shrink-0 w-28 h-36 rounded-2xl overflow-hidden">
                           <img
                             src={getMainCharacterImage()}
                             alt="Pet Character"
-                            className="w-full h-full object-cover object-top"
+                            className="w-full h-full object-cover"
                             onError={(e) => {
                               e.target.style.display = 'none';
                               e.target.parentElement.innerHTML = `<span class="text-5xl">${petData.species === 'dog' ? '🐕' : petData.species === 'cat' ? '🐈' : '🐾'}</span>`;
@@ -1175,7 +1189,9 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
               {!petData ? (
                 <div className="bg-white rounded-2xl p-8 shadow-lg">
                   <div className="text-center">
-                    <div className="text-6xl mb-4">🐾</div>
+                    <div className="w-24 h-24 mx-auto mb-4 rounded-full overflow-hidden">
+                      <img src={PROFILE_ICON_IMAGES.other} alt="Pet" className="w-full h-full object-cover" />
+                    </div>
                     <h3 className="text-xl font-bold text-gray-900 mb-2">반려동물을 등록해주세요</h3>
                     <p className="text-gray-500 mb-6">맞춤형 AI 건강관리 서비스를 시작하세요</p>
                     <button
@@ -1331,8 +1347,8 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
       {/* Header - 회사명 가운데 정렬 */}
       <header className="bg-gradient-to-r from-sky-500 to-blue-600 text-white px-4 py-4 shadow-lg">
         <div className="flex items-center justify-center gap-2">
-          <div className="w-9 h-9 bg-white rounded-lg flex items-center justify-center shadow-md flex-shrink-0">
-            <span className="text-xl">🐾</span>
+          <div className="w-9 h-9 bg-white rounded-lg flex items-center justify-center shadow-md flex-shrink-0 overflow-hidden">
+            <img src={PROFILE_ICON_IMAGES[petData?.species] || PROFILE_ICON_IMAGES.other} alt="Pet" className="w-full h-full object-cover" />
           </div>
           <div className="text-center">
             <h1 className="text-xl font-bold tracking-tight">PetMedical.AI</h1>
@@ -1363,12 +1379,12 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
               <div className="absolute bottom-0 left-0 w-24 h-24 bg-blue-200/20 rounded-full blur-2xl"></div>
 
               <div className="relative flex items-stretch gap-3">
-                {/* 캐릭터 이미지 - 세로로 길게, 가로 좁게 */}
-                <div className="flex-shrink-0 w-24 h-36 bg-white/80 rounded-2xl shadow-md flex items-center justify-center overflow-hidden border-2 border-white">
+                {/* 캐릭터 이미지 - 세로로 길게, 가로 좁게, 여백없이 */}
+                <div className="flex-shrink-0 w-28 h-36 rounded-2xl overflow-hidden">
                   <img
                     src={getMainCharacterImage()}
                     alt="Pet Character"
-                    className="w-full h-full object-cover object-top"
+                    className="w-full h-full object-cover"
                     onError={(e) => {
                       e.target.style.display = 'none';
                       e.target.parentElement.innerHTML = `<span class="text-5xl">${petData.species === 'dog' ? '🐕' : petData.species === 'cat' ? '🐈' : '🐾'}</span>`;
@@ -4614,7 +4630,9 @@ function App() {
             ) : (
               <div className="min-h-screen bg-background-light flex items-center justify-center p-4">
                 <div className="text-center">
-                  <div className="text-6xl mb-4">🐾</div>
+                  <div className="w-24 h-24 mx-auto mb-4 rounded-full overflow-hidden">
+                    <img src={PROFILE_ICON_IMAGES.other} alt="Pet" className="w-full h-full object-cover" />
+                  </div>
                   <h2 className="text-xl font-bold text-slate-900 mb-2">반려동물을 등록해주세요</h2>
                   <button
                     onClick={() => setCurrentView('registration')}
@@ -4670,7 +4688,9 @@ function App() {
             <div className="page-container">
               <div className="px-4 pt-8 pb-24">
                 <div className="text-center mb-8">
-                  <div className="text-6xl mb-4">🐾</div>
+                  <div className="w-24 h-24 mx-auto mb-4 rounded-full overflow-hidden">
+                    <img src={PROFILE_ICON_IMAGES.other} alt="Pet" className="w-full h-full object-cover" />
+                  </div>
                   <h2 className="text-2xl font-bold text-slate-900 mb-2">환영합니다!</h2>
                   <p className="text-slate-600">반려동물을 등록하고 AI 건강 관리를 시작하세요</p>
                 </div>
