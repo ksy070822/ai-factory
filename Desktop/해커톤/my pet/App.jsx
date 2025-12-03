@@ -4940,7 +4940,7 @@ function App() {
       )}
 
       {/* 하단 탭 네비게이션 - 보호자 모드에서 항상 표시 (특정 화면 제외) */}
-      {userMode === 'guardian' && currentTab && (
+      {userMode === 'guardian' && (currentTab || currentView) && (
         <BottomTabNavigation
           currentTab={currentTab}
           onTabChange={handleTabChange}
