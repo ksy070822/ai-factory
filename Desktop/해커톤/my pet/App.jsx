@@ -1082,19 +1082,14 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
                     </div>
 
                     {/* AI 건강 문진 카드 */}
-                    <div className="bg-amber-50 rounded-2xl p-4 shadow-lg border-2 border-amber-200 relative overflow-hidden mb-4">
-                      <div className="relative flex flex-col items-center text-center gap-2">
-                        <div className="w-12 h-12 flex items-center justify-center">
-                          <span className="text-3xl">🤖</span>
-                        </div>
-                        <div>
-                          <h3 className="text-gray-800 font-bold text-base">AI 건강 문진</h3>
-                          <p className="text-gray-600 text-xs">{petData?.petName || petData?.name || '반려동물'} 건강기록 주요알림</p>
-                        </div>
+                    <div className="bg-amber-50 rounded-2xl p-3 shadow-lg border-2 border-amber-200 relative overflow-hidden mb-4">
+                      <div className="relative flex items-center justify-center gap-2 mb-2">
+                        <span className="text-2xl">🤖</span>
+                        <h3 className="text-gray-800 font-bold text-base">AI 건강 문진</h3>
                       </div>
                       <button
                         onClick={() => onNavigate('ai-consultation')}
-                        className="w-full mt-3 bg-gradient-to-r from-amber-400 to-yellow-500 text-gray-900 font-bold text-sm py-2.5 rounded-xl shadow-md hover:shadow-lg hover:scale-[1.02] transition-all"
+                        className="w-full bg-gradient-to-r from-amber-400 to-yellow-500 text-gray-900 font-bold text-sm py-2 rounded-xl shadow-md hover:shadow-lg hover:scale-[1.02] transition-all"
                       >
                         7일 케어기록으로 AI 문진하기 &gt;
                       </button>
@@ -1102,8 +1097,8 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
 
                     {/* 케어 주요 알림 섹션 */}
                     <div className="mb-4">
-                      <div className="flex flex-col items-center mb-3">
-                        <div className="flex items-center gap-2 mb-1">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-2">
                           <span className="text-lg">🔔</span>
                           <h3 className="text-base font-bold text-gray-800">{petData?.petName || petData?.name || '반려동물'} 케어 주요알림</h3>
                         </div>
@@ -1476,19 +1471,14 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
             </div>
 
             {/* AI 건강 문진 카드 - 컴팩트 레이아웃 */}
-            <div className="bg-amber-50 rounded-2xl p-4 shadow-lg border-2 border-amber-200 relative overflow-hidden mb-4">
-              <div className="relative flex flex-col items-center text-center gap-2">
-                <div className="w-12 h-12 flex items-center justify-center">
-                  <span className="text-3xl">🤖</span>
-                </div>
-                <div>
-                  <h3 className="text-gray-800 font-bold text-base">AI 건강 문진</h3>
-                  <p className="text-gray-600 text-xs">{petData?.petName || petData?.name || '반려동물'} 건강기록 주요알림</p>
-                </div>
+            <div className="bg-amber-50 rounded-2xl p-3 shadow-lg border-2 border-amber-200 relative overflow-hidden mb-4">
+              <div className="relative flex items-center justify-center gap-2 mb-2">
+                <span className="text-2xl">🤖</span>
+                <h3 className="text-gray-800 font-bold text-base">AI 건강 문진</h3>
               </div>
               <button
                 onClick={() => onNavigate('ai-consultation')}
-                className="w-full mt-3 bg-gradient-to-r from-amber-400 to-yellow-500 text-gray-900 font-bold text-sm py-2.5 rounded-xl shadow-md hover:shadow-lg hover:scale-[1.02] transition-all"
+                className="w-full bg-gradient-to-r from-amber-400 to-yellow-500 text-gray-900 font-bold text-sm py-2 rounded-xl shadow-md hover:shadow-lg hover:scale-[1.02] transition-all"
               >
                 7일 케어기록으로 AI 문진하기 &gt;
               </button>
@@ -1496,8 +1486,8 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
 
             {/* 케어 주요 알림 섹션 */}
             <div className="mb-4">
-              <div className="flex flex-col items-center mb-3">
-                <div className="flex items-center gap-2 mb-1">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
                   <span className="text-lg">🔔</span>
                   <h3 className="text-base font-bold text-gray-800">{petData?.petName || petData?.name || '반려동물'} 케어 주요알림</h3>
                 </div>
@@ -2052,20 +2042,23 @@ function SymptomInput({ petData, onComplete, onBack, onRegister }) {
         </div>
       </div>
 
-      {/* Bottom Button */}
-      <div className="fixed bottom-16 left-0 right-0 bg-white/95 backdrop-blur-sm p-4 border-t border-slate-100">
+      {/* Bottom Button - AI 진료실 전용 확대 버튼 (하단 내비게이션바 숨김) */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-slate-100 p-6 z-50">
         <button 
           onClick={handleSubmit}
           disabled={loading || (selectedSymptoms.length === 0 && !symptomText.trim() && images.length === 0)}
-          className="w-full bg-sky-500 text-white py-4 px-6 rounded-xl font-bold text-base disabled:opacity-50 disabled:cursor-not-allowed hover:bg-sky-600 transition-colors flex items-center justify-center gap-2 shadow-lg shadow-sky-500/30"
+          className="w-full bg-sky-500 text-white py-6 px-8 rounded-xl font-bold text-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-sky-600 active:bg-sky-700 transition-all flex items-center justify-center gap-3 shadow-lg shadow-sky-500/30 hover:shadow-xl hover:shadow-sky-500/40"
         >
           {loading ? (
             <>
-              <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              AI 분석 중...
+              <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              <span className="text-lg font-bold">AI 분석 중...</span>
             </>
           ) : (
-            'AI 분석하기'
+            <>
+              <span className="material-symbols-outlined text-2xl">psychology</span>
+              <span className="text-lg font-bold">AI 분석하기</span>
+            </>
           )}
         </button>
       </div>
@@ -2336,18 +2329,36 @@ function MultiAgentDiagnosis({ petData, symptomData, onComplete, onBack, onDiagn
         if (!isMounted) return; // 컴포넌트가 언마운트되었으면 무시
 
         // 최종 진단서 표시
-        setTimeout(() => {
-          setDiagnosisResult(result.finalDiagnosis);
-          setShowResult(true);
+        console.log('[MultiAgentDiagnosis] 결과 수신:', result);
+        console.log('[MultiAgentDiagnosis] finalDiagnosis:', result?.finalDiagnosis);
+        
+        if (!result || !result.finalDiagnosis) {
+          console.error('[MultiAgentDiagnosis] 결과가 올바르지 않습니다:', result);
           setIsProcessing(false);
-          setChatMode(true);
-          
-          // 진단서 저장
-          saveDiagnosisToStorage(result.finalDiagnosis, currentUser?.uid);
-          
-          // 부모 컴포넌트에 진단 결과 전달
-          if (onDiagnosisResult) {
-            onDiagnosisResult(result.finalDiagnosis);
+          alert('진단 결과를 생성하는 중 오류가 발생했습니다. 다시 시도해주세요.');
+          return;
+        }
+
+        setTimeout(() => {
+          try {
+            setDiagnosisResult(result.finalDiagnosis);
+            setShowResult(true);
+            setIsProcessing(false);
+            setChatMode(true);
+            
+            // 진단서 저장
+            saveDiagnosisToStorage(result.finalDiagnosis, currentUser?.uid);
+            
+            // 부모 컴포넌트에 진단 결과 전달
+            if (onDiagnosisResult) {
+              onDiagnosisResult(result.finalDiagnosis);
+            }
+            
+            console.log('[MultiAgentDiagnosis] 진단서 표시 완료');
+          } catch (displayError) {
+            console.error('[MultiAgentDiagnosis] 진단서 표시 오류:', displayError);
+            setIsProcessing(false);
+            alert('진단서를 표시하는 중 오류가 발생했습니다.');
           }
         }, 1500);
 
@@ -5329,13 +5340,14 @@ function App() {
         </div>
       )}
 
-      {/* 하단 탭 네비게이션 - 보호자 모드에서 항상 표시 (특정 화면 제외) */}
+      {/* 하단 탭 네비게이션 - 보호자 모드에서 항상 표시 (AI 진료실 제외) */}
       {userMode === 'guardian' && currentTab && (
         <BottomTabNavigation
           currentTab={currentTab}
           onTabChange={handleTabChange}
           onModeSwitch={() => handleModeSwitch('clinic')}
           showModeSwitch={!!currentUser}
+          hideInDiagnosis={currentView === 'symptom-input'}
         />
       )}
         </>

@@ -1,6 +1,6 @@
 // src/components/BottomTabNavigation.jsx
 
-export function BottomTabNavigation({ currentTab, onTabChange, onModeSwitch, showModeSwitch }) {
+export function BottomTabNavigation({ currentTab, onTabChange, onModeSwitch, showModeSwitch, hideInDiagnosis = false }) {
   const tabs = [
     { id: 'care', label: '홈', icon: 'home' },
     { id: 'diagnosis', label: 'AI진단', icon: 'medical_services' },
@@ -8,6 +8,11 @@ export function BottomTabNavigation({ currentTab, onTabChange, onModeSwitch, sho
     { id: 'records', label: '기록', icon: 'receipt_long' },
     { id: 'mypage', label: '마이', icon: 'person' }
   ];
+
+  // AI 진료실에서는 숨김
+  if (hideInDiagnosis) {
+    return null;
+  }
 
   return (
     <div className="fixed bottom-0 left-0 right-0 md:left-1/2 md:-translate-x-1/2 md:w-[430px] md:bottom-2 md:rounded-b-[2.5rem] bg-white/95 backdrop-blur-sm border-t border-slate-200 z-50 overflow-hidden">
