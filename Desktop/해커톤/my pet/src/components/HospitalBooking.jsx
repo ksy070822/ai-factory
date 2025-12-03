@@ -703,14 +703,16 @@ export function HospitalBooking({ petData, diagnosis, symptomData, onBack, onSel
       alert('예약 저장 중 오류가 발생했습니다: ' + firestoreError.message);
     }
 
-    setSelectedHospital(bookingHospital);
+    // 예약 완료 후 selectedHospital 업데이트 (bookingDate, bookingTime 포함)
+    const hospitalWithBooking = {
+      ...bookingHospital,
+      bookingDate,
+      bookingTime,
+      bookingMessage
+    };
+    setSelectedHospital(hospitalWithBooking);
     if (onSelectHospital) {
-      onSelectHospital({
-        ...bookingHospital,
-        bookingDate,
-        bookingTime,
-        bookingMessage
-      });
+      onSelectHospital(hospitalWithBooking);
     }
 
     // 성공 화면 표시
@@ -1239,10 +1241,10 @@ export function HospitalBooking({ petData, diagnosis, symptomData, onBack, onSel
                   ) : (
                     <button
                       onClick={() => generateReviewSummary(hospital)}
-                      className="text-sm text-sky-600 hover:text-sky-700 font-bold flex items-center gap-1.5 bg-sky-50 px-3 py-2 rounded-lg hover:bg-sky-100 transition-colors"
+                      className="text-xs text-sky-600 hover:text-sky-700 font-semibold flex items-center gap-1 bg-sky-50 px-2 py-1.5 rounded-lg hover:bg-sky-100 transition-colors"
                     >
-                      <span className="text-base">🤖</span>
-                      AI 병원 분석 보기
+                      <span className="text-xs">🤖</span>
+                      <span>AI 병원 분석</span>
                     </button>
                   )}
                 </div>
