@@ -3370,7 +3370,7 @@ ${userQuestion}
               fontSize: '14px',
               fontWeight: '600'
             }}>
-              👨‍⚕️ 전문 AI 의료진들이 {petData?.petName || petData?.name || '반려동물'}을(를) 함께 진료합니다
+              전문 AI 의료진들이 함께 진료 중입니다.
             </span>
           </div>
         </div>
