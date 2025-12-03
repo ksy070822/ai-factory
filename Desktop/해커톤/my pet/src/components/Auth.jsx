@@ -766,7 +766,11 @@ export function RegisterScreen({ onRegister, onGoToLogin }) {
         {step === 2 && (
           <div className="space-y-4">
             <div className="flex items-center gap-2 mb-2">
-              <span className="text-2xl">{formData.userMode === 'guardian' ? '🐕' : '🏥'}</span>
+              <img
+                src={`${import.meta.env.BASE_URL}icon/login/${formData.userMode === 'guardian' ? 'main_friend' : 'main_hospital'}.png`}
+                alt={formData.userMode === 'guardian' ? '보호자' : '병원'}
+                className="w-8 h-8 object-contain"
+              />
               <span className="text-sm font-medium text-slate-500">
                 {formData.userMode === 'guardian' ? '보호자' : '병원'} 회원가입
               </span>
