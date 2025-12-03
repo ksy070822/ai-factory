@@ -93,6 +93,27 @@ const getTodayWeightFromDailyLogs = async (petId) => {
   }
 };
 
+// Firestore에 쓰기 전에 undefined를 제거/변환하는 유틸
+const sanitizeForFirestore = (data) => {
+  if (Array.isArray(data)) {
+    return data.map((item) => sanitizeForFirestore(item));
+  }
+
+  if (data && typeof data === 'object') {
+    const result = {};
+    Object.entries(data).forEach(([key, value]) => {
+      if (value === undefined) {
+        result[key] = null; // undefined를 null로 변환
+      } else {
+        result[key] = sanitizeForFirestore(value);
+      }
+    });
+    return result;
+  }
+
+  return data;
+};
+
 export function HospitalBooking({ petData, diagnosis, symptomData, onBack, onSelectHospital, onHome, currentUser }) {
   const [hospitalPacket, setHospitalPacket] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -394,19 +415,26 @@ export function HospitalBooking({ petData, diagnosis, symptomData, onBack, onSel
         ? Number(petData.weight) || null
         : null;
 
-    // 반려동물 상세 정보
+    // 반려동물 상세 정보 (모든 필드 null-safe)
     const petProfile = {
-      id: petData?.id,
-      name: petData?.petName || petData?.name,
-      species: petData?.species,
-      breed: petData?.breed,
-      birthDate: petData?.birthDate,
-      age: petData?.birthDate ? calculateAge(petData.birthDate) : petData?.age,
-      sex: petData?.sex,
-      neutered: petData?.neutered,
+      id: petData?.id || null,
+      name: petData?.petName || petData?.name || null,
+      species: petData?.species || null,
+      breed: petData?.breed || null,
+      birthDate: petData?.birthDate || null,
+      age: petData?.birthDate
+        ? calculateAge(petData.birthDate)
+        : (typeof petData?.age === 'number' ? petData.age : null),
+      sex: petData?.sex || null,
+      neutered:
+        typeof petData?.neutered === 'boolean'
+          ? petData.neutered
+          : null,
       weight: resolvedWeight, // 🔹 undefined 방지: dailyLogs > petData.weight > null
-      allergies: petData?.allergies || [],
-      chronicConditions: petData?.chronicConditions || []
+      allergies: Array.isArray(petData?.allergies) ? petData.allergies : [],
+      chronicConditions: Array.isArray(petData?.chronicConditions)
+        ? petData.chronicConditions
+        : []
     };
 
     // AI 진단 상세 정보 (첨부 시)
@@ -496,7 +524,10 @@ export function HospitalBooking({ petData, diagnosis, symptomData, onBack, onSel
         animalHospitalId: animalHospitalId, // 원본 ID 보관 (하위 호환)
         hospitalId: animalHospitalId // 추가 필드로 보관
       };
-      const result = await bookingService.createBooking(firestoreBookingData);
+
+      // 🔹 Firestore 쓰기 전에 undefined 제거
+      const sanitizedBookingData = sanitizeForFirestore(firestoreBookingData);
+      const result = await bookingService.createBooking(sanitizedBookingData);
       if (result.success) {
         console.log('✅ 예약 Firestore 저장 완료:', result.id, 'clinicId:', actualClinicId);
         console.log('📋 예약 데이터:', {
