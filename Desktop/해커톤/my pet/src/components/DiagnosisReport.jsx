@@ -5,7 +5,6 @@ import { getPetImage } from '../utils/imagePaths';
 function DiagnosisReport({ petData, diagnosisResult, symptomData, onClose, onGoToHospital, onGoToTreatment }) {
   const [isSaving, setIsSaving] = useState(false);
   const [isSending, setIsSending] = useState(false);
-  const [activeTab, setActiveTab] = useState('overview'); // 'overview' or 'detail'
   const reportRef = useRef(null);
 
   const getPetInfo = () => {
@@ -159,163 +158,146 @@ ${diagnosisResult?.actions?.map((action, idx) => `${idx + 1}. ${action}`).join('
           </div>
         </div>
 
-        {/* 탭 네비게이션 */}
-        <div className="report-tabs">
-          <button
-            className={`tab-btn ${activeTab === 'overview' ? 'active' : ''}`}
-            onClick={() => setActiveTab('overview')}
-          >
-            요약
-          </button>
-          <button
-            className={`tab-btn ${activeTab === 'detail' ? 'active' : ''}`}
-            onClick={() => setActiveTab('detail')}
-          >
-            상세
-          </button>
-        </div>
-
-        {/* 탭 콘텐츠 */}
+        {/* 전체 콘텐츠 (탭 제거, 한 번에 표시) */}
         <div className="report-content">
-          {activeTab === 'overview' ? (
-            /* 요약 탭 */
-            <div className="overview-tab">
-              {/* 반려동물 카드 */}
-              <div className="pet-card-new">
-                <div className="pet-avatar-new">
-                  <img src={petInfo.profileImage} alt={petInfo.name} />
-                </div>
-                <div className="pet-info-new">
-                  <h3>{petInfo.name}</h3>
-                  <p>{petInfo.breed} · {petInfo.age}</p>
-                  {petInfo.gender && (
-                    <span className="pet-gender-badge">
-                      {petInfo.gender === 'M' ? '♂ 수컷' : '♀ 암컷'}
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              {/* 진단 결과 카드 */}
-              <div className="diagnosis-card-new">
-                <div className="diagnosis-label">진단명</div>
-                <h2 className="diagnosis-title-new">{diagnosisResult?.diagnosis || '진단 결과 없음'}</h2>
-
-                {/* 응급도 배지 */}
-                <div
-                  className="emergency-badge-new"
-                  style={{ backgroundColor: emergencyInfo.bgColor, color: emergencyInfo.color }}
-                >
-                  <span className="emergency-dot" style={{ backgroundColor: emergencyInfo.color }}></span>
-                  <span>{emergencyInfo.text}</span>
-                  <span className="emergency-separator">|</span>
-                  <span>{emergencyInfo.desc}</span>
-                </div>
-
-                {/* 응급도 바 */}
-                {diagnosisResult?.triage_score !== undefined && (
-                  <div className="triage-bar-new">
-                    <div className="triage-label-new">응급도</div>
-                    <div className="triage-dots">
-                      {[1, 2, 3, 4, 5].map(num => (
-                        <div
-                          key={num}
-                          className={`triage-dot-new ${num <= diagnosisResult.triage_score ? 'filled' : ''}`}
-                          style={{
-                            backgroundColor: num <= diagnosisResult.triage_score
-                              ? (diagnosisResult.triage_score >= 4 ? '#ef4444' :
-                                 diagnosisResult.triage_score >= 3 ? '#f59e0b' : '#22c55e')
-                              : '#e5e7eb'
-                          }}
-                        />
-                      ))}
-                    </div>
-                    <span className="triage-score-new">{diagnosisResult.triage_score}/5</span>
-                  </div>
-                )}
-              </div>
-
-              {/* 간단 설명 */}
-              {diagnosisResult?.description && (
-                <div className="summary-card">
-                  <h4>요약 설명</h4>
-                  <p>{diagnosisResult.description.length > 150
-                    ? diagnosisResult.description.substring(0, 150) + '...'
-                    : diagnosisResult.description}
-                  </p>
-                  {diagnosisResult.description.length > 150 && (
-                    <button className="read-more-btn" onClick={() => setActiveTab('detail')}>
-                      자세히 보기
-                    </button>
-                  )}
-                </div>
+          {/* 반려동물 카드 */}
+          <div className="pet-card-new">
+            <div className="pet-avatar-new">
+              <img src={petInfo.profileImage} alt={petInfo.name} />
+            </div>
+            <div className="pet-info-new">
+              <h3>{petInfo.name}</h3>
+              <p>{petInfo.breed} · {petInfo.age}</p>
+              {petInfo.gender && (
+                <span className="pet-gender-badge">
+                  {petInfo.gender === 'M' ? '♂ 수컷' : '♀ 암컷'}
+                </span>
               )}
             </div>
-          ) : (
-            /* 상세 탭 */
-            <div className="detail-tab">
-              {/* 증상 정보 */}
-              <div className="detail-section">
-                <h4>증상 정보</h4>
-                {symptomData?.department && (
-                  <div className="detail-item">
-                    <span className="detail-icon">🏥</span>
-                    <span>진료과목: {symptomData.department}</span>
-                  </div>
-                )}
-                {symptomData?.selectedSymptoms?.length > 0 && (
-                  <div className="symptom-tags">
-                    {symptomData.selectedSymptoms.map((symptom, idx) => (
-                      <span key={idx} className="symptom-tag">{symptom}</span>
-                    ))}
-                  </div>
-                )}
-                {(symptomData?.userDescription || symptomData?.description) && (
-                  <div className="detail-description">
-                    {symptomData?.userDescription || symptomData?.description}
-                  </div>
-                )}
-                {symptomData?.duration && (
-                  <div className="detail-item">
-                    <span className="detail-icon">⏱</span>
-                    <span>증상 지속: {symptomData.duration}</span>
-                  </div>
-                )}
+          </div>
+
+          {/* 진단 결과 카드 */}
+          <div className="diagnosis-card-new">
+            <div className="diagnosis-label">진단명</div>
+            <h2 className="diagnosis-title-new">{diagnosisResult?.diagnosis || '진단 결과 없음'}</h2>
+
+            {/* 응급도 배지 */}
+            <div
+              className="emergency-badge-new"
+              style={{ backgroundColor: emergencyInfo.bgColor, color: emergencyInfo.color }}
+            >
+              <span className="emergency-dot" style={{ backgroundColor: emergencyInfo.color }}></span>
+              <span>{emergencyInfo.text}</span>
+              <span className="emergency-separator">|</span>
+              <span>{emergencyInfo.desc}</span>
+            </div>
+
+            {/* 응급도 바 */}
+            {diagnosisResult?.triage_score !== undefined && (
+              <div className="triage-bar-new">
+                <div className="triage-label-new">응급도</div>
+                <div className="triage-dots">
+                  {[1, 2, 3, 4, 5].map(num => (
+                    <div
+                      key={num}
+                      className={`triage-dot-new ${num <= diagnosisResult.triage_score ? 'filled' : ''}`}
+                      style={{
+                        backgroundColor: num <= diagnosisResult.triage_score
+                          ? (diagnosisResult.triage_score >= 4 ? '#ef4444' :
+                             diagnosisResult.triage_score >= 3 ? '#f59e0b' : '#22c55e')
+                          : '#e5e7eb'
+                      }}
+                    />
+                  ))}
+                </div>
+                <span className="triage-score-new">{diagnosisResult.triage_score}/5</span>
               </div>
+            )}
+          </div>
 
-              {/* 상세 설명 */}
-              {diagnosisResult?.description && (
-                <div className="detail-section">
-                  <h4>상세 설명</h4>
-                  <p className="full-description">{diagnosisResult.description}</p>
-                </div>
-              )}
+          {/* 증상 정보 */}
+          <div className="detail-section">
+            <h4>증상 정보</h4>
+            {symptomData?.department && (
+              <div className="detail-item">
+                <span className="detail-icon">🏥</span>
+                <span>진료과목: {symptomData.department}</span>
+              </div>
+            )}
+            {symptomData?.selectedSymptoms?.length > 0 && (
+              <div className="symptom-tags">
+                {symptomData.selectedSymptoms.map((symptom, idx) => (
+                  <span key={idx} className="symptom-tag">{symptom}</span>
+                ))}
+              </div>
+            )}
+            {(symptomData?.userDescription || symptomData?.description) && (
+              <div className="detail-description">
+                {symptomData?.userDescription || symptomData?.description}
+              </div>
+            )}
+            {symptomData?.duration && (
+              <div className="detail-item">
+                <span className="detail-icon">⏱</span>
+                <span>증상 지속: {symptomData.duration}</span>
+              </div>
+            )}
+          </div>
 
-              {/* 권장 조치사항 */}
-              {diagnosisResult?.actions?.length > 0 && (
-                <div className="detail-section">
-                  <h4>권장 조치사항</h4>
-                  <ul className="actions-list-new">
-                    {diagnosisResult.actions.map((action, idx) => (
-                      <li key={idx}>
-                        <span className="action-num">{idx + 1}</span>
-                        <span className="action-text">{action}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
+          {/* 상세 설명 */}
+          {diagnosisResult?.description && (
+            <div className="detail-section">
+              <h4>상세 설명</h4>
+              <p className="full-description">{diagnosisResult.description}</p>
+            </div>
+          )}
 
-              {/* 병원 방문 안내 */}
-              {diagnosisResult?.hospitalVisit && (
-                <div className="hospital-alert">
-                  <div className="hospital-alert-icon">🏥</div>
-                  <div className="hospital-alert-content">
-                    <strong>병원 방문 권장</strong>
-                    <p>{diagnosisResult.hospitalVisitTime || '가능한 빨리'} 내 방문하세요</p>
-                  </div>
+          {/* 권장 조치사항 */}
+          {diagnosisResult?.actions?.length > 0 && (
+            <div className="detail-section">
+              <h4>권장 조치사항</h4>
+              <ul className="actions-list-new">
+                {diagnosisResult.actions.map((action, idx) => (
+                  <li key={idx}>
+                    <span className="action-num">{idx + 1}</span>
+                    <span className="action-text">{action}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* 약물 안내 정보 */}
+          {diagnosisResult?.medicationGuidance?.hasMedicationGuidance && (
+            <div className="detail-section medication-section">
+              <h4>💊 약물 안내</h4>
+              <p className="medication-summary">{diagnosisResult.medicationGuidance.message}</p>
+              {diagnosisResult.medicationGuidance.medications?.map((categoryMed, idx) => (
+                <div key={idx} className="medication-category">
+                  <div className="medication-category-title">{categoryMed.category} 관련</div>
+                  {categoryMed.medications?.slice(0, 2).map((med, medIdx) => (
+                    <div key={medIdx} className="medication-item">
+                      <div className="medication-type">{med.type}</div>
+                      <div className="medication-details">
+                        <span>복용: {med.usage}</span>
+                        <span>기간: {med.duration}</span>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              )}
+              ))}
+              <p className="medication-disclaimer">{diagnosisResult.medicationGuidance.disclaimer}</p>
+            </div>
+          )}
+
+          {/* 병원 방문 안내 */}
+          {diagnosisResult?.hospitalVisit && (
+            <div className="hospital-alert">
+              <div className="hospital-alert-icon">🏥</div>
+              <div className="hospital-alert-content">
+                <strong>병원 방문 권장</strong>
+                <p>{diagnosisResult.hospitalVisitTime || '가능한 빨리'} 내 방문하세요</p>
+              </div>
             </div>
           )}
         </div>
