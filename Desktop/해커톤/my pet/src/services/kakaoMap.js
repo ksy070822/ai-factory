@@ -244,6 +244,80 @@ function getMockHospitals(lat, lng) {
 }
 
 /**
+ * 카카오맵 REST API로 지역명 기반 동물병원 검색
+ * @param {string} regionName - 검색할 지역명 (예: "부산역", "강남구", "해운대")
+ * @returns {Promise<Array>} 동물병원 목록
+ */
+export async function searchHospitalsByRegionName(regionName) {
+  console.log('[KakaoMap] 지역명 검색 시작:', regionName);
+
+  try {
+    // 지역명 + "동물병원" 키워드로 검색
+    const query = `${regionName} 동물병원`;
+    const encodedQuery = encodeURIComponent(query);
+    
+    // 카카오맵 REST API 호출
+    // category_group_code=HP8: 동물병원 카테고리
+    const url = `https://dapi.kakao.com/v2/local/search/keyword.json?query=${encodedQuery}&category_group_code=HP8&size=15`;
+    
+    console.log('[KakaoMap] REST API 호출:', url);
+    
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Authorization': `KakaoAK ${KAKAO_REST_API_KEY}`
+      }
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('[KakaoMap] REST API 오류:', response.status, errorText);
+      
+      // CORS 오류인 경우
+      if (response.status === 0 || response.status === 403) {
+        throw new Error('CORS 오류: 카카오 개발자 콘솔에서 도메인을 등록해주세요.');
+      }
+      
+      throw new Error(`카카오맵 API 호출 실패: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log('[KakaoMap] REST API 응답:', data);
+
+    if (data.documents && data.documents.length > 0) {
+      const hospitals = data.documents.map((place) => ({
+        id: place.id,
+        name: place.place_name,
+        address: place.address_name,
+        roadAddress: place.road_address_name,
+        phone: place.phone,
+        lat: parseFloat(place.y),
+        lng: parseFloat(place.x),
+        category: place.category_name,
+        url: place.place_url,
+        distance: place.distance ? parseInt(place.distance) : null,
+        is24Hours: place.place_name.includes('24') || place.place_name.includes('응급'),
+      }));
+
+      console.log('[KakaoMap] 지역 검색 성공:', hospitals.length, '개 병원 발견');
+      return hospitals;
+    } else {
+      console.log('[KakaoMap] 검색 결과 없음');
+      return [];
+    }
+  } catch (error) {
+    console.error('[KakaoMap] 지역 검색 오류:', error);
+    
+    // CORS 오류인 경우 사용자에게 안내
+    if (error.message.includes('CORS')) {
+      throw new Error('브라우저 보안 정책으로 인해 지역 검색이 제한됩니다. 내 주변 검색을 사용해주세요.');
+    }
+    
+    throw error;
+  }
+}
+
+/**
  * 카카오맵 지도 초기화
  */
 export async function initKakaoMap(containerId, lat, lng) {

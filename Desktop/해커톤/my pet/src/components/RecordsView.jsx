@@ -217,12 +217,152 @@ const DUMMY_VACCINATIONS = [
   }
 ];
 
+// 더미 데이터 - 종합건강검진 상세 결과 (샘플)
+const SAMPLE_CHECKUP_DETAIL = {
+  id: 'checkup_detail_1',
+  date: '2024-09-05',
+  hospitalName: '행복한동물병원',
+  hospitalAddress: '서울시 강남구 역삼동 123-45',
+  hospitalPhone: '02-1234-5678',
+  veterinarian: '김수의 원장',
+  type: '종합건강검진',
+  overallStatus: '건강',
+  overallComment: '전반적으로 건강 상태가 양호합니다. 현재 특별한 이상 소견은 발견되지 않았으며, 적정 체중을 유지하고 있습니다. 정기적인 검진을 지속해 주세요.',
+
+  // 신체 검사
+  physicalExam: {
+    weight: 6.2,
+    weightStatus: 'normal', // normal, overweight, underweight
+    bodyConditionScore: 5, // 1-9 scale
+    temperature: 38.5,
+    heartRate: 120,
+    respiratoryRate: 24,
+    comments: '신체 검사 결과 모두 정상 범위입니다.'
+  },
+
+  // 혈액검사 - CBC (일반혈액검사)
+  cbc: {
+    status: 'normal',
+    items: [
+      { name: 'WBC (백혈구)', value: 12.5, unit: '10³/µL', range: '5.5-16.9', status: 'normal' },
+      { name: 'RBC (적혈구)', value: 7.2, unit: '10⁶/µL', range: '5.5-8.5', status: 'normal' },
+      { name: 'HGB (혈색소)', value: 16.8, unit: 'g/dL', range: '12-18', status: 'normal' },
+      { name: 'HCT (적혈구용적)', value: 48, unit: '%', range: '37-55', status: 'normal' },
+      { name: 'PLT (혈소판)', value: 285, unit: '10³/µL', range: '175-500', status: 'normal' },
+      { name: 'MCV (평균적혈구용적)', value: 67, unit: 'fL', range: '60-77', status: 'normal' },
+      { name: 'MCH (평균적혈구혈색소)', value: 23.3, unit: 'pg', range: '19.5-24.5', status: 'normal' },
+      { name: 'MCHC (평균적혈구혈색소농도)', value: 35, unit: 'g/dL', range: '32-36', status: 'normal' }
+    ],
+    comment: '일반 혈액검사 결과 모든 항목이 정상 범위입니다. 빈혈, 감염, 혈소판 이상 등의 소견은 없습니다.'
+  },
+
+  // 혈액검사 - 생화학 검사
+  biochemistry: {
+    status: 'normal',
+    items: [
+      { name: 'BUN (혈중요소질소)', value: 18, unit: 'mg/dL', range: '7-27', status: 'normal' },
+      { name: 'CREA (크레아티닌)', value: 1.2, unit: 'mg/dL', range: '0.5-1.8', status: 'normal' },
+      { name: 'ALT (간효소)', value: 42, unit: 'U/L', range: '10-125', status: 'normal' },
+      { name: 'ALP (알칼리성인산분해효소)', value: 85, unit: 'U/L', range: '23-212', status: 'normal' },
+      { name: 'TP (총단백)', value: 6.8, unit: 'g/dL', range: '5.2-8.2', status: 'normal' },
+      { name: 'ALB (알부민)', value: 3.4, unit: 'g/dL', range: '2.3-4.0', status: 'normal' },
+      { name: 'GLU (혈당)', value: 98, unit: 'mg/dL', range: '74-143', status: 'normal' },
+      { name: 'CHOL (콜레스테롤)', value: 220, unit: 'mg/dL', range: '110-320', status: 'normal' },
+      { name: 'TBIL (총빌리루빈)', value: 0.2, unit: 'mg/dL', range: '0.0-0.9', status: 'normal' },
+      { name: 'Ca (칼슘)', value: 10.2, unit: 'mg/dL', range: '7.9-12.0', status: 'normal' },
+      { name: 'PHOS (인)', value: 4.5, unit: 'mg/dL', range: '2.5-6.8', status: 'normal' }
+    ],
+    comment: '간 기능, 신장 기능, 혈당 등 모든 생화학 검사 수치가 정상입니다.'
+  },
+
+  // 소변검사
+  urinalysis: {
+    status: 'normal',
+    items: [
+      { name: '요비중 (SG)', value: '1.035', range: '1.015-1.045', status: 'normal' },
+      { name: 'pH', value: '6.5', range: '5.5-7.0', status: 'normal' },
+      { name: '단백질', value: '음성', range: '음성', status: 'normal' },
+      { name: '포도당', value: '음성', range: '음성', status: 'normal' },
+      { name: '빌리루빈', value: '음성', range: '음성', status: 'normal' },
+      { name: '잠혈', value: '음성', range: '음성', status: 'normal' },
+      { name: '백혈구', value: '음성', range: '음성', status: 'normal' },
+      { name: '결정체', value: '없음', range: '없음', status: 'normal' }
+    ],
+    comment: '소변검사 결과 신장 기능 양호, 요로 감염 및 결석 소견 없습니다.'
+  },
+
+  // 심장 초음파
+  cardiacUltrasound: {
+    status: 'normal',
+    findings: [
+      { item: '좌심실 크기', result: '정상', status: 'normal' },
+      { item: '좌심방 크기', result: '정상', status: 'normal' },
+      { item: '심장 벽 두께', result: '정상', status: 'normal' },
+      { item: '심박출량', result: '정상', status: 'normal' },
+      { item: '판막 기능', result: '이상 없음', status: 'normal' },
+      { item: '심낭액', result: '없음', status: 'normal' }
+    ],
+    laToAoRatio: 1.2, // 좌심방/대동맥 비율 (정상: < 1.6)
+    fractionalShortening: 38, // % (정상: 25-50%)
+    comment: '심장 크기, 기능 모두 정상입니다. 심잡음이나 부정맥 소견 없습니다.'
+  },
+
+  // 복부 초음파
+  abdominalUltrasound: {
+    status: 'normal',
+    organs: [
+      { name: '간', result: '크기, 에코 정상', status: 'normal' },
+      { name: '담낭', result: '정상, 담석 없음', status: 'normal' },
+      { name: '비장', result: '크기, 에코 정상', status: 'normal' },
+      { name: '신장 (좌)', result: '크기, 구조 정상', status: 'normal' },
+      { name: '신장 (우)', result: '크기, 구조 정상', status: 'normal' },
+      { name: '방광', result: '정상, 결석 없음', status: 'normal' },
+      { name: '위장관', result: '이상 없음', status: 'normal' },
+      { name: '부신', result: '정상', status: 'normal' }
+    ],
+    comment: '복부 장기 모두 정상 소견입니다. 종양, 결석, 복수 등의 이상 소견 없습니다.'
+  },
+
+  // 추가 권고사항
+  recommendations: [
+    '현재 건강 상태가 양호합니다. 정기 검진을 연 1회 지속해 주세요.',
+    '적정 체중 유지를 위해 균형 잡힌 식단을 유지해 주세요.',
+    '심장사상충 예방약을 정기적으로 투여해 주세요.',
+    '치석이 약간 있으니 치아 관리에 신경 써 주세요.'
+  ],
+
+  // 다음 검진 권장일
+  nextCheckupDate: '2025-09-05'
+};
+
 export function RecordsView({ petData, onBack, onViewDiagnosis, onOCR, onHome, onHospitalBooking }) {
-  const [activeTab, setActiveTab] = useState('visits'); // visits, medication, checkup, vaccination
+  // localStorage에서 초기 탭 확인
+  const getInitialTab = () => {
+    const savedTab = localStorage.getItem('records_initialTab');
+    if (savedTab && ['visits', 'medication', 'checkup', 'vaccination'].includes(savedTab)) {
+      localStorage.removeItem('records_initialTab');
+      return savedTab;
+    }
+    return 'visits';
+  };
+  
+  const [activeTab, setActiveTab] = useState(getInitialTab); // visits, medication, checkup, vaccination
+  
+  // 커스텀 이벤트 리스너 추가
+  useEffect(() => {
+    const handleSetTab = (event) => {
+      if (event.detail && ['visits', 'medication', 'checkup', 'vaccination'].includes(event.detail)) {
+        setActiveTab(event.detail);
+      }
+    };
+    window.addEventListener('records-set-tab', handleSetTab);
+    return () => window.removeEventListener('records-set-tab', handleSetTab);
+  }, []);
   const [diagnoses, setDiagnoses] = useState([]);
   const [clinicResults, setClinicResults] = useState([]);
   const [medicationFeedback, setMedicationFeedback] = useState({});
   const [useDummyData, setUseDummyData] = useState(true); // 더미데이터 사용 플래그 - 샘플 데이터 표시
+  const [showCheckupDetail, setShowCheckupDetail] = useState(false); // 건강검진 상세 보기
 
   // 진단 기록 로드 (Firestore)
   useEffect(() => {
@@ -812,13 +952,278 @@ export function RecordsView({ petData, onBack, onViewDiagnosis, onOCR, onHome, o
                     ))}
                   </div>
 
-                  <button className="w-full mt-4 py-2 text-primary text-sm font-medium flex items-center justify-center gap-1 hover:bg-primary/5 rounded-lg transition-colors">
+                  <button
+                    onClick={() => setShowCheckupDetail(true)}
+                    className="w-full mt-4 py-2 text-primary text-sm font-medium flex items-center justify-center gap-1 hover:bg-primary/5 rounded-lg transition-colors"
+                  >
                     상세 결과 보기
                     <span className="material-symbols-outlined text-sm">arrow_forward_ios</span>
                   </button>
                 </div>
               ))
             )}
+          </div>
+        )}
+
+        {/* 건강검진 상세 결과 모달 */}
+        {showCheckupDetail && (
+          <div className="fixed inset-0 bg-black/50 z-50 flex items-end justify-center">
+            <div className="bg-white w-full max-w-lg h-[95vh] rounded-t-3xl overflow-hidden flex flex-col animate-slide-up">
+              {/* 헤더 */}
+              <div className="bg-gradient-to-r from-primary to-sky-500 text-white p-6 relative">
+                <button
+                  onClick={() => setShowCheckupDetail(false)}
+                  className="absolute top-4 right-4 w-8 h-8 bg-white/20 rounded-full flex items-center justify-center"
+                >
+                  <span className="material-symbols-outlined text-white">close</span>
+                </button>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center">
+                    <span className="material-symbols-outlined text-3xl">assignment</span>
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold">{SAMPLE_CHECKUP_DETAIL.type}</h2>
+                    <p className="text-white/80 text-sm">{formatDateShort(SAMPLE_CHECKUP_DETAIL.date)}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-white/90">
+                  <span className="material-symbols-outlined text-sm">location_on</span>
+                  <span>{SAMPLE_CHECKUP_DETAIL.hospitalName}</span>
+                  <span className="text-white/50">|</span>
+                  <span>{SAMPLE_CHECKUP_DETAIL.veterinarian}</span>
+                </div>
+              </div>
+
+              {/* 컨텐츠 - 스크롤 영역 */}
+              <div className="flex-1 overflow-y-auto p-4 pb-8 space-y-4">
+                {/* 종합 판정 */}
+                <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl p-4 border border-green-200">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="font-bold text-slate-800 flex items-center gap-2">
+                      <span className="material-symbols-outlined text-green-600">verified</span>
+                      종합 판정
+                    </h3>
+                    <span className="px-3 py-1 bg-green-500 text-white rounded-full text-sm font-bold">
+                      {SAMPLE_CHECKUP_DETAIL.overallStatus}
+                    </span>
+                  </div>
+                  <p className="text-slate-600 text-sm leading-relaxed">
+                    {SAMPLE_CHECKUP_DETAIL.overallComment}
+                  </p>
+                </div>
+
+                {/* 신체 검사 */}
+                <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100">
+                  <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2">
+                    <span className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                      <span className="material-symbols-outlined text-blue-600 text-lg">monitor_weight</span>
+                    </span>
+                    신체 검사
+                  </h3>
+                  <div className="grid grid-cols-3 gap-3">
+                    <div className="bg-slate-50 rounded-xl p-3 text-center">
+                      <p className="text-xs text-slate-500 mb-1">체중</p>
+                      <p className="text-lg font-bold text-slate-800">{SAMPLE_CHECKUP_DETAIL.physicalExam.weight}kg</p>
+                      <span className="text-xs text-green-600">정상</span>
+                    </div>
+                    <div className="bg-slate-50 rounded-xl p-3 text-center">
+                      <p className="text-xs text-slate-500 mb-1">체온</p>
+                      <p className="text-lg font-bold text-slate-800">{SAMPLE_CHECKUP_DETAIL.physicalExam.temperature}°C</p>
+                      <span className="text-xs text-green-600">정상</span>
+                    </div>
+                    <div className="bg-slate-50 rounded-xl p-3 text-center">
+                      <p className="text-xs text-slate-500 mb-1">심박수</p>
+                      <p className="text-lg font-bold text-slate-800">{SAMPLE_CHECKUP_DETAIL.physicalExam.heartRate}</p>
+                      <span className="text-xs text-green-600">회/분</span>
+                    </div>
+                  </div>
+                  <div className="mt-3 p-3 bg-blue-50 rounded-xl">
+                    <p className="text-xs text-slate-600">
+                      <span className="font-medium">BCS (체형지수):</span> {SAMPLE_CHECKUP_DETAIL.physicalExam.bodyConditionScore}/9 - 이상적인 체형입니다.
+                    </p>
+                  </div>
+                </div>
+
+                {/* 혈액검사 - CBC */}
+                <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="font-bold text-slate-800 flex items-center gap-2">
+                      <span className="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
+                        <span className="material-symbols-outlined text-red-600 text-lg">water_drop</span>
+                      </span>
+                      혈액검사 (CBC)
+                    </h3>
+                    <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">정상</span>
+                  </div>
+                  <div className="space-y-2 max-h-48 overflow-y-auto">
+                    {SAMPLE_CHECKUP_DETAIL.cbc.items.map((item, idx) => (
+                      <div key={idx} className="flex items-center justify-between py-2 border-b border-slate-50 last:border-0">
+                        <span className="text-sm text-slate-600">{item.name}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-medium text-slate-800">{item.value} {item.unit}</span>
+                          <span className="text-xs text-slate-400">({item.range})</span>
+                          <span className={`w-2 h-2 rounded-full ${item.status === 'normal' ? 'bg-green-500' : item.status === 'caution' ? 'bg-yellow-500' : 'bg-red-500'}`}></span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <p className="mt-3 text-xs text-slate-500 bg-slate-50 p-2 rounded-lg">{SAMPLE_CHECKUP_DETAIL.cbc.comment}</p>
+                </div>
+
+                {/* 혈액검사 - 생화학 */}
+                <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="font-bold text-slate-800 flex items-center gap-2">
+                      <span className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                        <span className="material-symbols-outlined text-purple-600 text-lg">science</span>
+                      </span>
+                      생화학 검사
+                    </h3>
+                    <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">정상</span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    {SAMPLE_CHECKUP_DETAIL.biochemistry.items.slice(0, 6).map((item, idx) => (
+                      <div key={idx} className="bg-slate-50 rounded-lg p-2">
+                        <p className="text-xs text-slate-500 truncate">{item.name}</p>
+                        <p className="text-sm font-medium text-slate-800">{item.value} <span className="text-xs text-slate-400">{item.unit}</span></p>
+                      </div>
+                    ))}
+                  </div>
+                  <details className="mt-3">
+                    <summary className="text-xs text-primary cursor-pointer hover:underline">전체 항목 보기 ({SAMPLE_CHECKUP_DETAIL.biochemistry.items.length}개)</summary>
+                    <div className="mt-2 space-y-1">
+                      {SAMPLE_CHECKUP_DETAIL.biochemistry.items.map((item, idx) => (
+                        <div key={idx} className="flex justify-between text-xs py-1 border-b border-slate-100">
+                          <span className="text-slate-600">{item.name}</span>
+                          <span className="text-slate-800">{item.value} {item.unit} ({item.range})</span>
+                        </div>
+                      ))}
+                    </div>
+                  </details>
+                  <p className="mt-3 text-xs text-slate-500 bg-slate-50 p-2 rounded-lg">{SAMPLE_CHECKUP_DETAIL.biochemistry.comment}</p>
+                </div>
+
+                {/* 소변검사 */}
+                <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="font-bold text-slate-800 flex items-center gap-2">
+                      <span className="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center">
+                        <span className="material-symbols-outlined text-yellow-600 text-lg">labs</span>
+                      </span>
+                      소변검사
+                    </h3>
+                    <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">정상</span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    {SAMPLE_CHECKUP_DETAIL.urinalysis.items.map((item, idx) => (
+                      <div key={idx} className="flex justify-between items-center bg-slate-50 rounded-lg p-2">
+                        <span className="text-xs text-slate-600">{item.name}</span>
+                        <span className="text-xs font-medium text-slate-800">{item.value}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <p className="mt-3 text-xs text-slate-500 bg-slate-50 p-2 rounded-lg">{SAMPLE_CHECKUP_DETAIL.urinalysis.comment}</p>
+                </div>
+
+                {/* 심장 초음파 */}
+                <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="font-bold text-slate-800 flex items-center gap-2">
+                      <span className="w-8 h-8 bg-pink-100 rounded-lg flex items-center justify-center">
+                        <span className="material-symbols-outlined text-pink-600 text-lg">cardiology</span>
+                      </span>
+                      심장 초음파
+                    </h3>
+                    <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">정상</span>
+                  </div>
+                  <div className="space-y-2">
+                    {SAMPLE_CHECKUP_DETAIL.cardiacUltrasound.findings.map((finding, idx) => (
+                      <div key={idx} className="flex justify-between items-center py-1">
+                        <span className="text-sm text-slate-600">{finding.item}</span>
+                        <span className={`text-sm font-medium ${finding.status === 'normal' ? 'text-green-600' : 'text-yellow-600'}`}>
+                          {finding.result}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="mt-3 grid grid-cols-2 gap-2">
+                    <div className="bg-pink-50 rounded-lg p-2 text-center">
+                      <p className="text-xs text-slate-500">LA/Ao 비율</p>
+                      <p className="text-sm font-bold text-slate-800">{SAMPLE_CHECKUP_DETAIL.cardiacUltrasound.laToAoRatio}</p>
+                      <p className="text-xs text-green-600">정상 (&lt;1.6)</p>
+                    </div>
+                    <div className="bg-pink-50 rounded-lg p-2 text-center">
+                      <p className="text-xs text-slate-500">FS (%)</p>
+                      <p className="text-sm font-bold text-slate-800">{SAMPLE_CHECKUP_DETAIL.cardiacUltrasound.fractionalShortening}%</p>
+                      <p className="text-xs text-green-600">정상 (25-50%)</p>
+                    </div>
+                  </div>
+                  <p className="mt-3 text-xs text-slate-500 bg-slate-50 p-2 rounded-lg">{SAMPLE_CHECKUP_DETAIL.cardiacUltrasound.comment}</p>
+                </div>
+
+                {/* 복부 초음파 */}
+                <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="font-bold text-slate-800 flex items-center gap-2">
+                      <span className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center">
+                        <span className="material-symbols-outlined text-orange-600 text-lg">radiology</span>
+                      </span>
+                      복부 초음파
+                    </h3>
+                    <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">정상</span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    {SAMPLE_CHECKUP_DETAIL.abdominalUltrasound.organs.map((organ, idx) => (
+                      <div key={idx} className="bg-slate-50 rounded-lg p-2">
+                        <p className="text-xs font-medium text-slate-700">{organ.name}</p>
+                        <p className="text-xs text-slate-500">{organ.result}</p>
+                      </div>
+                    ))}
+                  </div>
+                  <p className="mt-3 text-xs text-slate-500 bg-slate-50 p-2 rounded-lg">{SAMPLE_CHECKUP_DETAIL.abdominalUltrasound.comment}</p>
+                </div>
+
+                {/* 권고사항 */}
+                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-4 border border-blue-200">
+                  <h3 className="font-bold text-slate-800 mb-3 flex items-center gap-2">
+                    <span className="material-symbols-outlined text-blue-600">lightbulb</span>
+                    수의사 권고사항
+                  </h3>
+                  <ul className="space-y-2">
+                    {SAMPLE_CHECKUP_DETAIL.recommendations.map((rec, idx) => (
+                      <li key={idx} className="flex items-start gap-2 text-sm text-slate-600">
+                        <span className="material-symbols-outlined text-blue-500 text-sm mt-0.5">check_circle</span>
+                        {rec}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {/* 다음 검진 안내 */}
+                <div className="bg-primary/10 rounded-2xl p-4 flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-slate-600">다음 정기검진 권장일</p>
+                    <p className="text-lg font-bold text-primary">{formatDateShort(SAMPLE_CHECKUP_DETAIL.nextCheckupDate)}</p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setShowCheckupDetail(false);
+                      onHospitalBooking && onHospitalBooking();
+                    }}
+                    className="px-4 py-2 bg-primary text-white rounded-xl text-sm font-medium hover:bg-primary/90 transition-colors"
+                  >
+                    검진 예약하기
+                  </button>
+                </div>
+
+                {/* 병원 정보 */}
+                <div className="text-center text-xs text-slate-400 pb-4">
+                  <p>{SAMPLE_CHECKUP_DETAIL.hospitalName}</p>
+                  <p>{SAMPLE_CHECKUP_DETAIL.hospitalAddress}</p>
+                  <p>Tel. {SAMPLE_CHECKUP_DETAIL.hospitalPhone}</p>
+                </div>
+              </div>
+            </div>
           </div>
         )}
 

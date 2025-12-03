@@ -251,13 +251,16 @@ export async function getMonthlyBookings(clinicId, year, month) {
       ? `${year + 1}-01-01`
       : `${year}-${String(month + 1).padStart(2, '0')}-01`;
 
-    // clinics 정보 가져오기
-    const clinicDoc = await getDoc(doc(db, 'clinics', clinicId));
-    const clinicData = clinicDoc.exists() ? clinicDoc.data() : null;
-    const clinicName = clinicData?.name;
+    console.log('🔍 [getMonthlyBookings] 입력:', {
+      clinicId,
+      year,
+      month,
+      startDate,
+      endDate
+    });
 
-    // 1. clinics ID로 직접 조회
-    const bookingsQuery1 = query(
+    // 🔥 단순화된 쿼리: clinicId만 사용
+    const bookingsQuery = query(
       collection(db, 'bookings'),
       where('clinicId', '==', clinicId),
       where('date', '>=', startDate),
@@ -266,48 +269,15 @@ export async function getMonthlyBookings(clinicId, year, month) {
       orderBy('time', 'asc')
     );
 
-    // 2. 병원명으로도 조회 (하위 호환)
-    let bookingsQuery2 = null;
-    if (clinicName) {
-      bookingsQuery2 = query(
-        collection(db, 'bookings'),
-        where('clinicName', '==', clinicName),
-        where('date', '>=', startDate),
-        where('date', '<', endDate)
-      );
-    }
+    const snapshot = await getDocs(bookingsQuery);
 
-    // 3. animalHospitalId로도 조회
-    let bookingsQuery3 = null;
-    if (clinicData?.animalHospitalId) {
-      bookingsQuery3 = query(
-        collection(db, 'bookings'),
-        where('animalHospitalId', '==', clinicData.animalHospitalId),
-        where('date', '>=', startDate),
-        where('date', '<', endDate)
-      );
-    }
+    console.log('📊 [getMonthlyBookings] 조회 결과:', {
+      count: snapshot.size,
+      clinicId,
+      dateRange: `${startDate} ~ ${endDate}`
+    });
 
-    // 병렬로 모든 쿼리 실행
-    const queries = [getDocs(bookingsQuery1)];
-    if (bookingsQuery2) queries.push(getDocs(bookingsQuery2));
-    if (bookingsQuery3) queries.push(getDocs(bookingsQuery3));
-    
-    const snapshots = await Promise.all(queries);
-    
-    // 중복 제거를 위한 Map 사용
-    const bookingMap = new Map();
-    
-    for (const snapshot of snapshots) {
-      for (const bookingDoc of snapshot.docs) {
-        if (!bookingMap.has(bookingDoc.id)) {
-          bookingMap.set(bookingDoc.id, bookingDoc);
-        }
-      }
-    }
-
-    // 배열로 변환 및 정렬
-    const bookings = Array.from(bookingMap.values()).map(doc => ({
+    const bookings = snapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
     }));
@@ -321,7 +291,7 @@ export async function getMonthlyBookings(clinicId, year, month) {
 
     return bookings;
   } catch (error) {
-    console.error('월별 예약 조회 실패:', error);
+    console.error('❌ [getMonthlyBookings] 월별 예약 조회 실패:', error);
     throw error;
   }
 }
@@ -476,6 +446,8 @@ export async function getPatientDetail(petId) {
  */
 export async function getClinicResults(clinicId, options = {}) {
   try {
+    console.log('🔍 [getClinicResults] 입력:', { clinicId, options });
+
     let resultsQuery = query(
       collection(db, 'clinicResults'),
       where('clinicId', '==', clinicId),
@@ -487,24 +459,34 @@ export async function getClinicResults(clinicId, options = {}) {
     }
 
     const snapshot = await getDocs(resultsQuery);
+    console.log('📊 [getClinicResults] 조회 결과:', { count: snapshot.size });
+
     const results = [];
 
     for (const resultDoc of snapshot.docs) {
       const resultData = resultDoc.data();
 
       // 펫 정보
-      const petDoc = await getDoc(doc(db, 'pets', resultData.petId));
+      let pet = null;
+      if (resultData.petId) {
+        try {
+          const petDoc = await getDoc(doc(db, 'pets', resultData.petId));
+          pet = petDoc.exists() ? petDoc.data() : null;
+        } catch (petError) {
+          console.warn('⚠️ [getClinicResults] 펫 정보 조회 실패:', petError.message);
+        }
+      }
 
       results.push({
         id: resultDoc.id,
         ...resultData,
-        pet: petDoc.exists() ? petDoc.data() : null
+        pet
       });
     }
 
     return results;
   } catch (error) {
-    console.error('진료 결과 조회 실패:', error);
+    console.error('❌ [getClinicResults] 진료 결과 조회 실패:', error);
     throw error;
   }
 }
@@ -572,34 +554,63 @@ export async function updateClinicInfo(clinicId, data) {
  * @returns {Promise<Object>} 통계 데이터
  */
 export async function getClinicStats(clinicId) {
-  try {
-    const today = getLocalDateString(); // 🔴 로컬 기준 YYYY-MM-DD
-    const thisMonth = today.substring(0, 7);
+  const today = getLocalDateString(); // 🔴 로컬 기준 YYYY-MM-DD
+  const thisMonth = today.substring(0, 7);
 
-    // 오늘 예약 수
+  console.log('🔍 [getClinicStats] 입력:', {
+    clinicId,
+    today,
+    thisMonth
+  });
+
+  let todayBookingsCount = 0;
+  let monthlyVisitsCount = 0;
+  let totalPatientsCount = 0;
+  let upcomingVaccCount = 0;
+
+  // 오늘 예약 수 (실패해도 계속 진행)
+  try {
     const todayBookingsQuery = query(
       collection(db, 'bookings'),
       where('clinicId', '==', clinicId),
       where('date', '==', today)
     );
     const todayBookingsSnapshot = await getDocs(todayBookingsQuery);
+    todayBookingsCount = todayBookingsSnapshot.size;
+    console.log('📊 [getClinicStats] 오늘 예약:', todayBookingsCount);
+  } catch (bookingError) {
+    console.warn('⚠️ [getClinicStats] 오늘 예약 조회 실패 (무시):', bookingError.message);
+  }
 
-    // 이번 달 진료 수
+  // 이번 달 진료 수 (실패해도 계속 진행)
+  try {
     const monthlyResultsQuery = query(
       collection(db, 'clinicResults'),
       where('clinicId', '==', clinicId),
       where('visitDate', '>=', `${thisMonth}-01`)
     );
     const monthlyResultsSnapshot = await getDocs(monthlyResultsQuery);
+    monthlyVisitsCount = monthlyResultsSnapshot.size;
+    console.log('📊 [getClinicStats] 이번 달 진료:', monthlyVisitsCount);
+  } catch (resultsError) {
+    console.warn('⚠️ [getClinicStats] 이번 달 진료 조회 실패 (무시):', resultsError.message);
+  }
 
-    // 총 환자 수
+  // 총 환자 수 (실패해도 계속 진행)
+  try {
     const patientsQuery = query(
       collection(db, 'clinicPatients'),
       where('clinicId', '==', clinicId)
     );
     const patientsSnapshot = await getDocs(patientsQuery);
+    totalPatientsCount = patientsSnapshot.size;
+    console.log('📊 [getClinicStats] 총 환자:', totalPatientsCount);
+  } catch (patientsError) {
+    console.warn('⚠️ [getClinicStats] 총 환자 조회 실패 (무시):', patientsError.message);
+  }
 
-    // 예정된 예방접종
+  // 예정된 예방접종 (실패해도 계속 진행)
+  try {
     const upcomingVaccQuery = query(
       collection(db, 'vaccinations'),
       where('clinicId', '==', clinicId),
@@ -607,17 +618,21 @@ export async function getClinicStats(clinicId) {
       where('scheduledDate', '>=', today)
     );
     const upcomingVaccSnapshot = await getDocs(upcomingVaccQuery);
-
-    return {
-      todayBookings: todayBookingsSnapshot.size,
-      monthlyVisits: monthlyResultsSnapshot.size,
-      totalPatients: patientsSnapshot.size,
-      upcomingVaccinations: upcomingVaccSnapshot.size
-    };
-  } catch (error) {
-    console.error('통계 조회 실패:', error);
-    throw error;
+    upcomingVaccCount = upcomingVaccSnapshot.size;
+    console.log('📊 [getClinicStats] 예정 예방접종:', upcomingVaccCount);
+  } catch (vaccError) {
+    console.warn('⚠️ [getClinicStats] 예방접종 조회 실패 (무시):', vaccError.message);
   }
+
+  const stats = {
+    todayBookings: todayBookingsCount,
+    monthlyVisits: monthlyVisitsCount,
+    totalPatients: totalPatientsCount,
+    upcomingVaccinations: upcomingVaccCount
+  };
+
+  console.log('✅ [getClinicStats] 최종 통계:', stats);
+  return stats;
 }
 
 // ============================================

@@ -964,7 +964,7 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-200 via-sky-100 to-blue-200">
+    <div className="min-h-screen bg-slate-100">
       {/* PC 레이아웃 (임시 비활성화) */}
       <div className="hidden">
         {/* 좌측: 모바일 화면 미리보기 */}
@@ -973,10 +973,14 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
             {/* 모바일 컨텐츠 */}
             <div className="h-full overflow-y-auto overflow-x-hidden bg-slate-50 pb-20">
               {/* Header - 회사 로고 가운데 배치 */}
-              <header className="bg-gradient-to-r from-sky-400 to-sky-500 text-white px-4 pt-4 pb-4 shadow-lg">
+              <header className="bg-gradient-to-r from-sky-500 to-sky-600 text-white px-4 pt-4 pb-4 shadow-lg">
                 <div className="flex items-center justify-center">
                   <div className="w-9 h-9 bg-white rounded-lg flex items-center justify-center shadow-md flex-shrink-0">
-                    <span className="text-xl">🐾</span>
+                    <img
+                      src={`${import.meta.env.BASE_URL}icon/login/logo.png`}
+                      alt="PetMedical.AI"
+                      className="w-6 h-6 object-contain"
+                    />
                   </div>
                   <div className="text-center ml-2">
                     <h1 className="text-xl font-bold tracking-tight">PetMedical.AI</h1>
@@ -993,7 +997,7 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
                     <p className="text-sm text-slate-500 mb-4">사용자님만의 반려동물 정보를 등록하면 맞춤형 건강을 시작하세요</p>
                     <button
                       onClick={() => onNavigate('profile-registration')}
-                      className="w-full py-3 bg-gradient-to-r from-sky-400 to-sky-500 text-white font-bold rounded-xl hover:shadow-lg transition-all"
+                      className="w-full py-3 bg-gradient-to-r from-sky-500 to-sky-600 text-white font-bold rounded-xl hover:shadow-lg transition-all"
                     >
                       반려동물 등록하기
                     </button>
@@ -1039,27 +1043,27 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
 
                         <div className="flex-1 flex flex-col justify-between py-1">
                           <div className="flex flex-col items-center justify-center text-center w-full">
-                            <p className="text-base font-bold text-gray-800 w-full">AI 전문 의료진 24시간 대기</p>
-                            <p className="text-base font-bold text-gray-800 mt-1 w-full">{petData?.petName || petData?.name || '반려동물'} 지켜줄게요 ❤️</p>
-                            <p className="text-base font-bold text-sky-700 mt-2 w-full">
+                            <p className="text-lg font-display font-bold text-gray-900 w-full">AI 전문 의료진 24시간 대기</p>
+                            <p className="text-lg font-display font-bold text-gray-900 mt-1 w-full">{petData?.petName || petData?.name || '반려동물'} 지켜줄게요 ❤️</p>
+                            <p className="text-base font-semibold text-sky-600 mt-2 w-full">
                               오늘도 든든한 케어 시작!
                             </p>
                           </div>
 
                           <div className="flex items-center gap-1.5 flex-wrap mt-2">
-                            <span className="text-[11px] text-gray-600 font-medium bg-white/80 px-2 py-0.5 rounded-full">
+                            <span className="text-[11px] text-sky-700 font-semibold bg-sky-100 px-2.5 py-1 rounded-full border border-sky-200">
                               {getSpeciesDisplay()}
                             </span>
                             {getSexDisplay() && (
-                              <span className="text-[11px] text-gray-600 font-medium bg-white/80 px-2 py-0.5 rounded-full">
+                              <span className="text-[11px] text-sky-700 font-semibold bg-sky-100 px-2.5 py-1 rounded-full border border-sky-200">
                                 {getSexDisplay()}
                               </span>
                             )}
-                            <span className="text-[11px] text-gray-600 font-medium bg-white/80 px-2 py-0.5 rounded-full">
+                            <span className="text-[11px] text-sky-700 font-semibold bg-sky-100 px-2.5 py-1 rounded-full border border-sky-200">
                               {calculateAge(petData.birthDate)}
                             </span>
                             {todayWeight && (
-                              <span className="text-[11px] text-gray-600 font-medium bg-white/80 px-2 py-0.5 rounded-full">
+                              <span className="text-[11px] text-sky-700 font-semibold bg-sky-100 px-2.5 py-1 rounded-full border border-sky-200">
                                 {todayWeight}kg
                               </span>
                             )}
@@ -1075,26 +1079,21 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
 
                       <button
                         onClick={() => onNavigate('symptom-input')}
-                        className="w-full mt-3 bg-gradient-to-r from-sky-400 to-sky-500 text-white font-bold text-sm py-3 rounded-xl shadow-md hover:shadow-lg transition-all"
+                        className="w-full mt-3 bg-gradient-to-r from-sky-500 to-sky-600 text-white font-bold text-sm py-3 rounded-xl shadow-md hover:shadow-lg transition-all"
                       >
                         PetMedical.AI 종합의료센터 바로 방문 &gt;
                       </button>
                     </div>
 
                     {/* AI 건강 문진 카드 */}
-                    <div className="bg-amber-50 rounded-2xl p-4 shadow-lg border-2 border-amber-200 relative overflow-hidden mb-4">
-                      <div className="relative flex flex-col items-center text-center gap-2">
-                        <div className="w-12 h-12 flex items-center justify-center">
-                          <span className="text-3xl">🤖</span>
-                        </div>
-                        <div>
-                          <h3 className="text-gray-800 font-bold text-base">AI 건강 문진</h3>
-                          <p className="text-gray-600 text-xs">{petData?.petName || petData?.name || '반려동물'} 건강기록 주요알림</p>
-                        </div>
+                    <div className="bg-amber-50 rounded-2xl p-3 shadow-lg border-2 border-amber-200 relative overflow-hidden mb-4">
+                      <div className="relative flex items-center justify-center gap-2 mb-2">
+                        <span className="text-2xl">🤖</span>
+                        <h3 className="text-gray-900 font-display font-bold text-base">AI 건강 문진</h3>
                       </div>
                       <button
                         onClick={() => onNavigate('ai-consultation')}
-                        className="w-full mt-3 bg-gradient-to-r from-amber-400 to-yellow-500 text-gray-900 font-bold text-sm py-2.5 rounded-xl shadow-md hover:shadow-lg hover:scale-[1.02] transition-all"
+                        className="w-full bg-gradient-to-r from-amber-400 to-yellow-500 text-gray-900 font-bold text-sm py-2 rounded-xl shadow-md hover:shadow-lg hover:scale-[1.02] transition-all"
                       >
                         7일 케어기록으로 AI 문진하기 &gt;
                       </button>
@@ -1102,8 +1101,8 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
 
                     {/* 케어 주요 알림 섹션 */}
                     <div className="mb-4">
-                      <div className="flex flex-col items-center mb-3">
-                        <div className="flex items-center gap-2 mb-1">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-2">
                           <span className="text-lg">🔔</span>
                           <h3 className="text-base font-bold text-gray-800">{petData?.petName || petData?.name || '반려동물'} 케어 주요알림</h3>
                         </div>
@@ -1116,29 +1115,30 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
                       </div>
 
                       <div className="bg-white rounded-2xl p-4 shadow-lg border border-gray-200">
-                        <div className="flex items-center gap-3 py-3 border-b border-gray-100">
+                        <button
+                          onClick={() => {
+                            setCurrentTab('mypage');
+                            // MyPage의 bookings 탭으로 이동하기 위해 localStorage에 저장
+                            localStorage.setItem('mypage_initialTab', 'bookings');
+                            // 컴포넌트가 마운트된 후 탭 변경을 위해 약간의 지연
+                            setTimeout(() => {
+                              const event = new CustomEvent('mypage-set-tab', { detail: 'bookings' });
+                              window.dispatchEvent(event);
+                            }, 100);
+                          }}
+                          className="w-full flex items-center gap-3 py-3 border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer"
+                        >
                           <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center flex-shrink-0">
                             <span className="text-2xl">📅</span>
                           </div>
-                          <div className="flex-1">
+                          <div className="flex-1 text-left">
                             <h4 className="text-sm font-bold text-gray-800 mb-0.5">병원 예약일</h4>
                             <p className="text-xs text-gray-500">다음 진료: 2025년 12월 15일</p>
                           </div>
                           <span className="text-gray-400 text-lg">&gt;</span>
-                        </div>
+                        </button>
 
                         <div className="flex items-center gap-3 py-3 border-b border-gray-100">
-                          <div className="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center flex-shrink-0">
-                            <span className="text-2xl">💉</span>
-                          </div>
-                          <div className="flex-1">
-                            <h4 className="text-sm font-bold text-gray-800 mb-0.5">접종 예정</h4>
-                            <p className="text-xs text-gray-500">광견병 백신 (2주 후)</p>
-                          </div>
-                          <span className="text-gray-400 text-lg">&gt;</span>
-                        </div>
-
-                        <div className="flex items-center gap-3 py-3">
                           <div className="w-12 h-12 bg-orange-50 rounded-xl flex items-center justify-center flex-shrink-0">
                             <span className="text-2xl">⚠️</span>
                           </div>
@@ -1220,7 +1220,7 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
                     <p className="text-gray-500 mb-6">맞춤형 AI 건강관리 서비스를 시작하세요</p>
                     <button
                       onClick={() => onNavigate('profile-registration')}
-                      className="px-8 py-3 bg-gradient-to-r from-sky-400 to-sky-500 text-white font-bold rounded-xl hover:shadow-lg transition-all"
+                      className="px-8 py-3 bg-gradient-to-r from-sky-500 to-sky-600 text-white font-bold rounded-xl hover:shadow-lg transition-all"
                     >
                       반려동물 등록하기
                     </button>
@@ -1232,7 +1232,7 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
                   <div className="grid grid-cols-2 gap-4">
                     <button
                       onClick={() => onNavigate('symptom-input')}
-                      className="bg-gradient-to-br from-sky-400 to-sky-500 text-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all text-left"
+                      className="bg-gradient-to-br from-sky-500 to-sky-600 text-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all text-left"
                     >
                       <span className="text-3xl mb-3 block">🏥</span>
                       <h3 className="text-lg font-bold">AI 종합진료센터</h3>
@@ -1261,20 +1261,24 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
                         </button>
                       </div>
                       <div className="space-y-3">
-                        <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-xl">
+                        <button
+                          onClick={() => {
+                            setCurrentTab('mypage');
+                            localStorage.setItem('mypage_initialTab', 'bookings');
+                            setTimeout(() => {
+                              const event = new CustomEvent('mypage-set-tab', { detail: 'bookings' });
+                              window.dispatchEvent(event);
+                            }, 100);
+                          }}
+                          className="w-full flex items-center gap-3 p-3 bg-blue-50 rounded-xl hover:bg-blue-100 transition-colors cursor-pointer text-left"
+                        >
                           <span className="text-2xl">📅</span>
-                          <div>
+                          <div className="flex-1">
                             <p className="font-medium text-gray-900">병원 예약일</p>
                             <p className="text-sm text-gray-500">다음 진료: 2025년 12월 15일</p>
                           </div>
-                        </div>
-                        <div className="flex items-center gap-3 p-3 bg-green-50 rounded-xl">
-                          <span className="text-2xl">💉</span>
-                          <div>
-                            <p className="font-medium text-gray-900">접종 예정</p>
-                            <p className="text-sm text-gray-500">광견병 백신 (2주 후)</p>
-                          </div>
-                        </div>
+                          <span className="text-gray-400 text-lg">&gt;</span>
+                        </button>
                         <div className="flex items-center gap-3 p-3 bg-orange-50 rounded-xl">
                           <span className="text-2xl">⚠️</span>
                           <div>
@@ -1341,7 +1345,7 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
                           className={`w-full py-3 rounded-xl font-bold text-sm transition-all ${
                             careSaved
                               ? 'bg-green-500 text-white'
-                              : 'bg-gradient-to-r from-sky-400 to-sky-500 text-white hover:shadow-lg'
+                              : 'bg-gradient-to-r from-sky-500 to-sky-600 text-white hover:shadow-lg'
                           }`}
                         >
                           {careSaved ? '저장 완료!' : `오늘 ${petData?.petName || petData?.name || '반려동물'} 케어 완료`}
@@ -1360,16 +1364,20 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
       <div className="md:flex md:items-center md:justify-center md:p-8 md:min-h-screen">
         {/* 모바일 프레임 (태블릿에서만 보임) */}
         <div className="hidden md:block fixed inset-0 pointer-events-none">
-          <div className="absolute inset-0 bg-gradient-to-br from-slate-200 via-sky-100 to-blue-200"></div>
+          <div className="absolute inset-0 bg-slate-100"></div>
         </div>
 
         <div className="relative md:w-[430px] md:h-[932px] md:rounded-[3rem] md:shadow-2xl md:border-8 md:border-gray-800 overflow-hidden">
           <div className="h-full overflow-y-auto overflow-x-hidden bg-slate-50 pb-20">
       {/* Header - 회사 로고 가운데 배치 */}
-      <header className="bg-gradient-to-r from-sky-400 to-sky-500 text-white px-4 pt-4 pb-4 shadow-lg">
+      <header className="bg-gradient-to-r from-sky-500 to-sky-600 text-white px-4 pt-4 pb-4 shadow-lg">
         <div className="flex items-center justify-center">
           <div className="w-9 h-9 bg-white rounded-lg flex items-center justify-center shadow-md flex-shrink-0">
-            <span className="text-xl">🐾</span>
+            <img
+              src={`${import.meta.env.BASE_URL}icon/login/logo.png`}
+              alt="PetMedical.AI"
+              className="w-6 h-6 object-contain"
+            />
           </div>
           <div className="text-center ml-2">
             <h1 className="text-xl font-bold tracking-tight">PetMedical.AI</h1>
@@ -1386,7 +1394,7 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
             <p className="text-sm text-slate-500 mb-4">사용자님만의 반려동물 정보를 등록하면 맞춤형 건강을 시작하세요</p>
             <button
               onClick={() => onNavigate('profile-registration')}
-              className="w-full py-3 bg-gradient-to-r from-sky-400 to-sky-500 text-white font-bold rounded-xl hover:shadow-lg transition-all"
+              className="w-full py-3 bg-gradient-to-r from-sky-500 to-sky-600 text-white font-bold rounded-xl hover:shadow-lg transition-all"
             >
               반려동물 등록하기
             </button>
@@ -1399,11 +1407,11 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
 
               <div className="relative flex items-stretch gap-3">
                 {/* 캐릭터 이미지 - 세로로 길게, 가로 좁게 */}
-                <div className="flex-shrink-0 w-24 h-36 bg-white/80 rounded-2xl shadow-md overflow-hidden border-2 border-white">
+                <div className="flex-shrink-0 w-24 h-36 bg-amber-50 rounded-2xl shadow-md overflow-hidden border-2 border-white flex items-center justify-center">
                   <img
                     src={getMainCharacterImagePath()}
                     alt={petData?.petName || '반려동물'}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-contain"
                     style={{ objectPosition: 'center', display: 'block' }}
                     onError={(e) => {
                       // 무한 루프 방지: 이미 한 번 시도했으면 더 이상 시도하지 않음
@@ -1431,35 +1439,35 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
                   />
                 </div>
 
-                <div className="flex-1 flex flex-col justify-between py-1">
+                <div className="flex-1 flex flex-col justify-between py-1 min-w-0">
                   <div className="flex flex-col items-center justify-center text-center w-full">
-                    <p className="text-base font-bold text-gray-800 w-full">AI 전문 의료진 24시간 대기</p>
-                    <p className="text-base font-bold text-gray-800 mt-1 w-full">{petData?.petName || petData?.name || '반려동물'} 지켜줄게요 ❤️</p>
-                    <p className="text-base font-bold text-sky-700 mt-2 w-full">
+                    <p className="text-sm sm:text-base font-display font-bold text-gray-900 w-full leading-tight">AI 전문 의료진 24시간 대기</p>
+                    <p className="text-sm sm:text-base font-display font-bold text-gray-900 mt-1 w-full leading-tight truncate">{petData?.petName || petData?.name || '반려동물'} 지켜줄게요 ❤️</p>
+                    <p className="text-xs sm:text-sm font-semibold text-sky-600 mt-2 w-full">
                       오늘도 든든한 케어 시작!
                     </p>
                   </div>
 
-                  <div className="flex items-center gap-1.5 flex-wrap mt-2">
-                    <span className="text-[11px] text-gray-600 font-medium bg-white/80 px-2 py-0.5 rounded-full">
+                  <div className="flex items-center gap-1 flex-wrap mt-2 justify-center">
+                    <span className="text-[10px] sm:text-[11px] text-sky-700 font-semibold bg-sky-100 px-2 py-0.5 rounded-full border border-sky-200">
                       {getSpeciesDisplay()}
                     </span>
                     {getSexDisplay() && (
-                      <span className="text-[11px] text-gray-600 font-medium bg-white/80 px-2 py-0.5 rounded-full">
+                      <span className="text-[10px] sm:text-[11px] text-sky-700 font-semibold bg-sky-100 px-2 py-0.5 rounded-full border border-sky-200">
                         {getSexDisplay()}
                       </span>
                     )}
-                    <span className="text-[11px] text-gray-600 font-medium bg-white/80 px-2 py-0.5 rounded-full">
+                    <span className="text-[10px] sm:text-[11px] text-sky-700 font-semibold bg-sky-100 px-2 py-0.5 rounded-full border border-sky-200">
                       {calculateAge(petData.birthDate)}
                     </span>
                     {todayWeight && (
-                      <span className="text-[11px] text-gray-600 font-medium bg-white/80 px-2 py-0.5 rounded-full">
+                      <span className="text-[10px] sm:text-[11px] text-sky-700 font-semibold bg-sky-100 px-2 py-0.5 rounded-full border border-sky-200">
                         {todayWeight}kg
                       </span>
                     )}
                     <button
                       onClick={() => onNavigate('profile-list')}
-                      className="px-3 py-1 bg-sky-500 text-white text-[11px] font-bold rounded-full shadow-md hover:bg-sky-600 transition-colors"
+                      className="px-2 py-0.5 bg-sky-500 text-white text-[10px] sm:text-[11px] font-bold rounded-full shadow-md hover:bg-sky-600 transition-colors"
                     >
                       변경
                     </button>
@@ -1469,26 +1477,21 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
 
               <button
                 onClick={() => onNavigate('symptom-input')}
-                className="w-full mt-3 bg-gradient-to-r from-sky-400 to-sky-500 text-white font-bold text-sm py-3 rounded-xl shadow-md hover:shadow-lg transition-all"
+                className="w-full mt-3 bg-gradient-to-r from-sky-500 to-sky-600 text-white font-bold text-xs sm:text-sm py-2.5 sm:py-3 rounded-xl shadow-md hover:shadow-lg transition-all"
               >
                 PetMedical.AI 종합의료센터 바로 방문 &gt;
               </button>
             </div>
 
             {/* AI 건강 문진 카드 - 컴팩트 레이아웃 */}
-            <div className="bg-amber-50 rounded-2xl p-4 shadow-lg border-2 border-amber-200 relative overflow-hidden mb-4">
-              <div className="relative flex flex-col items-center text-center gap-2">
-                <div className="w-12 h-12 flex items-center justify-center">
-                  <span className="text-3xl">🤖</span>
-                </div>
-                <div>
-                  <h3 className="text-gray-800 font-bold text-base">AI 건강 문진</h3>
-                  <p className="text-gray-600 text-xs">{petData?.petName || petData?.name || '반려동물'} 건강기록 주요알림</p>
-                </div>
+            <div className="bg-amber-50 rounded-2xl p-3 shadow-lg border-2 border-amber-200 relative overflow-hidden mb-4">
+              <div className="relative flex items-center justify-center gap-2 mb-2">
+                <span className="text-2xl">🤖</span>
+                <h3 className="text-gray-800 font-bold text-base">AI 건강 문진</h3>
               </div>
               <button
                 onClick={() => onNavigate('ai-consultation')}
-                className="w-full mt-3 bg-gradient-to-r from-amber-400 to-yellow-500 text-gray-900 font-bold text-sm py-2.5 rounded-xl shadow-md hover:shadow-lg hover:scale-[1.02] transition-all"
+                className="w-full bg-gradient-to-r from-amber-400 to-yellow-500 text-gray-900 font-bold text-sm py-2 rounded-xl shadow-md hover:shadow-lg hover:scale-[1.02] transition-all"
               >
                 7일 케어기록으로 AI 문진하기 &gt;
               </button>
@@ -1496,8 +1499,8 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
 
             {/* 케어 주요 알림 섹션 */}
             <div className="mb-4">
-              <div className="flex flex-col items-center mb-3">
-                <div className="flex items-center gap-2 mb-1">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
                   <span className="text-lg">🔔</span>
                   <h3 className="text-base font-bold text-gray-800">{petData?.petName || petData?.name || '반려동물'} 케어 주요알림</h3>
                 </div>
@@ -1518,18 +1521,6 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
                   <div className="flex-1">
                     <h4 className="text-sm font-bold text-gray-800 mb-0.5">병원 예약일</h4>
                     <p className="text-xs text-gray-500">다음 진료: 2025년 12월 15일</p>
-                  </div>
-                  <span className="text-gray-400 text-lg">&gt;</span>
-                </div>
-
-                {/* 접종 예정 */}
-                <div className="flex items-center gap-3 py-3 border-b border-gray-100">
-                  <div className="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center flex-shrink-0">
-                    <span className="text-2xl">💉</span>
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="text-sm font-bold text-gray-800 mb-0.5">접종 예정</h4>
-                    <p className="text-xs text-gray-500">광견병 백신 (2주 후)</p>
                   </div>
                   <span className="text-gray-400 text-lg">&gt;</span>
                 </div>
@@ -1705,7 +1696,7 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
                 className={`w-full py-3 rounded-xl font-bold text-sm transition-all ${
                   careSaved
                     ? 'bg-green-500 text-white'
-                    : 'bg-gradient-to-r from-sky-400 to-sky-500 text-white hover:shadow-lg'
+                    : 'bg-gradient-to-r from-sky-500 to-sky-600 text-white hover:shadow-lg'
                 }`}
               >
                 {careSaved ? '저장 완료!' : `오늘 ${petData?.petName || petData?.name || '반려동물'} 케어 완료`}
@@ -1933,22 +1924,22 @@ function SymptomInput({ petData, onComplete, onBack, onRegister }) {
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Header */}
-      <div className="bg-white px-4 py-4 border-b border-slate-100">
-        <div className="flex items-center gap-3 mb-2">
+      <div className="bg-white px-3 sm:px-4 py-3 sm:py-4 border-b border-slate-100">
+        <div className="flex items-center gap-2 sm:gap-3 mb-1 sm:mb-2">
           <button onClick={onBack} className="text-slate-600">
-            <span className="text-sm">← 돌아가기</span>
+            <span className="text-xs sm:text-sm">← 돌아가기</span>
           </button>
         </div>
-        <h1 className="text-xl font-bold text-slate-900">AI 증상 진단</h1>
-        <p className="text-sm text-slate-500 mt-1">{petData.petName || petData.name || '반려동물'}의 증상을 알려주세요</p>
+        <h1 className="text-lg sm:text-xl font-bold text-slate-900">AI 증상 진단</h1>
+        <p className="text-xs sm:text-sm text-slate-500 mt-0.5 sm:mt-1">{petData.petName || petData.name || '반려동물'}의 증상을 알려주세요</p>
       </div>
 
-      <div className="px-4 pt-4 pb-24 space-y-4">
+      <div className="px-3 sm:px-4 pt-3 sm:pt-4 pb-24 space-y-3 sm:space-y-4">
         {/* 진료과목 선택 */}
-        <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100">
-          <h3 className="font-bold text-slate-800 mb-1 text-sm">어디가 불편해 보이나요? *</h3>
-          <p className="text-xs text-slate-500 mb-3">진료과목을 선택해주세요</p>
-          <div className="grid grid-cols-2 gap-2">
+        <div className="bg-white rounded-2xl p-3 sm:p-4 shadow-sm border border-slate-100">
+          <h3 className="font-bold text-slate-800 mb-0.5 sm:mb-1 text-xs sm:text-sm">어디가 불편해 보이나요? *</h3>
+          <p className="text-[10px] sm:text-xs text-slate-500 mb-2 sm:mb-3">진료과목을 선택해주세요</p>
+          <div className="grid grid-cols-2 gap-1.5 sm:gap-2">
             {currentDepartments.map(dept => {
               const info = DEPARTMENT_INFO[dept] || { icon: '🏥', desc: '일반 진료' };
               const isSelected = selectedDepartment === dept;
@@ -1956,19 +1947,19 @@ function SymptomInput({ petData, onComplete, onBack, onRegister }) {
                 <button
                   key={dept}
                   onClick={() => handleDepartmentSelect(dept)}
-                  className={`p-3 rounded-xl text-left transition-all border-2 ${
+                  className={`p-2 sm:p-3 rounded-xl text-left transition-all border-2 ${
                     isSelected
                       ? 'bg-sky-50 border-sky-500'
                       : 'bg-white border-slate-200 hover:border-slate-300'
                   }`}
                 >
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-lg">{info.icon}</span>
-                    <span className={`font-bold text-sm ${isSelected ? 'text-sky-700' : 'text-slate-800'}`}>
+                  <div className="flex items-center gap-1.5 sm:gap-2 mb-0.5 sm:mb-1">
+                    <span className="text-base sm:text-lg">{info.icon}</span>
+                    <span className={`font-bold text-xs sm:text-sm ${isSelected ? 'text-sky-700' : 'text-slate-800'}`}>
                       {dept}
                     </span>
           </div>
-                  <p className={`text-xs ${isSelected ? 'text-sky-600' : 'text-slate-500'}`}>
+                  <p className={`text-[10px] sm:text-xs ${isSelected ? 'text-sky-600' : 'text-slate-500'} leading-tight`}>
                     {info.desc}
                   </p>
                 </button>
@@ -1979,17 +1970,17 @@ function SymptomInput({ petData, onComplete, onBack, onRegister }) {
 
         {/* 증상 선택 - 진료과목 선택 후 표시 */}
         {selectedDepartment && currentSymptoms.length > 0 && (
-          <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100">
-            <h3 className="font-bold text-slate-800 mb-1 text-sm">
+          <div className="bg-white rounded-2xl p-3 sm:p-4 shadow-sm border border-slate-100">
+            <h3 className="font-bold text-slate-800 mb-0.5 sm:mb-1 text-xs sm:text-sm">
               {selectedDepartment} 관련 증상
             </h3>
-            <p className="text-xs text-slate-500 mb-3">해당하는 증상을 모두 선택해주세요</p>
-            <div className="flex flex-wrap gap-2">
+            <p className="text-[10px] sm:text-xs text-slate-500 mb-2 sm:mb-3">해당하는 증상을 모두 선택해주세요</p>
+            <div className="flex flex-wrap gap-1.5 sm:gap-2">
               {currentSymptoms.map(symptom => (
                 <button
                   key={symptom}
                   onClick={() => toggleSymptom(symptom)}
-                  className={`px-3 py-2 rounded-xl text-sm font-medium transition-all border ${
+                  className={`px-2 sm:px-3 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-medium transition-all border ${
                     selectedSymptoms.includes(symptom)
                       ? 'bg-sky-500 text-white border-sky-500'
                       : 'bg-slate-50 text-slate-700 border-slate-200 hover:border-sky-300'
@@ -2000,8 +1991,8 @@ function SymptomInput({ petData, onComplete, onBack, onRegister }) {
               ))}
             </div>
             {selectedSymptoms.length > 0 && (
-              <div className="mt-3 p-3 bg-sky-50 rounded-xl">
-                <p className="text-xs text-sky-700 font-medium">
+              <div className="mt-2 sm:mt-3 p-2 sm:p-3 bg-sky-50 rounded-xl">
+                <p className="text-[10px] sm:text-xs text-sky-700 font-medium leading-relaxed">
                   ✓ 선택됨: {selectedSymptoms.join(', ')}
                 </p>
               </div>
@@ -2010,11 +2001,11 @@ function SymptomInput({ petData, onComplete, onBack, onRegister }) {
         )}
 
         {/* 증상 상세 설명 */}
-        <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100">
-          <h3 className="font-bold text-slate-800 mb-1 text-sm">증상 상세 설명</h3>
-          <p className="text-xs text-slate-500 mb-3">추가로 설명하고 싶은 내용이 있다면 적어주세요</p>
+        <div className="bg-white rounded-2xl p-3 sm:p-4 shadow-sm border border-slate-100">
+          <h3 className="font-bold text-slate-800 mb-0.5 sm:mb-1 text-xs sm:text-sm">증상 상세 설명</h3>
+          <p className="text-[10px] sm:text-xs text-slate-500 mb-2 sm:mb-3">추가로 설명하고 싶은 내용이 있다면 적어주세요</p>
           <textarea
-            className="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 min-h-[80px] text-sm resize-none"
+            className="w-full p-2.5 sm:p-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 min-h-[70px] sm:min-h-[80px] text-xs sm:text-sm resize-none"
             placeholder="예: 3일 전부터 밥을 잘 안 먹고, 자꾸 구석에 숨어요..."
             value={symptomText}
             onChange={(e) => setSymptomText(e.target.value)}
@@ -2022,23 +2013,23 @@ function SymptomInput({ petData, onComplete, onBack, onRegister }) {
         </div>
 
         {/* 사진 업로드 */}
-        <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100">
-          <h3 className="font-bold text-slate-800 mb-3 text-sm">증상 사진 첨부 (선택)</h3>
-          <div className="flex gap-3 overflow-x-auto pb-2">
+        <div className="bg-white rounded-2xl p-3 sm:p-4 shadow-sm border border-slate-100">
+          <h3 className="font-bold text-slate-800 mb-2 sm:mb-3 text-xs sm:text-sm">증상 사진 첨부 (선택)</h3>
+          <div className="flex gap-2 sm:gap-3 overflow-x-auto pb-2">
             {images.map((img, idx) => (
               <div key={idx} className="relative shrink-0">
-                <img src={img} alt={`증상 사진 ${idx + 1}`} className="w-20 h-20 object-cover rounded-xl" />
+                <img src={img} alt={`증상 사진 ${idx + 1}`} className="w-16 h-16 sm:w-20 sm:h-20 object-cover rounded-xl" />
                 <button
                   onClick={() => removeImage(idx)}
-                  className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full text-xs flex items-center justify-center"
+                  className="absolute -top-1.5 -right-1.5 sm:-top-2 sm:-right-2 w-5 h-5 sm:w-6 sm:h-6 bg-red-500 text-white rounded-full text-[10px] sm:text-xs flex items-center justify-center"
                 >
                   ✕
                 </button>
               </div>
             ))}
-            <label className="w-20 h-20 shrink-0 border-2 border-dashed border-slate-300 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:border-sky-500 hover:bg-sky-50 transition-all">
-              <span className="text-2xl text-slate-400">📷</span>
-              <span className="text-[10px] text-slate-400 mt-1">추가</span>
+            <label className="w-16 h-16 sm:w-20 sm:h-20 shrink-0 border-2 border-dashed border-slate-300 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:border-sky-500 hover:bg-sky-50 transition-all">
+              <span className="text-xl sm:text-2xl text-slate-400">📷</span>
+              <span className="text-[9px] sm:text-[10px] text-slate-400 mt-0.5 sm:mt-1">추가</span>
               <input
                 type="file"
                 accept="image/*"
@@ -2048,24 +2039,27 @@ function SymptomInput({ petData, onComplete, onBack, onRegister }) {
               />
             </label>
               </div>
-          <p className="text-xs text-slate-400 mt-2">피부, 눈, 귀 등 증상 부위 사진을 첨부하면 더 정확한 진단이 가능해요</p>
+          <p className="text-[10px] sm:text-xs text-slate-400 mt-1.5 sm:mt-2">피부, 눈, 귀 등 증상 부위 사진을 첨부하면 더 정확한 진단이 가능해요</p>
         </div>
       </div>
 
-      {/* Bottom Button */}
-      <div className="fixed bottom-16 left-0 right-0 bg-white/95 backdrop-blur-sm p-4 border-t border-slate-100">
-        <button 
+      {/* Bottom Button - AI 진료실 전용 확대 버튼 (하단 내비게이션바 숨김) */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-slate-100 p-4 sm:p-6 z-50">
+        <button
           onClick={handleSubmit}
           disabled={loading || (selectedSymptoms.length === 0 && !symptomText.trim() && images.length === 0)}
-          className="w-full bg-sky-500 text-white py-4 px-6 rounded-xl font-bold text-base disabled:opacity-50 disabled:cursor-not-allowed hover:bg-sky-600 transition-colors flex items-center justify-center gap-2 shadow-lg shadow-sky-500/30"
+          className="w-full bg-sky-500 text-white py-4 sm:py-6 px-6 sm:px-8 rounded-xl font-bold text-base sm:text-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-sky-600 active:bg-sky-700 transition-all flex items-center justify-center gap-2 sm:gap-3 shadow-lg shadow-sky-500/30 hover:shadow-xl hover:shadow-sky-500/40"
         >
           {loading ? (
             <>
-              <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              AI 분석 중...
+              <div className="w-5 h-5 sm:w-6 sm:h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              <span className="text-base sm:text-lg font-bold">AI 분석 중...</span>
             </>
           ) : (
-            'AI 분석하기'
+            <>
+              <span className="material-symbols-outlined text-xl sm:text-2xl">psychology</span>
+              <span className="text-base sm:text-lg font-bold">AI 분석하기</span>
+            </>
           )}
         </button>
       </div>
@@ -2264,6 +2258,12 @@ function MultiAgentDiagnosis({ petData, symptomData, onComplete, onBack, onDiagn
   const [additionalComment, setAdditionalComment] = useState(''); // 추가 코멘트
   const guardianResolveRef = useRef(null); // Promise resolve 함수 저장
 
+  // FAQ 선택 관련 상태
+  const [isFAQPhase, setIsFAQPhase] = useState(false); // FAQ 선택 단계
+  const [faqUIData, setFaqUIData] = useState(null); // FAQ UI 데이터
+  const [selectedFAQs, setSelectedFAQs] = useState([]); // 선택된 FAQ IDs
+  const faqResolveRef = useRef(null); // FAQ Promise resolve 함수 저장
+
   // 자동 스크롤: 메시지가 추가될 때마다 맨 아래로 스크롤
   useEffect(() => {
     if (messagesEndRef.current) {
@@ -2280,18 +2280,28 @@ function MultiAgentDiagnosis({ petData, symptomData, onComplete, onBack, onDiagn
         setMessages([]);
         setCurrentStep(0);
 
-        // 보호자 응답 대기 콜백 함수
-        const handleWaitForGuardianResponse = (questions) => {
+        // 보호자 응답 대기 콜백 함수 (질문 단계 또는 FAQ 단계)
+        const handleWaitForGuardianResponse = (data, phaseType = 'questions') => {
           return new Promise((resolve) => {
             if (!isMounted) {
-              resolve({});
+              resolve(phaseType === 'faq' ? [] : {});
               return;
             }
-            setGuardianQuestions(questions);
-            setGuardianResponses({});
-            setIsWaitingForGuardian(true);
-            setAdditionalComment('');
-            guardianResolveRef.current = resolve;
+
+            if (phaseType === 'faq') {
+              // FAQ 선택 단계
+              setFaqUIData(data);
+              setSelectedFAQs([]);
+              setIsFAQPhase(true);
+              faqResolveRef.current = resolve;
+            } else {
+              // 일반 질문 단계
+              setGuardianQuestions(data);
+              setGuardianResponses({});
+              setIsWaitingForGuardian(true);
+              setAdditionalComment('');
+              guardianResolveRef.current = resolve;
+            }
           });
         };
 
@@ -2336,18 +2346,36 @@ function MultiAgentDiagnosis({ petData, symptomData, onComplete, onBack, onDiagn
         if (!isMounted) return; // 컴포넌트가 언마운트되었으면 무시
 
         // 최종 진단서 표시
-        setTimeout(() => {
-          setDiagnosisResult(result.finalDiagnosis);
-          setShowResult(true);
+        console.log('[MultiAgentDiagnosis] 결과 수신:', result);
+        console.log('[MultiAgentDiagnosis] finalDiagnosis:', result?.finalDiagnosis);
+        
+        if (!result || !result.finalDiagnosis) {
+          console.error('[MultiAgentDiagnosis] 결과가 올바르지 않습니다:', result);
           setIsProcessing(false);
-          setChatMode(true);
-          
-          // 진단서 저장
-          saveDiagnosisToStorage(result.finalDiagnosis, currentUser?.uid);
-          
-          // 부모 컴포넌트에 진단 결과 전달
-          if (onDiagnosisResult) {
-            onDiagnosisResult(result.finalDiagnosis);
+          alert('진단 결과를 생성하는 중 오류가 발생했습니다. 다시 시도해주세요.');
+          return;
+        }
+
+        setTimeout(() => {
+          try {
+            setDiagnosisResult(result.finalDiagnosis);
+            setShowResult(true);
+            setIsProcessing(false);
+            setChatMode(true);
+            
+            // 진단서 저장
+            saveDiagnosisToStorage(result.finalDiagnosis, currentUser?.uid);
+            
+            // 부모 컴포넌트에 진단 결과 전달
+            if (onDiagnosisResult) {
+              onDiagnosisResult(result.finalDiagnosis);
+            }
+            
+            console.log('[MultiAgentDiagnosis] 진단서 표시 완료');
+          } catch (displayError) {
+            console.error('[MultiAgentDiagnosis] 진단서 표시 오류:', displayError);
+            setIsProcessing(false);
+            alert('진단서를 표시하는 중 오류가 발생했습니다.');
           }
         }, 1500);
 
@@ -2497,6 +2525,42 @@ function MultiAgentDiagnosis({ petData, symptomData, onComplete, onBack, onDiagn
 
     setIsWaitingForGuardian(false);
     setGuardianQuestions([]);
+  };
+
+  // FAQ 선택 핸들러
+  const handleFAQSelect = (faqId) => {
+    setSelectedFAQs(prev => {
+      if (prev.includes(faqId)) {
+        // 이미 선택된 경우 제거
+        return prev.filter(id => id !== faqId);
+      } else {
+        // 새로 선택
+        return [...prev, faqId];
+      }
+    });
+  };
+
+  // FAQ 선택 완료 핸들러
+  const handleFAQSubmit = () => {
+    // 선택된 FAQ가 없어도 진행 가능 (skip처럼 동작)
+    if (faqResolveRef.current) {
+      faqResolveRef.current(selectedFAQs.length > 0 ? selectedFAQs : ['skip']);
+      faqResolveRef.current = null;
+    }
+    setIsFAQPhase(false);
+    setFaqUIData(null);
+    setSelectedFAQs([]);
+  };
+
+  // FAQ 스킵 핸들러
+  const handleFAQSkip = () => {
+    if (faqResolveRef.current) {
+      faqResolveRef.current(['skip']);
+      faqResolveRef.current = null;
+    }
+    setIsFAQPhase(false);
+    setFaqUIData(null);
+    setSelectedFAQs([]);
   };
 
   const showFinalDiagnosis = (analysis, symptomText, hasImages) => {
@@ -3342,12 +3406,144 @@ ${userQuestion}
             </div>
           )}
 
+        {/* FAQ 선택 UI */}
+        {isFAQPhase && faqUIData && (
+          <div style={{
+            background: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)',
+            borderRadius: '16px',
+            padding: '20px',
+            margin: '12px 0',
+            border: '2px solid #22c55e',
+            boxShadow: '0 4px 12px rgba(34, 197, 94, 0.15)'
+          }}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              marginBottom: '16px'
+            }}>
+              <span style={{ fontSize: '24px' }}>📚</span>
+              <div>
+                <h3 style={{ margin: 0, fontSize: '16px', fontWeight: '700', color: '#166534' }}>
+                  {faqUIData.title}
+                </h3>
+                <p style={{ margin: '4px 0 0', fontSize: '13px', color: '#15803d' }}>
+                  {faqUIData.subtitle}
+                </p>
+              </div>
+            </div>
+
+            {/* FAQ 목록 */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '16px' }}>
+              {faqUIData.faqs && faqUIData.faqs.map((faq) => {
+                const isSelected = selectedFAQs.includes(faq.id);
+                return (
+                  <button
+                    key={faq.id}
+                    onClick={() => handleFAQSelect(faq.id)}
+                    style={{
+                      width: '100%',
+                      padding: '14px 16px',
+                      borderRadius: '12px',
+                      border: isSelected ? '2px solid #22c55e' : '2px solid #e2e8f0',
+                      background: isSelected ? 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)' : 'white',
+                      color: isSelected ? 'white' : '#1e293b',
+                      fontSize: '14px',
+                      fontWeight: isSelected ? '600' : '500',
+                      cursor: 'pointer',
+                      textAlign: 'left',
+                      transition: 'all 0.2s ease',
+                      boxShadow: isSelected ? '0 2px 8px rgba(34, 197, 94, 0.3)' : '0 1px 4px rgba(0,0,0,0.05)',
+                      display: 'flex',
+                      alignItems: 'flex-start',
+                      gap: '10px'
+                    }}
+                  >
+                    <span style={{
+                      width: '20px',
+                      height: '20px',
+                      borderRadius: '4px',
+                      border: isSelected ? 'none' : '2px solid #cbd5e1',
+                      background: isSelected ? 'white' : 'transparent',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0,
+                      marginTop: '2px'
+                    }}>
+                      {isSelected && <span style={{ color: '#22c55e', fontSize: '14px', fontWeight: 'bold' }}>✓</span>}
+                    </span>
+                    <div>
+                      <div style={{ marginBottom: '4px' }}>{faq.question}</div>
+                      {faq.category && (
+                        <span style={{
+                          fontSize: '11px',
+                          padding: '2px 8px',
+                          borderRadius: '10px',
+                          background: isSelected ? 'rgba(255,255,255,0.3)' : '#f1f5f9',
+                          color: isSelected ? 'white' : '#64748b'
+                        }}>
+                          {faq.category}
+                        </span>
+                      )}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* 버튼 영역 */}
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <button
+                onClick={handleFAQSkip}
+                style={{
+                  flex: 1,
+                  padding: '12px',
+                  borderRadius: '12px',
+                  border: '2px solid #e2e8f0',
+                  background: 'white',
+                  color: '#64748b',
+                  fontSize: '13px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                {faqUIData.skipOption?.label || '건너뛰기'}
+              </button>
+              <button
+                onClick={handleFAQSubmit}
+                disabled={selectedFAQs.length === 0}
+                style={{
+                  flex: 2,
+                  padding: '12px',
+                  borderRadius: '12px',
+                  border: 'none',
+                  background: selectedFAQs.length > 0
+                    ? 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)'
+                    : '#e2e8f0',
+                  color: selectedFAQs.length > 0 ? 'white' : '#94a3b8',
+                  fontSize: '13px',
+                  fontWeight: '700',
+                  cursor: selectedFAQs.length > 0 ? 'pointer' : 'not-allowed',
+                  transition: 'all 0.2s ease',
+                  boxShadow: selectedFAQs.length > 0 ? '0 4px 12px rgba(34, 197, 94, 0.3)' : 'none'
+                }}
+              >
+                {selectedFAQs.length > 0
+                  ? `선택한 질문 ${selectedFAQs.length}개 확인하기`
+                  : '질문을 선택해주세요'}
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* 자동 스크롤을 위한 참조 지점 */}
         <div ref={messagesEndRef} />
         </div>
 
       {/* 하단 영역 */}
-      {!showResult && !isWaitingForGuardian && (
+      {!showResult && !isWaitingForGuardian && !isFAQPhase && (
         <div style={{ marginTop: 'auto' }}>
           {/* AI 진단 중 메시지 */}
           {isProcessing && (
@@ -4200,7 +4396,6 @@ function HomeTreatmentGuide({ petData, diagnosisResult, onBack }) {
       const updated = prev.map(item =>
         item.id === id ? { ...item, checked: !item.checked } : item
       );
-      // 자동 저장
       try {
         localStorage.setItem(CHECKLIST_KEY, JSON.stringify(updated));
       } catch (e) {
@@ -4213,10 +4408,10 @@ function HomeTreatmentGuide({ petData, diagnosisResult, onBack }) {
   const handleSaveChecklist = () => {
     try {
       localStorage.setItem(CHECKLIST_KEY, JSON.stringify(checklist));
-      setSaveMessage('✅ 체크리스트가 저장되었습니다!');
+      setSaveMessage('체크리스트가 저장되었습니다!');
       setTimeout(() => setSaveMessage(''), 2000);
     } catch (e) {
-      setSaveMessage('❌ 저장에 실패했습니다.');
+      setSaveMessage('저장에 실패했습니다.');
       setTimeout(() => setSaveMessage(''), 2000);
     }
   };
@@ -4260,99 +4455,451 @@ function HomeTreatmentGuide({ petData, diagnosisResult, onBack }) {
                        diagnosisResult?.emergency === 'medium' ? '5-7일' : '병원 치료 후 확인';
 
   return (
-    <div className="treatment-container">
-      <div className="treatment-header">
-        <button className="back-btn" onClick={onBack}>← 뒤로</button>
-        <h1>🏠 직접 치료 가이드</h1>
+    <div style={{
+      minHeight: '100vh',
+      background: '#f8fafc',
+      display: 'flex',
+      flexDirection: 'column'
+    }}>
+      {/* 헤더 */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: '16px 20px',
+        background: 'white',
+        borderBottom: '1px solid #e2e8f0'
+      }}>
+        <button
+          onClick={onBack}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            color: '#0891b2',
+            fontWeight: '600',
+            fontSize: '15px',
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer'
+          }}
+        >
+          ← 이전으로
+        </button>
+        <button
+          onClick={onBack}
+          style={{
+            color: '#9ca3af',
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            fontSize: '24px',
+            lineHeight: 1
+          }}
+        >
+          ×
+        </button>
       </div>
 
-      <div className="treatment-content">
-        <div className="treatment-intro">
-          <div className="pet-info-card">
-            <span className="pet-icon-large">{petData.species === 'dog' ? '🐕' : '🐈'}</span>
+      {/* 스크롤 가능한 본문 */}
+      <div style={{
+        flex: 1,
+        overflowY: 'auto',
+        padding: '16px',
+        paddingBottom: '100px'
+      }}>
+        {/* 타이틀 헤더 카드 */}
+        <div style={{
+          background: 'linear-gradient(135deg, #22d3ee 0%, #06b6d4 100%)',
+          borderRadius: '16px',
+          padding: '20px',
+          marginBottom: '16px',
+          color: 'white',
+          boxShadow: '0 4px 12px rgba(6, 182, 212, 0.3)'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+            <span style={{ fontSize: '32px' }}>{petData?.species === 'dog' ? '🐕' : '🐈'}</span>
             <div>
-              <h2>{petData?.petName || petData?.name || '반려동물'}의 치료 가이드</h2>
+              <h2 style={{
+                fontSize: '20px',
+                fontWeight: 'bold',
+                margin: '0 0 4px 0',
+                lineHeight: '1.3'
+              }}>
+                {petData?.petName || petData?.name || '반려동물'}의 치료 가이드
+              </h2>
               {diagnosisResult && (
-                <p className="diagnosis-summary">{diagnosisResult.diagnosis}</p>
+                <p style={{
+                  fontSize: '13px',
+                  opacity: 0.9,
+                  margin: 0
+                }}>
+                  {diagnosisResult.diagnosis}
+                </p>
               )}
             </div>
           </div>
         </div>
 
-        <div className="treatment-steps">
-          <h3>📋 단계별 치료 방법</h3>
-          {steps.map((item, index) => (
-            <div key={index} className="treatment-step-card">
-              <div className="step-number">{item.step}</div>
-              <div className="step-content">
-                <h4>{item.title}</h4>
-                <p>{item.description}</p>
+        {/* 단계별 치료 방법 */}
+        <div style={{
+          background: 'white',
+          borderRadius: '16px',
+          padding: '20px',
+          marginBottom: '16px',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.06)'
+        }}>
+          <h3 style={{
+            fontSize: '16px',
+            fontWeight: 'bold',
+            color: '#1e293b',
+            margin: '0 0 16px 0',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px'
+          }}>
+            <span style={{
+              width: '22px',
+              height: '22px',
+              borderRadius: '50%',
+              background: '#22d3ee',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+              <span style={{ color: 'white', fontSize: '12px' }}>📋</span>
+            </span>
+            단계별 치료 방법
+          </h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {steps.map((item, index) => (
+              <div key={index} style={{
+                display: 'flex',
+                alignItems: 'flex-start',
+                gap: '12px',
+                background: 'linear-gradient(135deg, #ecfeff 0%, #f0f9ff 100%)',
+                padding: '14px',
+                borderRadius: '12px',
+                border: '1px solid #a5f3fc'
+              }}>
+                <div style={{
+                  width: '28px',
+                  height: '28px',
+                  borderRadius: '50%',
+                  background: 'linear-gradient(135deg, #22d3ee, #06b6d4)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'white',
+                  fontSize: '14px',
+                  fontWeight: 'bold',
+                  flexShrink: 0
+                }}>
+                  {item.step}
+                </div>
+                <div style={{ flex: 1 }}>
+                  <h4 style={{
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    color: '#0e7490',
+                    margin: '0 0 4px 0'
+                  }}>
+                    {item.title}
+                  </h4>
+                  <p style={{
+                    fontSize: '13px',
+                    color: '#475569',
+                    lineHeight: '1.5',
+                    margin: 0
+                  }}>
+                    {item.description}
+                  </p>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
 
         {diagnosisResult && (
           <>
-            <div className="treatment-info">
-              <h3>⏰ 예상 회복 기간</h3>
-              <p className="recovery-time">{recoveryTime}</p>
+            {/* 예상 회복 기간 */}
+            <div style={{
+              background: 'white',
+              borderRadius: '16px',
+              padding: '20px',
+              marginBottom: '16px',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+              textAlign: 'center'
+            }}>
+              <h3 style={{
+                fontSize: '14px',
+                fontWeight: '600',
+                color: '#64748b',
+                margin: '0 0 8px 0'
+              }}>
+                예상 회복 기간
+              </h3>
+              <p style={{
+                fontSize: '28px',
+                fontWeight: 'bold',
+                color: '#0891b2',
+                margin: 0
+              }}>
+                {recoveryTime}
+              </p>
             </div>
 
-            <div className="treatment-warnings">
-              <h3>⚠️ 주의사항</h3>
-              <ul>
-                <li>증상이 악화되거나 새로운 증상이 나타나면 즉시 병원을 방문하세요.</li>
-                <li>처방전 없이 사람 약물을 사용하지 마세요.</li>
-                <li>응급 상황(호흡 곤란, 의식 저하, 심한 출혈 등)은 즉시 응급실로 가세요.</li>
-                <li>이 가이드는 참고용이며, 전문 수의사의 진단을 대체할 수 없습니다.</li>
-              </ul>
+            {/* 주의사항 */}
+            <div style={{
+              background: 'linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%)',
+              borderRadius: '16px',
+              padding: '16px',
+              marginBottom: '16px',
+              border: '2px solid #fbbf24',
+              boxShadow: '0 2px 8px rgba(251, 191, 36, 0.2)'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+                <div style={{
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '50%',
+                  background: '#f97316',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0
+                }}>
+                  <span style={{ color: 'white', fontSize: '16px' }}>!</span>
+                </div>
+                <div style={{ flex: 1 }}>
+                  <h4 style={{
+                    fontSize: '14px',
+                    fontWeight: 'bold',
+                    color: '#9a3412',
+                    margin: '0 0 8px 0'
+                  }}>
+                    주의사항
+                  </h4>
+                  <ul style={{
+                    margin: 0,
+                    paddingLeft: '16px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '6px'
+                  }}>
+                    <li style={{ fontSize: '13px', color: '#c2410c', lineHeight: '1.5' }}>
+                      증상이 악화되거나 새로운 증상이 나타나면 즉시 병원을 방문하세요.
+                    </li>
+                    <li style={{ fontSize: '13px', color: '#c2410c', lineHeight: '1.5' }}>
+                      처방전 없이 사람 약물을 사용하지 마세요.
+                    </li>
+                    <li style={{ fontSize: '13px', color: '#c2410c', lineHeight: '1.5' }}>
+                      응급 상황(호흡 곤란, 의식 저하, 심한 출혈 등)은 즉시 응급실로 가세요.
+                    </li>
+                  </ul>
+                </div>
+              </div>
             </div>
 
-            <div className="treatment-checklist">
-              <div className="checklist-header">
-                <h3>✅ 일일 체크리스트</h3>
-                <span className="checklist-progress">{completedCount}/{totalCount} 완료</span>
+            {/* 일일 체크리스트 */}
+            <div style={{
+              background: 'white',
+              borderRadius: '16px',
+              padding: '20px',
+              marginBottom: '16px',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.06)'
+            }}>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                marginBottom: '12px'
+              }}>
+                <h3 style={{
+                  fontSize: '16px',
+                  fontWeight: 'bold',
+                  color: '#1e293b',
+                  margin: 0
+                }}>
+                  일일 체크리스트
+                </h3>
+                <span style={{
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  color: '#0891b2'
+                }}>
+                  {completedCount}/{totalCount} 완료
+                </span>
               </div>
-              <div className="checklist-progress-bar">
-                <div
-                  className="checklist-progress-fill"
-                  style={{ width: `${(completedCount / totalCount) * 100}%` }}
-                />
+
+              {/* 진행 막대 */}
+              <div style={{
+                width: '100%',
+                height: '8px',
+                background: '#e2e8f0',
+                borderRadius: '4px',
+                marginBottom: '16px',
+                overflow: 'hidden'
+              }}>
+                <div style={{
+                  width: `${(completedCount / totalCount) * 100}%`,
+                  height: '100%',
+                  background: 'linear-gradient(90deg, #22d3ee, #06b6d4)',
+                  borderRadius: '4px',
+                  transition: 'width 0.3s ease'
+                }} />
               </div>
-              <div className="checklist-items">
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {checklist.map(item => (
-                  <label key={item.id} className={item.checked ? 'checked' : ''}>
+                  <label key={item.id} style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                    padding: '12px',
+                    background: item.checked ? '#ecfeff' : '#f8fafc',
+                    borderRadius: '10px',
+                    cursor: 'pointer',
+                    border: item.checked ? '1px solid #a5f3fc' : '1px solid #e2e8f0',
+                    transition: 'all 0.2s'
+                  }}>
+                    <div style={{
+                      width: '22px',
+                      height: '22px',
+                      borderRadius: '6px',
+                      border: item.checked ? 'none' : '2px solid #cbd5e1',
+                      background: item.checked ? 'linear-gradient(135deg, #22d3ee, #06b6d4)' : 'white',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0
+                    }}>
+                      {item.checked && (
+                        <span style={{ color: 'white', fontSize: '14px', fontWeight: 'bold' }}>✓</span>
+                      )}
+                    </div>
                     <input
                       type="checkbox"
                       checked={item.checked}
                       onChange={() => handleChecklistChange(item.id)}
+                      style={{ display: 'none' }}
                     />
-                    <span className="checkmark">{item.checked ? '✓' : ''}</span>
-                    <span className="label-text">{item.label}</span>
+                    <span style={{
+                      fontSize: '14px',
+                      color: item.checked ? '#0e7490' : '#475569',
+                      textDecoration: item.checked ? 'line-through' : 'none',
+                      flex: 1
+                    }}>
+                      {item.label}
+                    </span>
                   </label>
                 ))}
               </div>
-              <div className="checklist-actions">
-                <button className="save-checklist-btn" onClick={handleSaveChecklist}>
-                  💾 체크리스트 저장
-                </button>
-                {saveMessage && <span className="save-message">{saveMessage}</span>}
-              </div>
-              <p className="checklist-note">※ 체크 시 자동 저장됩니다</p>
+
+              {saveMessage && (
+                <div style={{
+                  marginTop: '12px',
+                  padding: '10px',
+                  background: '#ecfeff',
+                  borderRadius: '8px',
+                  textAlign: 'center',
+                  fontSize: '13px',
+                  color: '#0891b2',
+                  fontWeight: '500'
+                }}>
+                  {saveMessage}
+                </div>
+              )}
+
+              <p style={{
+                fontSize: '12px',
+                color: '#9ca3af',
+                textAlign: 'center',
+                margin: '12px 0 0 0'
+              }}>
+                체크 시 자동 저장됩니다
+              </p>
             </div>
           </>
         )}
 
-        <div className="treatment-actions">
-          <button className="action-btn secondary" onClick={onBack}>
-            진단서로 돌아가기
+        {/* 푸터 로고 */}
+        <div style={{ textAlign: 'center', padding: '16px 0' }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '8px',
+            marginBottom: '4px'
+          }}>
+            <span style={{ color: '#06b6d4', fontSize: '16px' }}>❤️</span>
+            <span style={{ fontSize: '15px', fontWeight: '600', color: '#475569' }}>PetMedical.AI</span>
+          </div>
+          <p style={{ fontSize: '12px', color: '#9ca3af', margin: 0 }}>
+            반려동물 건강 관리의 새로운 기준
+          </p>
+        </div>
+      </div>
+
+      {/* 하단 고정 버튼 영역 */}
+      <div style={{
+        position: 'fixed',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        padding: '16px',
+        background: 'rgba(255, 255, 255, 0.97)',
+        backdropFilter: 'blur(8px)',
+        borderTop: '1px solid #e2e8f0',
+        zIndex: 100
+      }}>
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: '1fr 1fr',
+          gap: '10px',
+          maxWidth: '500px',
+          margin: '0 auto'
+        }}>
+          <button
+            onClick={onBack}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '6px',
+              padding: '14px 16px',
+              borderRadius: '12px',
+              border: 'none',
+              background: 'linear-gradient(135deg, #64748b 0%, #475569 100%)',
+              color: 'white',
+              fontSize: '14px',
+              fontWeight: '600',
+              cursor: 'pointer',
+              boxShadow: '0 4px 12px rgba(71, 85, 105, 0.3)'
+            }}
+          >
+            ← 진단서로 돌아가기
           </button>
-          {diagnosisResult?.hospitalVisit && (
-            <button className="action-btn primary" onClick={() => window.location.reload()}>
-              병원 예약하기
-            </button>
-          )}
+          <button
+            onClick={handleSaveChecklist}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '6px',
+              padding: '14px 16px',
+              borderRadius: '12px',
+              border: 'none',
+              background: 'linear-gradient(135deg, #22d3ee 0%, #06b6d4 100%)',
+              color: 'white',
+              fontSize: '14px',
+              fontWeight: '600',
+              cursor: 'pointer',
+              boxShadow: '0 4px 12px rgba(6, 182, 212, 0.3)'
+            }}
+          >
+            💾 체크리스트 저장
+          </button>
         </div>
       </div>
     </div>
@@ -4594,66 +5141,138 @@ function App() {
     setAuthScreen('login');
   };
 
-  // 로그인 없이 바로 입장 (테스트용)
-  const handleSkipLogin = () => {
-    // 테스트용 게스트 유저 (고정 ID로 데이터 유지)
-    const guestUser = {
-      uid: 'guest_test_user',
-      email: 'guest@test.com',
-      displayName: '테스트 유저',
-      userMode: 'guardian'
+  // 로그인 없이 바로 입장 (테스트용) - 선택한 모드의 테스트 계정으로 자동 로그인
+  const handleSkipLogin = async (selectedMode = 'guardian') => {
+    
+    // 선택한 모드에 따라 테스트 계정 정보 설정
+    const testAccounts = {
+      guardian: {
+        email: 'guardian@test.com',
+        password: 'test1234',
+        displayName: '테스트 보호자'
+      },
+      clinic: {
+        email: 'clinic@happyvet.com',
+        password: 'test1234',
+        displayName: '테스트 병원'
+      }
     };
 
-    // 이미 등록된 반려동물이 있는지 확인
-    const existingPets = getPetsForUser(guestUser.uid);
+    const testAccount = testAccounts[selectedMode] || testAccounts.guardian;
 
-    if (existingPets.length > 0) {
-      // 기존 반려동물 데이터 사용
-      setPets(existingPets);
-      setPetData(existingPets[0]);
+    try {
+      // 테스트 계정으로 자동 로그인
+      const { authService } = await import('./src/services/firebaseAuth');
+      const loginResult = await authService.login(testAccount.email, testAccount.password);
 
-      // 해당 반려동물의 최신 진단 기록 로드
-      try {
-        const stored = localStorage.getItem(DIAGNOSIS_KEY);
-        if (stored) {
-          const allDiagnoses = JSON.parse(stored);
-          const petDiagnoses = allDiagnoses
-            .filter(d => d.petId === existingPets[0].id)
-            .sort((a, b) => new Date(b.created_at || b.createdAt) - new Date(a.created_at || a.createdAt));
-          if (petDiagnoses.length > 0) {
-            setLastDiagnosis(petDiagnoses[0]);
+      if (loginResult.success) {
+        // 로그인 성공 - handleLogin과 동일한 로직 사용
+        const user = loginResult.user;
+        
+        // 실제 병원 데이터가 있는지 확인
+        let mode = user.userMode || selectedMode;
+        let clinicAccess = false;
+
+        if ((user.roles && user.roles.length > 0) || user.defaultClinicId) {
+          try {
+            const userClinics = await getUserClinics(user.uid);
+            clinicAccess = userClinics && userClinics.length > 0;
+
+            if (clinicAccess) {
+              mode = 'clinic';
+            } else {
+              console.warn('테스트 로그인: 사용자에게 roles는 있지만 실제 병원 데이터가 없습니다. guardian 모드로 유지합니다.');
+            }
+          } catch (error) {
+            console.error('병원 정보 확인 실패:', error);
+            clinicAccess = false;
           }
         }
-      } catch (err) {
-        console.error('진단 기록 로드 실패:', err);
+
+        setHasClinicAccess(clinicAccess);
+        setCurrentUser(user);
+        setUserMode(mode);
+        setAuthScreen(null);
+
+        // userMode를 localStorage에 저장
+        localStorage.setItem('petMedical_userMode', mode);
+
+        // 로그인한 사용자의 반려동물 데이터 로드 (Firestore 우선)
+        let userPets = [];
+        try {
+          // Firestore에서 동물 데이터 가져오기
+          const petsResult = await petService.getPetsByUser(user.uid);
+          if (petsResult.success && petsResult.data && petsResult.data.length > 0) {
+            userPets = petsResult.data;
+            // localStorage에도 저장 (오프라인 지원)
+            savePetsForUser(user.uid, userPets);
+            console.log(`✅ Firestore에서 ${userPets.length}마리 반려동물 로드 완료`);
+          } else {
+            // Firestore에 데이터가 없으면 localStorage 확인
+            userPets = getPetsForUser(user.uid);
+            
+            // 보호자 모드이고 동물 데이터가 없으면 시드 데이터 생성
+            if (mode === 'guardian' && userPets.length === 0) {
+              console.log('🐾 보호자 테스트 계정: 동물 데이터 자동 생성 중...');
+              try {
+                await seedGuardianData(user.uid, user.email);
+                // 시드 데이터 생성 후 다시 Firestore에서 가져오기
+                const seedResult = await petService.getPetsByUser(user.uid);
+                if (seedResult.success && seedResult.data && seedResult.data.length > 0) {
+                  userPets = seedResult.data;
+                  savePetsForUser(user.uid, userPets);
+                  console.log(`✅ 시드 데이터 생성 완료: ${userPets.length}마리 반려동물`);
+                }
+              } catch (seedError) {
+                console.warn('시드 데이터 생성 실패:', seedError);
+              }
+            }
+          }
+        } catch (error) {
+          console.warn('동물 데이터 로드 실패, localStorage 확인:', error);
+          userPets = getPetsForUser(user.uid);
+        }
+
+        setPets(userPets);
+        if (userPets.length > 0) {
+          setPetData(userPets[0]);
+        } else {
+          setPetData(null);
+        }
+
+        // 푸시 알림 권한 요청 및 토큰 저장
+        try {
+          await requestPushPermission(user.uid);
+          console.log('✅ 푸시 알림 설정 완료');
+        } catch (error) {
+          console.warn('푸시 알림 설정 실패:', error);
+        }
+      } else {
+        // 로그인 실패 시 게스트 모드로 fallback
+        console.warn('테스트 계정 로그인 실패, 게스트 모드로 전환:', loginResult.error);
+        const guestUser = {
+          uid: `guest_${selectedMode}_${Date.now()}`,
+          email: `guest@test.com`,
+          displayName: testAccount.displayName,
+          userMode: selectedMode
+        };
+        setCurrentUser(guestUser);
+        setUserMode(selectedMode);
+        setAuthScreen(null);
       }
-    } else {
-      // 기본 반려동물 자동 등록 (테스트 편의성)
-      const defaultPet = {
-        id: Date.now(),
-        userId: guestUser.uid,
-        name: '멍멍이',
-        species: 'dog',
-        breed: '믹스견',
-        birthDate: '2022-01-01',
-        sex: 'M',
-        neutered: true,
-        weight: 8.5,
-        sido: '서울특별시',
-        sigungu: '강남구',
-        profileImage: null,
-        character: 'dog_white',
-        createdAt: new Date().toISOString()
+    } catch (error) {
+      console.error('테스트 계정 로그인 오류:', error);
+      // 오류 발생 시 게스트 모드로 fallback
+      const guestUser = {
+        uid: `guest_${selectedMode}_${Date.now()}`,
+        email: `guest@test.com`,
+        displayName: testAccount.displayName,
+        userMode: selectedMode
       };
-
-      savePetsForUser(guestUser.uid, [defaultPet], defaultPet); // Firestore에도 저장
-      setPets([defaultPet]);
-      setPetData(defaultPet);
+      setCurrentUser(guestUser);
+      setUserMode(selectedMode);
+      setAuthScreen(null);
     }
-
-    setCurrentUser(guestUser);
-    setUserMode('guardian');
-    setAuthScreen(null);
   };
 
   // 인증 화면 렌더링
@@ -4847,6 +5466,15 @@ function App() {
             setCurrentTab('care');
           }}
           onHome={handleGoHome}
+          onGoToMyBookings={() => {
+            setCurrentView(null);
+            setCurrentTab('mypage');
+            localStorage.setItem('mypage_initialTab', 'bookings');
+            setTimeout(() => {
+              const event = new CustomEvent('mypage-set-tab', { detail: 'bookings' });
+              window.dispatchEvent(event);
+            }, 100);
+          }}
           onSelectHospital={async (hospital) => {
             setSelectedHospital(hospital);
             if (lastDiagnosis) {
@@ -4890,6 +5518,8 @@ function App() {
         <PacketSentSummary
           petData={petData}
           hospital={selectedHospital}
+          bookingDate={selectedHospital.bookingDate}
+          bookingTime={selectedHospital.bookingTime}
           onBack={() => {
             setCurrentView(null);
             setCurrentTab('care');
@@ -5187,6 +5817,14 @@ function App() {
                 currentUser={currentUser}
                 onBack={() => setCurrentTab('care')}
                 onHome={handleGoHome}
+                onGoToMyBookings={() => {
+                  setCurrentTab('mypage');
+                  localStorage.setItem('mypage_initialTab', 'bookings');
+                  setTimeout(() => {
+                    const event = new CustomEvent('mypage-set-tab', { detail: 'bookings' });
+                    window.dispatchEvent(event);
+                  }, 100);
+                }}
                 onSelectHospital={async (hospital) => {
                   setSelectedHospital(hospital);
                   if (lastDiagnosis) {
@@ -5329,13 +5967,14 @@ function App() {
         </div>
       )}
 
-      {/* 하단 탭 네비게이션 - 보호자 모드에서 항상 표시 (특정 화면 제외) */}
+      {/* 하단 탭 네비게이션 - 보호자 모드에서 항상 표시 (AI 진료실 제외) */}
       {userMode === 'guardian' && currentTab && (
         <BottomTabNavigation
           currentTab={currentTab}
           onTabChange={handleTabChange}
           onModeSwitch={() => handleModeSwitch('clinic')}
           showModeSwitch={!!currentUser}
+          hideInDiagnosis={currentView === 'symptom-input'}
         />
       )}
         </>

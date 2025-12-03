@@ -15,6 +15,41 @@ import { collection, query, where, onSnapshot, orderBy, getDoc, doc } from 'fire
 import { getPetImage } from '../utils/imagePaths';
 import { TreatmentSheet } from './TreatmentSheet';
 
+// 동물 종류 한글 매핑
+const SPECIES_LABELS = {
+  dog: '강아지',
+  cat: '고양이',
+  rabbit: '토끼',
+  hamster: '햄스터',
+  bird: '조류',
+  hedgehog: '고슴도치',
+  reptile: '파충류',
+  etc: '기타',
+  other: '기타'
+};
+
+// 나이 표시 헬퍼 (이미 "세"가 포함되어 있으면 그대로, 아니면 추가)
+const formatAge = (age) => {
+  if (!age) return '나이 미상';
+  if (typeof age === 'string' && age.includes('세')) return age;
+  if (typeof age === 'number') return `${age}세`;
+  return age;
+};
+
+// 성별 표시 헬퍼 (색상 포함)
+const formatGender = (gender) => {
+  if (!gender) return null;
+  const isMale = gender === 'M' || gender === 'male' || gender === '수컷' || gender === '♂';
+  const isFemale = gender === 'F' || gender === 'female' || gender === '암컷' || gender === '♀';
+  
+  if (isMale) {
+    return <span className="text-blue-600 font-semibold">♂</span>;
+  } else if (isFemale) {
+    return <span className="text-red-600 font-semibold">♀</span>;
+  }
+  return gender;
+};
+
 // 로컬 타임존 기준으로 YYYY-MM-DD 문자열을 반환
 const getLocalDateString = (date = new Date()) => {
   const year = date.getFullYear();
@@ -107,7 +142,16 @@ export function ClinicDashboard({ currentUser, onBack }) {
           if (bookingData.userId) {
             try {
               const userDoc = await getDoc(doc(db, 'users', bookingData.userId));
-              owner = userDoc.exists() ? userDoc.data() : bookingData.owner || null;
+              if (userDoc.exists()) {
+                const userData = userDoc.data();
+                owner = {
+                  ...userData,
+                  name: userData.displayName || userData.name || bookingData.owner?.name || '알 수 없음',
+                  displayName: userData.displayName || userData.name || bookingData.owner?.displayName
+                };
+              } else {
+                owner = bookingData.owner || null;
+              }
             } catch (e) {
               owner = bookingData.owner || null;
             }
@@ -437,9 +481,19 @@ export function ClinicDashboard({ currentUser, onBack }) {
     setHistoryLoading(true);
 
     try {
+      // 🔥 병원 모드: clinicId + ownerId + petId로 조회 (권한 문제 해결)
+      const ownerId = booking.userId || booking.owner?.id;
+
+      const diagnosesPromise = ownerId
+        ? diagnosisService.getDiagnosesByClinicAndPatient(currentClinic.id, ownerId, booking.petId)
+        : diagnosisService.getDiagnosesByPet(booking.petId);
+
+      // clinicResults는 petId만으로 조회 가능 (병원 직원 권한)
+      const resultsPromise = clinicResultService.getResultsByPet(booking.petId);
+
       const [diagRes, resultRes] = await Promise.all([
-        diagnosisService.getDiagnosesByPet(booking.petId),
-        clinicResultService.getResultsByPet(booking.petId)
+        diagnosesPromise,
+        resultsPromise
       ]);
 
       setHistoryData({
@@ -726,25 +780,35 @@ export function ClinicDashboard({ currentUser, onBack }) {
                     <div className="flex items-center gap-3 mb-3">
                       <div className="w-12 h-12 rounded-full bg-gradient-to-br from-sky-400 to-purple-400 overflow-hidden">
                         <img
-                          src={getPetImage(booking.pet || { species: booking.pet?.species || 'dog' }, false)}
+                          src={booking.pet?.profileImage || getPetImage(booking.pet || { species: booking.pet?.species || 'dog' }, false)}
                           alt={booking.pet?.name || '반려동물'}
                           className="w-full h-full object-cover"
                           style={{ objectPosition: 'center', display: 'block' }}
                         />
                       </div>
                       <div className="flex-1">
-                        <h3 className="text-base font-semibold text-gray-900">
-                          {booking.pet?.name || '미등록'} ({booking.pet?.breed || '품종 미상'}, {booking.pet?.age || '?'}세)
+                        <h3 className="text-sm font-semibold text-gray-900 whitespace-nowrap overflow-hidden text-ellipsis">
+                          {booking.pet?.name || '미등록'} ({SPECIES_LABELS[booking.pet?.species] || booking.pet?.speciesLabelKo || booking.pet?.species || '기타'}, {formatAge(booking.pet?.age)})
+                          {booking.pet?.sex && <span className="ml-1">{formatGender(booking.pet.sex)}</span>}
                         </h3>
                         <p className="text-sm text-gray-600">
-                          보호자: {booking.owner?.name || '알 수 없음'} · {booking.owner?.phone || ''}
+                          보호자: {booking.owner?.displayName || booking.owner?.name || '알 수 없음'} · {booking.owner?.phone || ''}
                         </p>
                       </div>
                     </div>
 
                     <div className="bg-gray-50 p-3 rounded-lg mb-3">
-                      <div className="text-xs text-gray-600 mb-1">증상</div>
-                      <div className="text-sm text-gray-900">{booking.symptom || '일반 진료'}</div>
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-xs text-gray-600">증상</span>
+                        {(booking.aiDiagnosis || booking.diagnosisId) && (
+                          <span className="px-2 py-0.5 bg-emerald-100 text-emerald-700 text-xs font-semibold rounded-full">
+                            AI 진단서 첨부
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-sm text-gray-900">
+                        {booking.aiDiagnosis?.diagnosis || booking.aiDiagnosis?.mainDiagnosis || booking.symptom || '일반 진료'}
+                      </div>
                     </div>
 
         {/* Info Buttons (2개만: 진단서 상세보기, 과거 기록) */}
@@ -1225,9 +1289,9 @@ export function ClinicDashboard({ currentUser, onBack }) {
               <div>
                 <div className="font-semibold mb-1">펫 정보</div>
                 <div className="text-gray-700">
-                  종: {selectedBooking.pet?.speciesLabelKo || selectedBooking.pet?.species}<br/>
-                  품종: {selectedBooking.pet?.breed}<br/>
-                  생일: {selectedBooking.pet?.birthDate}<br/>
+                  종: {SPECIES_LABELS[selectedBooking.pet?.species] || selectedBooking.pet?.speciesLabelKo || selectedBooking.pet?.species || '기타'}<br/>
+                  품종: {selectedBooking.pet?.breed || '미등록'}<br/>
+                  나이: {formatAge(selectedBooking.pet?.age)} {selectedBooking.pet?.sex && formatGender(selectedBooking.pet.sex)}<br/>
                   체중: {selectedBooking.pet?.weight ? `${selectedBooking.pet.weight}kg` : '기록 없음'}
                 </div>
               </div>
@@ -1235,9 +1299,9 @@ export function ClinicDashboard({ currentUser, onBack }) {
               <div>
                 <div className="font-semibold mb-1">보호자 정보</div>
                 <div className="text-gray-700">
-                  이름: {selectedBooking.owner?.name}<br/>
-                  연락처: {selectedBooking.owner?.phone}<br/>
-                  이메일: {selectedBooking.owner?.email}
+                  이름: {selectedBooking.owner?.displayName || selectedBooking.owner?.name || '알 수 없음'}<br/>
+                  연락처: {selectedBooking.owner?.phone || '없음'}<br/>
+                  이메일: {selectedBooking.owner?.email || '없음'}
                 </div>
               </div>
 
@@ -1247,6 +1311,55 @@ export function ClinicDashboard({ currentUser, onBack }) {
                   증상 메모: {selectedBooking.symptom || selectedBooking.message || '입력 없음'}
                 </div>
               </div>
+
+              {/* AI 진단서 정보 */}
+              {(selectedBooking.aiDiagnosis || selectedBooking.diagnosisId) && (
+                <div className="mt-4 p-4 bg-emerald-50 border border-emerald-200 rounded-xl">
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="px-2 py-1 bg-emerald-500 text-white text-xs font-bold rounded">AI 진단서</span>
+                    <span className="text-emerald-700 font-semibold">첨부됨</span>
+                  </div>
+
+                  {selectedBooking.aiDiagnosis && (
+                    <div className="space-y-2 text-sm">
+                      <div>
+                        <span className="font-semibold text-gray-700">진단명: </span>
+                        <span className="text-gray-900">{selectedBooking.aiDiagnosis.diagnosis || selectedBooking.aiDiagnosis.mainDiagnosis || '-'}</span>
+                      </div>
+                      {selectedBooking.aiDiagnosis.riskLevel && (
+                        <div>
+                          <span className="font-semibold text-gray-700">위험도: </span>
+                          <span className={`font-semibold ${
+                            selectedBooking.aiDiagnosis.riskLevel === 'high' ? 'text-red-600' :
+                            selectedBooking.aiDiagnosis.riskLevel === 'moderate' ? 'text-yellow-600' : 'text-green-600'
+                          }`}>
+                            {selectedBooking.aiDiagnosis.riskLevel === 'high' ? '높음' :
+                             selectedBooking.aiDiagnosis.riskLevel === 'moderate' ? '보통' : '낮음'}
+                          </span>
+                        </div>
+                      )}
+                      {selectedBooking.aiDiagnosis.confidence && (
+                        <div>
+                          <span className="font-semibold text-gray-700">신뢰도: </span>
+                          <span className="text-gray-900">{Math.round(selectedBooking.aiDiagnosis.confidence * 100)}%</span>
+                        </div>
+                      )}
+                      {selectedBooking.aiDiagnosis.symptomSummary && (
+                        <div>
+                          <span className="font-semibold text-gray-700">증상 요약: </span>
+                          <span className="text-gray-900">{selectedBooking.aiDiagnosis.symptomSummary}</span>
+                        </div>
+                      )}
+                      {selectedBooking.aiDiagnosis.treatmentRecommendation && (
+                        <div>
+                          <span className="font-semibold text-gray-700">권장 치료: </span>
+                          <span className="text-gray-900">{selectedBooking.aiDiagnosis.treatmentRecommendation}</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             <div className="mt-4 flex justify-end">
