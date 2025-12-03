@@ -2040,20 +2040,23 @@ function SymptomInput({ petData, onComplete, onBack, onRegister }) {
         </div>
       </div>
 
-      {/* Bottom Button */}
-      <div className="fixed bottom-16 left-0 right-0 bg-white/95 backdrop-blur-sm p-4 border-t border-slate-100">
+      {/* Bottom Button - AI 진료실 전용 확대 버튼 (하단 내비게이션바 숨김) */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-slate-100 p-6 z-50">
         <button 
           onClick={handleSubmit}
           disabled={loading || (selectedSymptoms.length === 0 && !symptomText.trim() && images.length === 0)}
-          className="w-full bg-sky-500 text-white py-4 px-6 rounded-xl font-bold text-base disabled:opacity-50 disabled:cursor-not-allowed hover:bg-sky-600 transition-colors flex items-center justify-center gap-2 shadow-lg shadow-sky-500/30"
+          className="w-full bg-sky-500 text-white py-6 px-8 rounded-xl font-bold text-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-sky-600 active:bg-sky-700 transition-all flex items-center justify-center gap-3 shadow-lg shadow-sky-500/30 hover:shadow-xl hover:shadow-sky-500/40"
         >
           {loading ? (
             <>
-              <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              AI 분석 중...
+              <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              <span className="text-lg font-bold">AI 분석 중...</span>
             </>
           ) : (
-            'AI 분석하기'
+            <>
+              <span className="material-symbols-outlined text-2xl">psychology</span>
+              <span className="text-lg font-bold">AI 분석하기</span>
+            </>
           )}
         </button>
       </div>
@@ -4805,13 +4808,14 @@ function App() {
         </div>
       )}
 
-      {/* 하단 탭 네비게이션 - 보호자 모드에서 항상 표시 (특정 화면 제외) */}
+      {/* 하단 탭 네비게이션 - 보호자 모드에서 항상 표시 (AI 진료실 제외) */}
       {userMode === 'guardian' && currentTab && (
         <BottomTabNavigation
           currentTab={currentTab}
           onTabChange={handleTabChange}
           onModeSwitch={() => handleModeSwitch('clinic')}
           showModeSwitch={!!currentUser}
+          hideInDiagnosis={currentView === 'symptom-input'}
         />
       )}
         </>

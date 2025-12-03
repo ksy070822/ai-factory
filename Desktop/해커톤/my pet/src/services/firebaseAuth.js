@@ -180,6 +180,21 @@ export const authService = {
         };
       } catch (popupError) {
         console.error('팝업 로그인 실패:', popupError);
+        
+        // COOP 오류 또는 팝업 차단 시 리다이렉트 방식으로 전환
+        if (
+          popupError.code === 'auth/popup-blocked' ||
+          popupError.code === 'auth/popup-closed-by-user' ||
+          popupError.message?.includes('Cross-Origin-Opener-Policy') ||
+          popupError.message?.includes('window.close')
+        ) {
+          console.log('[Google Login] 팝업 실패, 리다이렉트 방식으로 전환');
+          // 리다이렉트 전에 userMode 저장
+          sessionStorage.setItem('pendingUserMode', userMode);
+          await signInWithRedirect(auth, googleProvider);
+          return { success: false, redirecting: true };
+        }
+        
         return { success: false, error: '구글 로그인에 실패했습니다: ' + popupError.message };
       }
     } catch (error) {

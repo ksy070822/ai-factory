@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { generateHospitalPacket } from '../services/ai/hospitalPacket';
-import { getCurrentPosition, searchAnimalHospitals, initKakaoMap, addMarker, loadKakao } from '../services/kakaoMap';
+import { getCurrentPosition, searchAnimalHospitals, searchHospitalsByRegionName, initKakaoMap, addMarker, loadKakao } from '../services/kakaoMap';
 import { getApiKey, API_KEY_TYPES } from '../services/apiKeyManager';
 import { getNearbyHospitalsFromFirestore, searchHospitalsByRegion, searchHospitals } from '../lib/firestoreHospitals';
 import { bookingService } from '../services/firestore';
@@ -141,6 +141,28 @@ export function HospitalBooking({ petData, diagnosis, symptomData, onBack, onSel
 
   // 테스트 병원 state (동적으로 clinicId 업데이트)
   const [testHospital, setTestHospital] = useState(TEST_HOSPITAL_HAPPYVET);
+
+  // 모달이 열릴 때 body 스크롤 막기
+  useEffect(() => {
+    if (showBookingModal) {
+      // 모달이 열릴 때 body 스크롤 막기
+      document.body.style.overflow = 'hidden';
+      document.body.style.position = 'fixed';
+      document.body.style.width = '100%';
+    } else {
+      // 모달이 닫힐 때 body 스크롤 복구
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+    }
+    
+    // cleanup: 컴포넌트 언마운트 시 스크롤 복구
+    return () => {
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+    };
+  }, [showBookingModal]);
 
   // 1. 병원 패킷 생성 및 현재 위치 가져오기
   useEffect(() => {
@@ -715,7 +737,7 @@ export function HospitalBooking({ petData, diagnosis, symptomData, onBack, onSel
 
   const [searchQuery, setSearchQuery] = useState('');
 
-  // 지역/병원명 검색 핸들러 (Firestore 사용)
+  // 지역/병원명 검색 핸들러 (카카오맵 REST API 우선 사용)
   const handleSearch = async () => {
     if (!searchQuery.trim()) {
       // 검색어 없으면 내 위치 기반으로 복귀
@@ -737,15 +759,49 @@ export function HospitalBooking({ petData, diagnosis, symptomData, onBack, onSel
     setIsSearching(true);
     try {
       console.log('[HospitalBooking] 지역/병원명 검색:', searchQuery);
-      const results = await searchHospitalsByRegion(searchQuery, 50);
-      console.log('[HospitalBooking] 검색 결과:', results.length, '개');
-      // 🧪 테스트 병원을 최상단에 추가
-      setHospitals([TEST_HOSPITAL_HAPPYVET, ...results]);
-      setSearchMode('region');
-      setDataSource('firestore');
+      
+      // 1순위: 카카오맵 REST API 사용 (지역명 검색)
+      try {
+        const kakaoResults = await searchHospitalsByRegionName(searchQuery);
+        if (kakaoResults.length > 0) {
+          console.log('[HospitalBooking] 카카오맵 검색 결과:', kakaoResults.length, '개');
+          // 🧪 테스트 병원을 최상단에 추가
+          setHospitals([TEST_HOSPITAL_HAPPYVET, ...kakaoResults]);
+          setSearchMode('region');
+          setDataSource('kakao');
+          setIsSearching(false);
+          return;
+        }
+      } catch (kakaoError) {
+        console.warn('[HospitalBooking] 카카오맵 검색 실패, Firestore로 fallback:', kakaoError);
+        
+        // CORS 오류인 경우 사용자에게 안내
+        if (kakaoError.message?.includes('CORS')) {
+          alert('지역 검색이 제한되어 있습니다. 내 주변 검색을 사용해주세요.');
+          setIsSearching(false);
+          return;
+        }
+      }
+      
+      // 2순위: Firestore 검색 (fallback)
+      console.log('[HospitalBooking] Firestore 검색 시도');
+      const firestoreResults = await searchHospitalsByRegion(searchQuery, 50);
+      console.log('[HospitalBooking] Firestore 검색 결과:', firestoreResults.length, '개');
+      
+      if (firestoreResults.length > 0) {
+        // 🧪 테스트 병원을 최상단에 추가
+        setHospitals([TEST_HOSPITAL_HAPPYVET, ...firestoreResults]);
+        setSearchMode('region');
+        setDataSource('firestore');
+      } else {
+        // 검색 결과 없음
+        setHospitals([TEST_HOSPITAL_HAPPYVET]);
+        setSearchMode('region');
+        setDataSource('none');
+      }
     } catch (err) {
       console.error('검색 오류:', err);
-      alert('검색 중 오류가 발생했습니다.');
+      alert('검색 중 오류가 발생했습니다: ' + err.message);
     }
     setIsSearching(false);
   };
@@ -1104,8 +1160,33 @@ export function HospitalBooking({ petData, diagnosis, symptomData, onBack, onSel
 
       {/* 예약 모달 */}
       {showBookingModal && bookingHospital && (
-        <div className="fixed inset-0 bg-black/50 flex items-end justify-center z-50 animate-fade-in">
-          <div className="bg-white rounded-t-3xl w-full max-w-md p-6 pb-10 animate-slide-up max-h-[90vh] overflow-y-auto">
+        <div 
+          className="fixed inset-0 bg-black/50 flex items-end justify-center z-[9999] animate-fade-in"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setShowBookingModal(false);
+            }
+          }}
+          style={{ 
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            overflow: 'hidden'
+          }}
+        >
+          <div 
+            className="bg-white rounded-t-3xl w-full max-w-md p-6 pb-10 animate-slide-up overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              maxHeight: '90vh',
+              minHeight: '50vh',
+              overflowY: 'auto',
+              WebkitOverflowScrolling: 'touch',
+              overscrollBehavior: 'contain'
+            }}
+          >
             {bookingSuccess ? (
               /* 예약 성공 화면 */
               <div className="text-center py-8">

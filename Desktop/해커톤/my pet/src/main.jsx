@@ -11,7 +11,12 @@ if ('serviceWorker' in navigator) {
         console.log('✅ Service Worker 등록 성공:', registration.scope);
       })
       .catch((error) => {
-        console.error('❌ Service Worker 등록 실패:', error);
+        // 404 오류는 무시 (푸시 알림이 필요 없을 경우)
+        if (error.message?.includes('404') || error.message?.includes('bad HTTP response code')) {
+          console.warn('⚠️ Service Worker 파일이 없습니다. 푸시 알림 기능이 비활성화됩니다.');
+        } else {
+          console.error('❌ Service Worker 등록 실패:', error);
+        }
       });
   });
 }
