@@ -162,6 +162,96 @@
     }
   },
   "symptomTags": {
+    "limping": {
+      "id": "limping",
+      "name": "다리를 절어요",
+      "dept": "ortho",
+      "species": [
+        "dog",
+        "cat"
+      ]
+    },
+    "skip_walk": {
+      "id": "skip_walk",
+      "name": "점프/계단 거부",
+      "dept": "ortho",
+      "species": [
+        "dog"
+      ]
+    },
+    "hind_leg_weakness": {
+      "id": "hind_leg_weakness",
+      "name": "뒷다리가 후들거림",
+      "dept": "ortho",
+      "species": [
+        "dog"
+      ]
+    },
+    "sudden_sit": {
+      "id": "sudden_sit",
+      "name": "갑자기 주저앉음",
+      "dept": "ortho",
+      "species": [
+        "dog"
+      ]
+    },
+    "scratching": {
+      "id": "scratching",
+      "name": "긁어요",
+      "dept": "derm",
+      "species": [
+        "dog",
+        "cat",
+        "rabbit",
+        "hamster"
+      ]
+    },
+    "red_swollen": {
+      "id": "red_swollen",
+      "name": "붉게 부었어요",
+      "dept": "derm",
+      "species": [
+        "dog",
+        "cat"
+      ]
+    },
+    "hair_loss": {
+      "id": "hair_loss",
+      "name": "털이 빠짐",
+      "dept": "derm",
+      "species": [
+        "dog",
+        "cat",
+        "hamster",
+        "hedgehog"
+      ]
+    },
+    "bad_smell": {
+      "id": "bad_smell",
+      "name": "냄새가 나요",
+      "dept": "derm",
+      "species": [
+        "dog",
+        "cat"
+      ]
+    },
+    "dandruff": {
+      "id": "dandruff",
+      "name": "비듬",
+      "dept": "derm",
+      "species": [
+        "hamster",
+        "hedgehog"
+      ]
+    },
+    "over_grooming": {
+      "id": "over_grooming",
+      "name": "털을 뽑아요",
+      "dept": "derm",
+      "species": [
+        "cat"
+      ]
+    },
     "vomiting": {
       "id": "vomiting",
       "name": "구토",
@@ -189,7 +279,7 @@
     },
     "loss_appetite": {
       "id": "loss_appetite",
-      "name": "식욕부진",
+      "name": "밥을 안 먹어요",
       "dept": "digestive",
       "species": [
         "dog",
@@ -202,13 +292,46 @@
     },
     "abdominal_pain": {
       "id": "abdominal_pain",
-      "name": "복통",
+      "name": "배를 만지면 싫어해요",
       "dept": "digestive",
       "species": [
         "dog",
         "cat",
         "rabbit",
         "hamster"
+      ]
+    },
+    "small_poop": {
+      "id": "small_poop",
+      "name": "응가가 작아졌어요",
+      "dept": "digestive",
+      "species": [
+        "rabbit"
+      ]
+    },
+    "drooling": {
+      "id": "drooling",
+      "name": "침 흘림",
+      "dept": "digestive",
+      "species": [
+        "rabbit",
+        "hamster"
+      ]
+    },
+    "wet_anus": {
+      "id": "wet_anus",
+      "name": "젖은 엉덩이",
+      "dept": "digestive",
+      "species": [
+        "hamster"
+      ]
+    },
+    "no_poop": {
+      "id": "no_poop",
+      "name": "변을 안 봄",
+      "dept": "digestive",
+      "species": [
+        "reptile"
       ]
     },
     "coughing": {
@@ -227,7 +350,7 @@
     },
     "runny_nose": {
       "id": "runny_nose",
-      "name": "콧물",
+      "name": "콧물이 나요",
       "dept": "resp",
       "species": [
         "dog",
@@ -240,7 +363,7 @@
     },
     "breathing_difficulty": {
       "id": "breathing_difficulty",
-      "name": "호흡곤란",
+      "name": "숨을 힘들게 쉬어요",
       "dept": "resp",
       "species": [
         "dog",
@@ -262,69 +385,347 @@
         "bird"
       ]
     },
-    "hair_loss": {
-      "id": "hair_loss",
-      "name": "탈모",
-      "dept": "derm",
+    "eye_discharge": {
+      "id": "eye_discharge",
+      "name": "눈물",
+      "dept": "resp",
+      "species": [
+        "cat",
+        "rabbit"
+      ]
+    },
+    "open_mouth_breathing": {
+      "id": "open_mouth_breathing",
+      "name": "입을 벌리고 숨쉬기",
+      "dept": "resp",
+      "species": [
+        "reptile"
+      ]
+    },
+    "frequent_urination": {
+      "id": "frequent_urination",
+      "name": "화장실만 가요",
+      "dept": "uro",
+      "species": [
+        "cat"
+      ]
+    },
+    "no_urine": {
+      "id": "no_urine",
+      "name": "소변이 안 나와요",
+      "dept": "uro",
+      "species": [
+        "cat"
+      ]
+    },
+    "crying": {
+      "id": "crying",
+      "name": "울어요",
+      "dept": "uro",
+      "species": [
+        "cat"
+      ]
+    },
+    "red_urine": {
+      "id": "red_urine",
+      "name": "소변이 빨개요",
+      "dept": "uro",
+      "species": [
+        "rabbit"
+      ]
+    },
+    "swollen_abdomen": {
+      "id": "swollen_abdomen",
+      "name": "배가 빵빵함",
+      "dept": "uro",
+      "species": [
+        "bird"
+      ]
+    },
+    "straining": {
+      "id": "straining",
+      "name": "힘줘서 앉아있음",
+      "dept": "uro",
+      "species": [
+        "bird"
+      ]
+    },
+    "bloody_diarrhea": {
+      "id": "bloody_diarrhea",
+      "name": "혈변",
+      "dept": "infectious",
+      "species": [
+        "dog"
+      ]
+    },
+    "fever": {
+      "id": "fever",
+      "name": "열이 있어요",
+      "dept": "infectious",
       "species": [
         "dog",
-        "cat",
-        "hamster",
+        "cat"
+      ]
+    },
+    "severe_lethargy": {
+      "id": "severe_lethargy",
+      "name": "심한 무기력",
+      "dept": "infectious",
+      "species": [
+        "dog",
+        "cat"
+      ]
+    },
+    "nasal_bleeding": {
+      "id": "nasal_bleeding",
+      "name": "비출혈",
+      "dept": "infectious",
+      "species": [
+        "cat"
+      ]
+    },
+    "aggression": {
+      "id": "aggression",
+      "name": "갑자기 공격해요",
+      "dept": "behavior",
+      "species": [
+        "cat"
+      ]
+    },
+    "hiding": {
+      "id": "hiding",
+      "name": "숨어요",
+      "dept": "behavior",
+      "species": [
+        "cat"
+      ]
+    },
+    "wobbly_gait": {
+      "id": "wobbly_gait",
+      "name": "뒤뚱거림",
+      "dept": "neuro",
+      "species": [
         "hedgehog"
       ]
     },
-    "scratching": {
-      "id": "scratching",
-      "name": "가려움/긁음",
-      "dept": "derm",
+    "jaw_problem": {
+      "id": "jaw_problem",
+      "name": "턱을 잘 안 움직여요",
+      "dept": "dental",
+      "species": [
+        "rabbit",
+        "hamster"
+      ]
+    },
+    "cant_eat_hard": {
+      "id": "cant_eat_hard",
+      "name": "딱딱한 걸 못 먹어요",
+      "dept": "dental",
+      "species": [
+        "rabbit",
+        "hamster"
+      ]
+    },
+    "weak_limbs": {
+      "id": "weak_limbs",
+      "name": "힘이 없음",
+      "dept": "env",
+      "species": [
+        "reptile"
+      ]
+    },
+    "soft_jaw": {
+      "id": "soft_jaw",
+      "name": "부드러운 턱/다리",
+      "dept": "env",
+      "species": [
+        "reptile"
+      ]
+    },
+    "retained_shed": {
+      "id": "retained_shed",
+      "name": "탈피가 안 떨어짐",
+      "dept": "env",
+      "species": [
+        "reptile"
+      ]
+    },
+    "lethargy": {
+      "id": "lethargy",
+      "name": "무기력",
+      "dept": "general",
       "species": [
         "dog",
         "cat",
         "rabbit",
-        "hamster"
+        "hamster",
+        "bird",
+        "hedgehog"
+      ]
+    },
+    "reduced_movement": {
+      "id": "reduced_movement",
+      "name": "움직임이 줄었어요",
+      "dept": "general",
+      "species": [
+        "rabbit",
+        "hamster",
+        "bird"
       ]
     }
   },
   "followUpQuestions": {
     "vomiting": [
       {
-        "id": "vomit_duration",
-        "question": "언제부터 구토하나요?"
+        "id": "vomiting_duration",
+        "question": "구토는 언제부터 시작됐나요?",
+        "placeholder": "예: 어제 저녁부터 3번 정도 토했어요"
       },
       {
-        "id": "vomit_color",
-        "question": "토한 색깔은 어떤가요?"
+        "id": "vomiting_appearance",
+        "question": "토한 내용물의 색이나 모양은 어땠나요?",
+        "placeholder": "예: 노란 물만 나왔어요 / 먹은 사료가 그대로 나왔어요"
       },
       {
-        "id": "vomit_frequency",
-        "question": "하루에 몇 번 구토하나요?"
+        "id": "vomiting_frequency",
+        "question": "하루에 몇 번 정도 토하나요?",
+        "placeholder": "예: 하루에 2-3번 정도"
+      }
+    ],
+    "limping": [
+      {
+        "id": "limping_leg",
+        "question": "어느 쪽 다리를 절뚝거리는 것 같나요?",
+        "placeholder": "예: 오른쪽 뒷다리"
+      },
+      {
+        "id": "limping_started",
+        "question": "언제부터 절뚝거리기 시작했나요?",
+        "placeholder": "예: 산책 중 갑자기"
+      },
+      {
+        "id": "limping_severity",
+        "question": "절뚝거림이 심한가요?",
+        "placeholder": "예: 가끔 다리를 들고 걷기도 해요"
       }
     ],
     "diarrhea": [
       {
-        "id": "diarrhea_freq",
-        "question": "하루 몇 번 설사하나요?"
+        "id": "diarrhea_blood",
+        "question": "변에 피가 섞여 있나요?",
+        "placeholder": "예: 붉은색 피가 조금 묻어 있었어요"
+      },
+      {
+        "id": "diarrhea_frequency",
+        "question": "하루에 몇 번 정도 설사를 하나요?",
+        "placeholder": "예: 하루에 5-6번 정도"
       },
       {
         "id": "diarrhea_color",
-        "question": "변 색깔은 어떤가요?"
+        "question": "변의 색깔은 어떤가요?",
+        "placeholder": "예: 노란색 묽은 변"
+      }
+    ],
+    "loss_appetite": [
+      {
+        "id": "appetite_duration",
+        "question": "밥을 안 먹은 지 얼마나 되었나요?",
+        "placeholder": "예: 어제부터 밥을 전혀 안 먹어요"
+      },
+      {
+        "id": "appetite_water",
+        "question": "물은 마시나요?",
+        "placeholder": "예: 물은 조금씩 마셔요"
+      }
+    ],
+    "coughing": [
+      {
+        "id": "coughing_type",
+        "question": "어떤 종류의 기침인가요?",
+        "placeholder": "예: 켁켁 소리 / 헛기침"
+      },
+      {
+        "id": "coughing_when",
+        "question": "언제 기침을 하나요?",
+        "placeholder": "예: 운동 후 / 밤에"
+      }
+    ],
+    "no_urine": [
+      {
+        "id": "no_urine_duration",
+        "question": "소변이 안 나온 지 얼마나 되었나요?",
+        "placeholder": "예: 하루 종일 소변을 안 봤어요"
+      },
+      {
+        "id": "no_urine_attempts",
+        "question": "화장실에는 가나요?",
+        "placeholder": "예: 화장실에는 가는데 소변은 안 나와요"
+      }
+    ],
+    "small_poop": [
+      {
+        "id": "small_poop_duration",
+        "question": "응가가 작아진 지 얼마나 되었나요?",
+        "placeholder": "예: 이틀 전부터"
+      },
+      {
+        "id": "small_poop_appetite",
+        "question": "밥은 먹나요?",
+        "placeholder": "예: 밥은 거의 안 먹어요"
       }
     ],
     "breathing_difficulty": [
       {
-        "id": "breath_severity",
-        "question": "호흡이 얼마나 힘들어 보이나요?"
+        "id": "breathing_difficulty_severity",
+        "question": "숨쉬기가 얼마나 힘들어 보이나요?",
+        "placeholder": "예: 배로 숨을 쉬고 있어요"
       },
       {
-        "id": "breath_when",
-        "question": "언제 특히 심해지나요?"
+        "id": "breathing_difficulty_when",
+        "question": "언제 숨쉬기가 힘들어 보이나요?",
+        "placeholder": "예: 조금만 움직여도"
+      }
+    ],
+    "hair_loss": [
+      {
+        "id": "hair_loss_location",
+        "question": "털이 빠진 부위는 어디인가요?",
+        "placeholder": "예: 등 전체 / 배 쪽"
+      },
+      {
+        "id": "hair_loss_pattern",
+        "question": "털이 빠지는 패턴은 어떤가요?",
+        "placeholder": "예: 동그랗게 빠져요 / 전체적으로 얇아졌어요"
+      }
+    ],
+    "scratching": [
+      {
+        "id": "scratching_location",
+        "question": "어디를 긁나요?",
+        "placeholder": "예: 귀 / 배 / 등"
+      },
+      {
+        "id": "scratching_frequency",
+        "question": "얼마나 자주 긁나요?",
+        "placeholder": "예: 하루 종일 긁어요"
       }
     ]
   },
   "conditions": {
     "dog": [
       {
-        "id": "dog_gastro",
+        "id": "dog_patella_luxation",
+        "name_ko": "슬개골 탈구",
+        "dept": "ortho",
+        "typical_symptoms": [
+          "limping",
+          "skip_walk",
+          "hind_leg_weakness"
+        ],
+        "note": "소형견에서 매우 흔함"
+      },
+      {
+        "id": "dog_gastroenteritis",
         "name_ko": "급성 위장염",
         "dept": "digestive",
         "typical_symptoms": [
@@ -334,51 +735,179 @@
         ]
       },
       {
+        "id": "dog_parvovirus",
+        "name_ko": "파보바이러스 장염",
+        "dept": "infectious",
+        "typical_symptoms": [
+          "bloody_diarrhea",
+          "vomiting",
+          "severe_lethargy"
+        ],
+        "note": "응급 가능성 높음(특히 어린 개)"
+      },
+      {
         "id": "dog_allergy",
         "name_ko": "알레르기 피부염",
         "dept": "derm",
         "typical_symptoms": [
           "scratching",
+          "red_swollen",
           "hair_loss"
         ]
       }
     ],
     "cat": [
       {
-        "id": "cat_flutd",
-        "name_ko": "하부요로질환",
-        "dept": "uro",
+        "id": "cat_panleukopenia",
+        "name_ko": "범백(전염성 장염)",
+        "dept": "infectious",
         "typical_symptoms": [
-          "loss_appetite"
-        ]
+          "vomiting",
+          "diarrhea",
+          "fever",
+          "severe_lethargy"
+        ],
+        "note": "응급 가능성 높음"
       },
       {
-        "id": "cat_uri",
+        "id": "cat_flutd",
+        "name_ko": "FLUTD (하부요로질환)",
+        "dept": "uro",
+        "typical_symptoms": [
+          "frequent_urination",
+          "crying",
+          "no_urine"
+        ],
+        "note": "요도폐색은 응급"
+      },
+      {
+        "id": "cat_upper_respiratory",
         "name_ko": "상부 호흡기 감염",
-        "dept": "resp",
+        "dept": "infectious",
         "typical_symptoms": [
           "runny_nose",
           "sneezing",
-          "coughing"
+          "eye_discharge"
         ]
       }
     ],
     "rabbit": [
       {
         "id": "rabbit_gi_stasis",
-        "name_ko": "위장정체",
+        "name_ko": "위장 정체(GI Stasis)",
         "dept": "digestive",
         "typical_symptoms": [
           "loss_appetite",
+          "small_poop",
           "abdominal_pain",
-          "diarrhea"
+          "reduced_movement"
+        ],
+        "note": "토끼에서 매우 흔한 응급 질환"
+      },
+      {
+        "id": "rabbit_malocclusion",
+        "name_ko": "부정교합",
+        "dept": "dental",
+        "typical_symptoms": [
+          "jaw_problem",
+          "cant_eat_hard",
+          "drooling"
         ]
       },
       {
-        "id": "rabbit_snuffles",
-        "name_ko": "파스튜렐라 감염",
+        "id": "rabbit_pasteurella",
+        "name_ko": "파스티렐라 감염(콧물병)",
         "dept": "resp",
         "typical_symptoms": [
+          "runny_nose",
+          "sneezing",
+          "breathing_difficulty"
+        ]
+      }
+    ],
+    "hamster": [
+      {
+        "id": "hamster_wet_tail",
+        "name_ko": "웻테일(심한 설사)",
+        "dept": "digestive",
+        "typical_symptoms": [
+          "diarrhea",
+          "wet_anus",
+          "lethargy"
+        ]
+      },
+      {
+        "id": "hamster_mite",
+        "name_ko": "진드기 감염",
+        "dept": "derm",
+        "typical_symptoms": [
+          "hair_loss",
+          "scratching",
+          "dandruff"
+        ]
+      }
+    ],
+    "bird": [
+      {
+        "id": "bird_egg_binding",
+        "name_ko": "난체 정체(Egg binding)",
+        "dept": "uro",
+        "typical_symptoms": [
+          "swollen_abdomen",
+          "straining",
+          "reduced_movement"
+        ],
+        "note": "응급 가능성 매우 높음"
+      },
+      {
+        "id": "bird_aspergillosis",
+        "name_ko": "아스페르길루스증",
+        "dept": "resp",
+        "typical_symptoms": [
+          "breathing_difficulty",
+          "runny_nose"
+        ]
+      }
+    ],
+    "hedgehog": [
+      {
+        "id": "hedgehog_wobbly_syndrome",
+        "name_ko": "휘청거리는 고슴도치 증후군",
+        "dept": "neuro",
+        "typical_symptoms": [
+          "wobbly_gait",
+          "hind_leg_weakness"
+        ]
+      },
+      {
+        "id": "hedgehog_mite",
+        "name_ko": "진드기 감염",
+        "dept": "derm",
+        "typical_symptoms": [
+          "hair_loss",
+          "scratching",
+          "dandruff"
+        ]
+      }
+    ],
+    "reptile": [
+      {
+        "id": "reptile_mbd",
+        "name_ko": "대사성 뼈질환(MBD)",
+        "dept": "env",
+        "typical_symptoms": [
+          "weak_limbs",
+          "soft_jaw",
+          "loss_appetite"
+        ],
+        "note": "잘못된 사육 환경/칼슘 부족"
+      },
+      {
+        "id": "reptile_respiratory",
+        "name_ko": "상부 호흡기 감염",
+        "dept": "resp",
+        "typical_symptoms": [
+          "open_mouth_breathing",
           "runny_nose",
           "breathing_difficulty"
         ]
