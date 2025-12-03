@@ -9,8 +9,8 @@ import { convertHealthFlagsFormat } from '../../utils/healthFlagsMapper';
 import { buildAIContext } from './dataContextService';
 import { runCollaborativeDiagnosis } from './collaborativeDiagnosis';
 import { getMedicationGuidance, formatMedicationMessage, getShortMedicationSummary } from './medicationService';
-// FAQ는 진찰 단계가 아닌 별도 화면에서 제공 (진찰 중 조회 제거)
-// import { getRecommendedFAQs, generateMultipleFAQAnswers, formatFAQsForUI, formatFAQAnswersMessage } from './faqService';
+// FAQ 서비스 - 진단서 작성 전 보호자 예상 질문 3개 표시
+import { getRecommendedFAQs, generateMultipleFAQAnswers, formatFAQsForUI, formatFAQAnswersMessage } from './faqService';
 
 export const runMultiAgentDiagnosis = async (petData, symptomData, onLogReceived, onWaitForGuardianResponse = null) => {
   const logs = [];
@@ -426,10 +426,6 @@ export const runMultiAgentDiagnosis = async (petData, symptomData, onLogReceived
     // const medicationSummary = getShortMedicationSummary(medicationGuidance);
     const medicationGuidance = null;
 
-    // FAQ 정보 초기화 (진찰 완료 후 별도 화면에서 제공)
-    const faqAnswers = [];
-    const recommendedFAQs = [];
-
     // 약물 안내가 있으면 포함
     let careMessage = careResult.message;
     // if (medicationGuidance && medicationGuidance.hasMedicationGuidance) {
@@ -462,8 +458,64 @@ export const runMultiAgentDiagnosis = async (petData, symptomData, onLogReceived
 
     await new Promise(resolve => setTimeout(resolve, 800));
 
-    // FAQ는 진찰 완료 후 별도 화면에서 제공 (진찰 중 FAQ 조회 제거)
-    // 사용자 요청: "진찰단계에서 FAQ를 조회할 필요는 없어"
+    // FAQ 조회 및 보호자 선택 단계 (진단서 작성 전)
+    let recommendedFAQs = [];
+    let faqAnswers = [];
+
+    try {
+      // 증상 기반 FAQ 3개 조회
+      recommendedFAQs = await getRecommendedFAQs(
+        medicalResult.json,
+        normalizedSymptomData,
+        normalizedPetData.species
+      );
+      console.log('FAQ 조회 성공:', recommendedFAQs.length, '개');
+
+      // FAQ가 있고 보호자 응답 콜백이 있을 때만 FAQ 선택 UI 표시
+      if (recommendedFAQs.length > 0 && onWaitForGuardianResponse) {
+        // FAQ 선택 UI 표시 안내
+        onLogReceived({
+          agent: 'FAQ Agent',
+          role: '보호자 문의 안내',
+          icon: '❓',
+          type: 'faq',
+          content: `${normalizedPetData.petName}의 증상과 관련해 보호자분들이 자주 궁금해하시는 질문들이에요. 궁금한 내용이 있으시면 선택해 주세요!`,
+          timestamp: Date.now()
+        });
+
+        // FAQ UI 데이터 생성 및 보호자 응답 대기
+        const faqUIData = formatFAQsForUI(recommendedFAQs);
+        const selectedFAQIds = await onWaitForGuardianResponse(faqUIData, 'faq');
+
+        // 선택된 FAQ가 있으면 답변 생성
+        if (selectedFAQIds && selectedFAQIds.length > 0 && !selectedFAQIds.includes('skip')) {
+          faqAnswers = generateMultipleFAQAnswers(
+            selectedFAQIds,
+            recommendedFAQs,
+            medicalResult.json,
+            normalizedPetData
+          );
+
+          // FAQ 답변 메시지 표시
+          if (faqAnswers.length > 0) {
+            const faqAnswerMessage = formatFAQAnswersMessage(faqAnswers);
+            onLogReceived({
+              agent: 'FAQ Agent',
+              role: '보호자 문의 안내',
+              icon: '📚',
+              type: 'faq_answer',
+              content: faqAnswerMessage,
+              timestamp: Date.now()
+            });
+
+            await new Promise(resolve => setTimeout(resolve, 1500));
+          }
+        }
+      }
+    } catch (error) {
+      console.warn('FAQ 조회/처리 오류:', error);
+      // FAQ 오류가 발생해도 진단 과정은 계속 진행
+    }
 
     // 8. Summary - 진료 요약 관리실
     onLogReceived({
@@ -506,9 +558,9 @@ export const runMultiAgentDiagnosis = async (petData, symptomData, onLogReceived
       carePlan: careResult.json,
       // 약물 안내 정보
       medicationGuidance: medicationGuidance,
-      // FAQ 정보 (진찰 단계에서는 조회하지 않음 - 별도 화면에서 제공)
-      faqAnswers: null,
-      recommendedFAQs: null,
+      // FAQ 정보 (진단서 작성 전 조회된 보호자 예상 질문과 답변)
+      faqAnswers: faqAnswers.length > 0 ? faqAnswers : null,
+      recommendedFAQs: recommendedFAQs.length > 0 ? recommendedFAQs : null,
       // 협진 정보
       collaboration: collaborationResult ? {
         consensus_reached: collaborationResult.consensus.consensus_reached,
