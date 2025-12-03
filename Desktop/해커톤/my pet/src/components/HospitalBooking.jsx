@@ -1,51 +1,112 @@
 import { useState, useEffect, useRef } from 'react';
 import { generateHospitalPacket } from '../services/ai/hospitalPacket';
-import { getCurrentPosition, searchAnimalHospitals, initKakaoMap, addMarker, loadKakao } from '../services/kakaoMap';
+import { getCurrentPosition, searchAnimalHospitals, initKakaoMap, addMarker, loadKakao, searchHospitalsByRegionName } from '../services/kakaoMap';
 import { getApiKey, API_KEY_TYPES } from '../services/apiKeyManager';
 import { getNearbyHospitalsFromFirestore, searchHospitalsByRegion, searchHospitals } from '../lib/firestoreHospitals';
 import { bookingService } from '../services/firestore';
 import { db } from '../lib/firebase';
-import { collection, query, where, getDocs } from 'firebase/firestore';
+import { collection, query, where, getDocs, limit, doc, getDoc } from 'firebase/firestore';
+import { sendNotificationToClinicStaff } from '../services/pushNotificationService';
 
-// 동물 종류별 메인 캐릭터 이미지 매핑
-const ANIMAL_CHARACTER_IMAGES = {
-  dog: '/icon/main-image/dog_main-removebg-preview.png',
-  cat: '/icon/main-image/Cat_main-removebg-preview.png',
-  rabbit: '/icon/main-image/rabbit_main-removebg-preview.png',
-  hamster: '/icon/main-image/hamster_main-removebg-preview.png',
-  bird: '/icon/main-image/bird_main-removebg-preview.png',
-  hedgehog: '/icon/main-image/hedgehog_main-removebg-preview.png',
-  reptile: '/icon/main-image/reptile_main-removebg-preview.png',
-  etc: '/icon/main-image/etc_main-removebg-preview.png'
-};
+// 동물 이미지 경로 유틸리티 import
+import { getPetImage } from '../utils/imagePaths';
 
 // 🧪 테스트용 병원 - 행복동물병원 (clinic@happyvet.com과 연동)
 // Firestore에서 실제 clinicId를 동적으로 가져오는 함수
 const fetchHappyVetClinicId = async () => {
   try {
-    // clinics 컬렉션에서 "행복" 이름을 포함하는 병원 찾기
-    const clinicsRef = collection(db, 'clinics');
+    const clinicsRef = collection(db, "clinics");
+
+    // 1️⃣ 정확히 "행복 동물병원" (공백 포함)
+    try {
+      const exactQuery = query(
+        clinicsRef,
+        where("name", "==", "행복 동물병원"),
+        limit(1)
+      );
+      const exactSnap = await getDocs(exactQuery);
+
+      if (!exactSnap.empty) {
+        const doc = exactSnap.docs[0];
+        console.log(
+          "[테스트] 정확매칭 clinicId:",
+          doc.id,
+          doc.data().name
+        );
+        return doc.id; // 이 병원이 clinicStaff와 연결된 병원
+      }
+    } catch (e) {
+      console.warn("[fetchHappyVetClinicId] exact match 오류:", e);
+    }
+
+    // 2️⃣ 정확히 "행복동물병원" (공백 없음)
+    try {
+      const altQuery = query(
+        clinicsRef,
+        where("name", "==", "행복동물병원"),
+        limit(1)
+      );
+      const altSnap = await getDocs(altQuery);
+
+      if (!altSnap.empty) {
+        const doc = altSnap.docs[0];
+        console.log(
+          "[테스트] 공백없는 버전 clinicId:",
+          doc.id,
+          doc.data().name
+        );
+        return doc.id;
+      }
+    } catch (e) {
+      console.warn("[fetchHappyVetClinicId] alt match 오류:", e);
+    }
+
+    // 3️⃣ 전체 스캔 후 "행복 동물병원" 포함하는 병원 우선
     const snapshot = await getDocs(clinicsRef);
+    let candidateId = null;
 
     for (const doc of snapshot.docs) {
-      const data = doc.data();
-      // 병원 이름에 "행복" 또는 "happyvet"이 포함되어 있으면 해당 clinicId 반환
-      if (data.name && (data.name.includes('행복') || data.name.toLowerCase().includes('happy'))) {
-        console.log('[테스트] 행복동물병원 clinicId 발견:', doc.id, data.name);
+      const name = doc.data().name || "";
+      if (name.includes("행복 동물병원")) {
+        console.log(
+          "[테스트] 전체 스캔 - 행복 동물병원 포함:",
+          doc.id,
+          name
+        );
         return doc.id;
       }
     }
 
-    // 못 찾으면 첫 번째 병원 ID 반환 (테스트용)
+    // 4️⃣ "행복" 또는 "happy" 포함 병원
+    for (const doc of snapshot.docs) {
+      const name = (doc.data().name || "").toLowerCase();
+      if (name.includes("행복") || name.includes("happy")) {
+        console.log(
+          "[테스트] 전체 스캔 - 행복/happy 포함:",
+          doc.id,
+          doc.data().name
+        );
+        return doc.id;
+      }
+    }
+
+    // 5️⃣ fallback: clinics 첫 번째 병원
     if (snapshot.docs.length > 0) {
       const firstClinic = snapshot.docs[0];
-      console.log('[테스트] 행복동물병원 못 찾음, 첫 번째 병원 사용:', firstClinic.id, firstClinic.data().name);
+      console.log(
+        "[테스트] fallback 첫 병원:",
+        firstClinic.id,
+        firstClinic.data().name
+      );
       return firstClinic.id;
     }
+
   } catch (error) {
-    console.error('[테스트] clinicId 조회 실패:', error);
+    console.error("[fetchHappyVetClinicId] 실패:", error);
   }
-  return 'happyvet_test_clinic'; // 기본값
+
+  // 6️⃣ 최종 fallback
+  return "happyvet_test_clinic";
 };
 
 // 테스트 병원 객체 생성 함수
@@ -78,7 +139,51 @@ const calculateAge = (birthDate) => {
   return `${age}세`;
 };
 
-export function HospitalBooking({ petData, diagnosis, symptomData, onBack, onSelectHospital, onHome, currentUser }) {
+// 오늘 날짜의 체중을 dailyLogs에서 가져오는 함수
+const getTodayWeightFromDailyLogs = async (petId) => {
+  if (!petId) return null;
+
+  const todayStr = new Date().toISOString().split('T')[0]; // "YYYY-MM-DD"
+  const docId = `${petId}_${todayStr}`; // dailyLogService.saveLog와 동일한 규칙
+
+  try {
+    const ref = doc(db, 'dailyLogs', docId);
+    const snap = await getDoc(ref);
+
+    if (!snap.exists()) return null;
+
+    const data = snap.data();
+    const w = data?.weight;
+
+    return typeof w === 'number' ? w : null;
+  } catch (e) {
+    console.warn('[예약] dailyLogs 조회 중 오류:', e);
+    return null;
+  }
+};
+
+// Firestore에 쓰기 전에 undefined를 제거/변환하는 유틸
+const sanitizeForFirestore = (data) => {
+  if (Array.isArray(data)) {
+    return data.map((item) => sanitizeForFirestore(item));
+  }
+
+  if (data && typeof data === 'object') {
+    const result = {};
+    Object.entries(data).forEach(([key, value]) => {
+      if (value === undefined) {
+        result[key] = null; // undefined를 null로 변환
+      } else {
+        result[key] = sanitizeForFirestore(value);
+      }
+    });
+    return result;
+  }
+
+  return data;
+};
+
+export function HospitalBooking({ petData, diagnosis, symptomData, onBack, onSelectHospital, onHome, currentUser, onGoToMyBookings }) {
   const [hospitalPacket, setHospitalPacket] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedHospital, setSelectedHospital] = useState(null);
@@ -105,12 +210,22 @@ export function HospitalBooking({ petData, diagnosis, symptomData, onBack, onSel
 
   // 테스트 병원 state (동적으로 clinicId 업데이트)
   const [testHospital, setTestHospital] = useState(TEST_HOSPITAL_HAPPYVET);
+  
+  // 병원 리스트에 테스트 병원을 항상 최상단에 배치하는 헬퍼 함수
+  const ensureTestHospitalOnTop = (hospitalList) => {
+    const testHosp = hospitalList.find(h => h.isTestHospital === true);
+    const otherHospitals = hospitalList.filter(h => h.isTestHospital !== true);
+    return testHosp ? [testHosp, ...otherHospitals] : hospitalList;
+  };
 
   // 1. 병원 패킷 생성 및 현재 위치 가져오기
   useEffect(() => {
     let isMounted = true;
 
     const init = async () => {
+      // 페이지 최상단으로 스크롤
+      window.scrollTo(0, 0);
+
       try {
         // 🧪 테스트: 실제 clinicId 가져오기
         try {
@@ -138,7 +253,7 @@ export function HospitalBooking({ petData, diagnosis, symptomData, onBack, onSel
         }
         if (isMounted) setLoading(false);
 
-        // 위치 및 병원 검색 (Firestore 우선 사용)
+        // 위치 및 병원 검색 (카카오맵 우선, 행안부 fallback)
         try {
           const position = await getCurrentPosition();
           if (isMounted) {
@@ -149,9 +264,27 @@ export function HospitalBooking({ petData, diagnosis, symptomData, onBack, onSel
             }
           }
 
-          // Firestore에서 병원 검색 (우선)
+          // 카카오맵 API에서 병원 검색 (우선)
           try {
-            console.log('[HospitalBooking] Firestore에서 병원 검색 시작');
+            console.log('[HospitalBooking] 카카오맵에서 병원 검색 시작');
+            const kakaoHospitals = await searchAnimalHospitals(position.lat, position.lng);
+
+            if (isMounted && kakaoHospitals.length > 0) {
+              console.log('[HospitalBooking] 카카오맵 병원 데이터:', kakaoHospitals.length, '개');
+              // 🧪 테스트 병원을 최상단에 추가 (항상 고정)
+              const hospitalList = ensureTestHospitalOnTop([testHospital || TEST_HOSPITAL_HAPPYVET, ...kakaoHospitals]);
+              setHospitals(hospitalList);
+              setDataSource('kakao');
+              setMapLoading(false);
+              return; // 카카오맵 성공 시 여기서 종료
+            }
+          } catch (kakaoErr) {
+            console.warn('[HospitalBooking] 카카오맵 검색 실패, Firestore로 fallback:', kakaoErr);
+          }
+
+          // 카카오맵 실패 시 Firestore(행안부) 데이터로 fallback
+          try {
+            console.log('[HospitalBooking] Firestore(행안부)에서 병원 검색 시작');
             const firestoreHospitals = await getNearbyHospitalsFromFirestore(
               position.lat,
               position.lng,
@@ -160,37 +293,54 @@ export function HospitalBooking({ petData, diagnosis, symptomData, onBack, onSel
 
             if (isMounted && firestoreHospitals.length > 0) {
               console.log('[HospitalBooking] Firestore 병원 데이터:', firestoreHospitals.length, '개');
-              // 🧪 테스트 병원을 최상단에 추가
-              setHospitals([TEST_HOSPITAL_HAPPYVET, ...firestoreHospitals]);
+              // 🧪 테스트 병원을 최상단에 추가 (항상 고정)
+              const hospitalList = ensureTestHospitalOnTop([testHospital || TEST_HOSPITAL_HAPPYVET, ...firestoreHospitals]);
+              setHospitals(hospitalList);
               setDataSource('firestore');
               setMapLoading(false);
-              return; // Firestore 성공 시 여기서 종료
+              return;
             }
           } catch (firestoreErr) {
-            console.warn('[HospitalBooking] Firestore 검색 실패, Kakao로 fallback:', firestoreErr);
+            console.warn('[HospitalBooking] Firestore 검색도 실패:', firestoreErr);
           }
 
-          // Firestore 실패 시 Kakao Map API로 fallback
-          const hospitalList = await searchAnimalHospitals(position.lat, position.lng);
+          // 둘 다 실패 시 테스트 병원만 표시
           if (isMounted) {
-            // 🧪 테스트 병원을 최상단에 추가
-            setHospitals([TEST_HOSPITAL_HAPPYVET, ...hospitalList]);
+            const hospitalList = ensureTestHospitalOnTop([testHospital || TEST_HOSPITAL_HAPPYVET]);
+            setHospitals(hospitalList);
             setDataSource('kakao');
             setMapLoading(false);
           }
         } catch (err) {
           console.error('위치/병원 검색 오류:', err);
-          // 기본 위치(강남역)로 Firestore 검색 시도
+          // 기본 위치(강남역)로 카카오맵 검색 시도
           if (isMounted) {
             const defaultLat = 37.4979;
             const defaultLng = 127.0276;
             setUserLocation({ lat: defaultLat, lng: defaultLng });
 
+            // 카카오맵 먼저 시도
+            try {
+              const kakaoHospitals = await searchAnimalHospitals(defaultLat, defaultLng);
+              if (kakaoHospitals.length > 0) {
+                // 🧪 테스트 병원을 최상단에 추가 (항상 고정)
+                const hospitalList = ensureTestHospitalOnTop([testHospital || TEST_HOSPITAL_HAPPYVET, ...kakaoHospitals]);
+                setHospitals(hospitalList);
+                setDataSource('kakao');
+                setMapLoading(false);
+                return;
+              }
+            } catch (kakaoErr) {
+              console.warn('[HospitalBooking] 카카오맵 fallback 실패:', kakaoErr);
+            }
+
+            // 카카오맵 실패 시 Firestore 시도
             try {
               const firestoreHospitals = await getNearbyHospitalsFromFirestore(defaultLat, defaultLng, 5);
               if (firestoreHospitals.length > 0) {
-                // 🧪 테스트 병원을 최상단에 추가
-                setHospitals([TEST_HOSPITAL_HAPPYVET, ...firestoreHospitals]);
+                // 🧪 테스트 병원을 최상단에 추가 (항상 고정)
+                const hospitalList = ensureTestHospitalOnTop([testHospital || TEST_HOSPITAL_HAPPYVET, ...firestoreHospitals]);
+                setHospitals(hospitalList);
                 setDataSource('firestore');
                 setMapLoading(false);
                 return;
@@ -232,8 +382,9 @@ export function HospitalBooking({ petData, diagnosis, symptomData, onBack, onSel
                 businessHours: '24시간 운영',
               }
             ];
-            // 🧪 테스트 병원을 최상단에 추가
-            setHospitals([TEST_HOSPITAL_HAPPYVET, ...fallbackHospitals]);
+            // 🧪 테스트 병원을 최상단에 추가 (항상 고정)
+            const hospitalList = ensureTestHospitalOnTop([testHospital || TEST_HOSPITAL_HAPPYVET, ...fallbackHospitals]);
+            setHospitals(hospitalList);
             setMapLoading(false);
           }
         }
@@ -349,7 +500,6 @@ export function HospitalBooking({ petData, diagnosis, symptomData, onBack, onSel
       if (hospitalVisitTime) {
         defaultMessage += `[권장 방문] ${hospitalVisitTime}\n`;
       }
-      defaultMessage += '\n※ AI 진단서가 함께 전송됩니다.';
       setBookingMessage(defaultMessage.trim());
     } else {
       setBookingMessage('');
@@ -359,25 +509,61 @@ export function HospitalBooking({ petData, diagnosis, symptomData, onBack, onSel
   // AI 진단서 첨부 여부 (디폴트: 해제)
   const [attachDiagnosis, setAttachDiagnosis] = useState(false);
 
+  // AI 진단서 첨부 체크 시 메시지에 안내 추가
+  useEffect(() => {
+    if (showBookingModal && diagnosis) {
+      setBookingMessage(prev => {
+        // 기존 AI 진단서 안내 문구 제거
+        const withoutNotice = prev.replace(/\n*※ AI 진단서가 함께 전송됩니다\.?/g, '').trim();
+        // 첨부 시에만 문구 추가
+        if (attachDiagnosis) {
+          return withoutNotice + '\n\n※ AI 진단서가 함께 전송됩니다.';
+        }
+        return withoutNotice;
+      });
+    }
+  }, [attachDiagnosis, showBookingModal, diagnosis]);
+
   const handleConfirmBooking = async () => {
     if (!bookingDate || !bookingTime) {
       alert('날짜와 시간을 선택해주세요.');
       return;
     }
 
-    // 반려동물 상세 정보
+    // 🔹 1단계: 오늘자 체중 시도 (dailyLogs에서 조회)
+    const petId = petData?.id;
+    const todayWeight = await getTodayWeightFromDailyLogs(petId);
+
+    // 🔹 2단계: 체중 우선순위 (오늘 체중 > petData.weight > null)
+    const resolvedWeight =
+      typeof todayWeight === 'number'
+        ? todayWeight
+        : typeof petData?.weight === 'number'
+        ? petData.weight
+        : petData?.weight
+        ? Number(petData.weight) || null
+        : null;
+
+    // 반려동물 상세 정보 (모든 필드 null-safe)
     const petProfile = {
-      id: petData?.id,
-      name: petData?.petName || petData?.name,
-      species: petData?.species,
-      breed: petData?.breed,
-      birthDate: petData?.birthDate,
-      age: petData?.birthDate ? calculateAge(petData.birthDate) : petData?.age,
-      sex: petData?.sex,
-      neutered: petData?.neutered,
-      weight: petData?.weight,
-      allergies: petData?.allergies || [],
-      chronicConditions: petData?.chronicConditions || []
+      id: petData?.id || null,
+      name: petData?.petName || petData?.name || null,
+      species: petData?.species || null,
+      breed: petData?.breed || null,
+      birthDate: petData?.birthDate || null,
+      age: petData?.birthDate
+        ? calculateAge(petData.birthDate)
+        : (typeof petData?.age === 'number' ? petData.age : null),
+      sex: petData?.sex || null,
+      neutered:
+        typeof petData?.neutered === 'boolean'
+          ? petData.neutered
+          : null,
+      weight: resolvedWeight, // 🔹 undefined 방지: dailyLogs > petData.weight > null
+      allergies: Array.isArray(petData?.allergies) ? petData.allergies : [],
+      chronicConditions: Array.isArray(petData?.chronicConditions)
+        ? petData.chronicConditions
+        : []
     };
 
     // AI 진단 상세 정보 (첨부 시)
@@ -410,6 +596,8 @@ export function HospitalBooking({ petData, diagnosis, symptomData, onBack, onSel
       id: 'booking_' + Date.now(),
       petId: petData?.id,
       petName: petData?.petName,
+      petSpecies: petData?.species || null, // 동물 종류 (대분류)
+      petBreed: petData?.breed || null, // 품종 (소분류)
       petProfile: petProfile, // 상세 펫 정보 추가
       hospital: {
         id: bookingHospital.id,
@@ -426,39 +614,105 @@ export function HospitalBooking({ petData, diagnosis, symptomData, onBack, onSel
       aiDiagnosis: aiDiagnosisData // AI 진단 상세 데이터 포함
     };
 
-    // localStorage에 저장
+    // localStorage에 저장 (사용자별 키 사용)
     try {
-      const existingBookings = JSON.parse(localStorage.getItem('petMedical_bookings') || '[]');
+      const userId = currentUser?.uid;
+      const storageKey = userId ? `petMedical_bookings_${userId}` : 'petMedical_bookings';
+      const existingBookings = JSON.parse(localStorage.getItem(storageKey) || '[]');
       existingBookings.push(bookingData);
-      localStorage.setItem('petMedical_bookings', JSON.stringify(existingBookings));
+      localStorage.setItem(storageKey, JSON.stringify(existingBookings));
+      console.log('✅ 예약 localStorage 저장 완료:', storageKey, bookingData.id);
     } catch (error) {
       console.error('예약 localStorage 저장 실패:', error);
     }
 
     // Firestore에도 저장
     try {
+      // clinics 컬렉션에서 병원명으로 clinics ID 찾기
+      let actualClinicId = bookingHospital.id; // 기본값은 animal_hospitals ID
+      let animalHospitalId = bookingHospital.id; // 원본 ID 보관
+      
+      try {
+        const clinicsQuery = query(
+          collection(db, 'clinics'),
+          where('name', '==', bookingHospital.name),
+          limit(1)
+        );
+        const clinicsSnapshot = await getDocs(clinicsQuery);
+        
+        if (!clinicsSnapshot.empty) {
+          actualClinicId = clinicsSnapshot.docs[0].id;
+          console.log('[예약] clinics ID 찾음:', actualClinicId, '병원명:', bookingHospital.name);
+        } else {
+          console.warn('[예약] clinics에서 병원을 찾을 수 없음, animal_hospitals ID 사용:', bookingHospital.id);
+        }
+      } catch (clinicSearchError) {
+        console.warn('[예약] clinics 검색 오류:', clinicSearchError);
+      }
+      
       const firestoreBookingData = {
         ...bookingData,
         userId: currentUser?.uid || petData?.userId || null,
-        clinicId: bookingHospital.id,
-        clinicName: bookingHospital.name
+        clinicId: actualClinicId, // clinics 컬렉션의 ID 사용
+        clinicName: bookingHospital.name,
+        animalHospitalId: animalHospitalId, // 원본 ID 보관 (하위 호환)
+        hospitalId: animalHospitalId // 추가 필드로 보관
       };
-      const result = await bookingService.createBooking(firestoreBookingData);
+
+      // 🔹 Firestore 쓰기 전에 undefined 제거
+      const sanitizedBookingData = sanitizeForFirestore(firestoreBookingData);
+      const result = await bookingService.createBooking(sanitizedBookingData);
       if (result.success) {
-        console.log('예약 Firestore 저장 완료:', result.id);
+        console.log('✅ 예약 Firestore 저장 완료:', result.id, 'clinicId:', actualClinicId);
+        console.log('📋 예약 데이터:', {
+          clinicId: actualClinicId,
+          clinicName: bookingHospital.name,
+          date: bookingDate,
+          time: bookingTime,
+          petName: petData?.petName
+        });
+        
+        // 병원 스태프에게 푸시 알림 전송
+        if (actualClinicId) {
+          try {
+            await sendNotificationToClinicStaff(
+              actualClinicId,
+              '예약 신청이 접수되었습니다',
+              `${petData?.petName || '반려동물'}의 예약이 접수되었습니다. (${bookingDate} ${bookingTime})`,
+              {
+                type: 'booking_created',
+                bookingId: result.id,
+                clinicId: actualClinicId,
+                petName: petData?.petName,
+                date: bookingDate,
+                time: bookingTime,
+                url: '/clinic-dashboard'
+              }
+            );
+            console.log('✅ 병원 스태프 푸시 알림 전송 완료');
+          } catch (pushError) {
+            console.warn('푸시 알림 전송 실패 (예약은 저장됨):', pushError);
+          }
+        }
+      } else {
+        console.error('❌ 예약 Firestore 저장 실패:', result.error);
+        alert('예약 저장에 실패했습니다. 다시 시도해주세요.');
       }
     } catch (firestoreError) {
-      console.warn('예약 Firestore 저장 실패 (로컬 저장은 완료):', firestoreError);
+      console.error('❌ 예약 Firestore 저장 오류:', firestoreError);
+      alert('예약 저장 중 오류가 발생했습니다: ' + firestoreError.message);
     }
 
-    setSelectedHospital(bookingHospital);
+    // 예약 완료 후 selectedHospital 업데이트 (bookingDate, bookingTime 포함)
+    const hospitalWithBooking = {
+      ...bookingHospital,
+      bookingDate,
+      bookingTime,
+      bookingMessage
+    };
+    setSelectedHospital(hospitalWithBooking);
     if (onSelectHospital) {
-      onSelectHospital({
-        ...bookingHospital,
-        bookingDate,
-        bookingTime,
-        bookingMessage
-      });
+      onSelectHospital(hospitalWithBooking);
     }
 
     // 성공 화면 표시
@@ -508,8 +762,9 @@ export function HospitalBooking({ petData, diagnosis, symptomData, onBack, onSel
         setLocationError(position.error);
       }
       const hospitalList = await searchAnimalHospitals(position.lat, position.lng);
-      // 🧪 테스트 병원을 최상단에 추가
-      setHospitals([TEST_HOSPITAL_HAPPYVET, ...hospitalList]);
+      // 🧪 테스트 병원을 최상단에 추가 (항상 고정)
+      const finalHospitalList = ensureTestHospitalOnTop([testHospital || TEST_HOSPITAL_HAPPYVET, ...hospitalList]);
+      setHospitals(finalHospitalList);
     } catch (error) {
       console.error('위치 갱신 오류:', error);
     } finally {
@@ -537,17 +792,19 @@ export function HospitalBooking({ petData, diagnosis, symptomData, onBack, onSel
       // localStorage에서 API 키 가져오기 (마이페이지에서 설정한 키)
       const apiKey = getApiKey(API_KEY_TYPES.GEMINI);
       if (apiKey) {
-        const prompt = `다음 동물병원 정보를 바탕으로 이 병원만의 특징과 장점을 구체적으로 요약해주세요.
+        const prompt = `다음 동물병원 정보를 바탕으로 이 병원만의 특징과 장점을 긍정적으로 요약해주세요.
 
 병원명: ${hospital.name}
 주소: ${hospital.address}
 24시간 운영: ${hospital.is24Hours ? '예' : '아니오'}
-평점: ${hospital.rating || '정보 없음'}
-후기 수: ${hospital.reviewCount || 0}개
 거리: ${hospital.distance ? (hospital.distance / 1000).toFixed(1) + 'km' : '정보 없음'}
 
-각 병원의 고유한 특징(24시간 여부, 평점, 위치 등)을 반영하여 다른 병원과 차별화된 2-3줄 요약을 작성하세요.
-병원마다 다른 내용으로 작성해주세요.`;
+중요 규칙:
+- "후기가 없어", "정확한 평가가 어렵다", "정보가 부족하다" 같은 부정적인 표현은 절대 사용하지 마세요.
+- 평점이나 후기 관련 언급은 하지 마세요.
+- 24시간 여부, 위치, 접근성 등 긍정적인 특징만 강조해주세요.
+- 병원의 장점과 접근성 위주로 2-3줄 요약을 작성하세요.
+- 병원마다 다른 내용으로 작성해주세요.`;
 
         const response = await fetch(
           `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
@@ -571,14 +828,8 @@ export function HospitalBooking({ petData, diagnosis, symptomData, onBack, onSel
         // API 키가 없으면 병원 특성에 맞는 기본 요약 생성
         let defaultSummary = '';
         if (hospital.is24Hours) {
-          defaultSummary = `🚨 24시간 운영 병원! 야간 응급 상황에도 즉시 대응 가능합니다. `;
-        }
-        if (hospital.rating && parseFloat(hospital.rating) >= 4.5) {
-          defaultSummary += `⭐ 평점 ${hospital.rating}점의 인기 병원으로, ${hospital.reviewCount}개 이상의 긍정적인 후기가 있습니다.`;
-        } else if (hospital.rating) {
-          defaultSummary += `평점 ${hospital.rating}점, ${hospital.reviewCount}개의 후기가 있는 검증된 병원입니다.`;
-        }
-        if (!defaultSummary) {
+          defaultSummary = `🚨 24시간 운영 병원! 야간 응급 상황에도 즉시 대응 가능합니다.`;
+        } else {
           defaultSummary = `${hospital.name}은(는) 내 위치에서 ${hospital.distance ? (hospital.distance / 1000).toFixed(1) + 'km' : '가까운'} 거리에 있는 동물병원입니다.`;
         }
         setReviewSummaries(prev => ({ ...prev, [hospital.id]: defaultSummary }));
@@ -588,10 +839,7 @@ export function HospitalBooking({ petData, diagnosis, symptomData, onBack, onSel
       // Fallback 요약 - 병원별 특성 반영
       let fallbackSummary = hospital.is24Hours
         ? `🚨 24시간 응급 진료 가능한 병원입니다.`
-        : `평점 ${hospital.rating || '정보없음'}점의 동물병원입니다.`;
-      if (hospital.reviewCount > 100) {
-        fallbackSummary += ` ${hospital.reviewCount}개의 후기로 검증된 곳입니다.`;
-      }
+        : `${hospital.name}은(는) 접근성이 좋은 동물병원입니다.`;
       setReviewSummaries(prev => ({ ...prev, [hospital.id]: fallbackSummary }));
     } finally {
       setLoadingReviews(prev => {
@@ -612,8 +860,9 @@ export function HospitalBooking({ petData, diagnosis, symptomData, onBack, onSel
         setIsSearching(true);
         try {
           const results = await getNearbyHospitalsFromFirestore(userLocation.lat, userLocation.lng, 5);
-          // 🧪 테스트 병원을 최상단에 추가
-          setHospitals([TEST_HOSPITAL_HAPPYVET, ...results]);
+          // 🧪 테스트 병원을 최상단에 추가 (항상 고정)
+          const hospitalList = ensureTestHospitalOnTop([testHospital || TEST_HOSPITAL_HAPPYVET, ...results]);
+          setHospitals(hospitalList);
           setSearchMode('nearby');
         } catch (err) {
           console.error('위치 기반 검색 실패:', err);
@@ -626,15 +875,51 @@ export function HospitalBooking({ petData, diagnosis, symptomData, onBack, onSel
     setIsSearching(true);
     try {
       console.log('[HospitalBooking] 지역/병원명 검색:', searchQuery);
-      const results = await searchHospitalsByRegion(searchQuery, 50);
-      console.log('[HospitalBooking] 검색 결과:', results.length, '개');
-      // 🧪 테스트 병원을 최상단에 추가
-      setHospitals([TEST_HOSPITAL_HAPPYVET, ...results]);
-      setSearchMode('region');
-      setDataSource('firestore');
+      
+      // 1. 카카오맵 REST API 우선 시도
+      try {
+        const kakaoResults = await searchHospitalsByRegionName(searchQuery);
+        if (kakaoResults && kakaoResults.length > 0) {
+          console.log('[HospitalBooking] 카카오맵 검색 결과:', kakaoResults.length, '개');
+          // 🧪 테스트 병원을 최상단에 추가 (항상 고정)
+          const hospitalList = ensureTestHospitalOnTop([testHospital || TEST_HOSPITAL_HAPPYVET, ...kakaoResults]);
+          setHospitals(hospitalList);
+          setSearchMode('region');
+          setDataSource('kakao');
+          setIsSearching(false);
+          return;
+        }
+      } catch (kakaoErr) {
+        console.warn('[HospitalBooking] 카카오맵 검색 실패, Firestore로 fallback:', kakaoErr);
+      }
+      
+      // 2. Firestore fallback (권한 오류 가능성 있음)
+      try {
+        const results = await searchHospitalsByRegion(searchQuery, 50);
+        console.log('[HospitalBooking] Firestore 검색 결과:', results.length, '개');
+        // 🧪 테스트 병원을 최상단에 추가 (항상 고정)
+        const hospitalList = ensureTestHospitalOnTop([testHospital || TEST_HOSPITAL_HAPPYVET, ...results]);
+        setHospitals(hospitalList);
+        setSearchMode('region');
+        setDataSource('firestore');
+      } catch (firestoreErr) {
+        console.error('[HospitalBooking] Firestore 검색 오류:', firestoreErr);
+        // 권한 오류인 경우 사용자에게 안내
+        if (firestoreErr.message?.includes('permissions') || firestoreErr.code === 'permission-denied') {
+          alert('검색 권한 오류가 발생했습니다. 카카오맵 검색을 사용하거나, Firebase 보안 규칙을 확인해주세요.');
+        } else {
+          alert('검색 중 오류가 발생했습니다: ' + firestoreErr.message);
+        }
+        // 테스트 병원만이라도 표시
+        const hospitalList = ensureTestHospitalOnTop([testHospital || TEST_HOSPITAL_HAPPYVET]);
+        setHospitals(hospitalList);
+      }
     } catch (err) {
       console.error('검색 오류:', err);
-      alert('검색 중 오류가 발생했습니다.');
+      alert('검색 중 오류가 발생했습니다: ' + err.message);
+      // 테스트 병원만이라도 표시
+      const hospitalList = ensureTestHospitalOnTop([testHospital || TEST_HOSPITAL_HAPPYVET]);
+      setHospitals(hospitalList);
     }
     setIsSearching(false);
   };
@@ -663,11 +948,19 @@ export function HospitalBooking({ petData, diagnosis, symptomData, onBack, onSel
     );
   }
 
-  // 검색 필터링
-  const filteredHospitals = hospitals.filter(hospital =>
+  // 검색 필터링 - 테스트 병원은 항상 최상단에 고정, 그 아래로 위치 기반 병원들
+  const testHospitalFromList = hospitals.find(h => h.isTestHospital === true);
+  const otherHospitals = hospitals.filter(h => h.isTestHospital !== true);
+
+  const filteredOtherHospitals = otherHospitals.filter(hospital =>
     !searchQuery || hospital.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     (hospital.address && hospital.address.toLowerCase().includes(searchQuery.toLowerCase()))
   );
+
+  // 테스트 병원이 있으면 항상 최상단에 배치, 그 아래로 필터링된 위치 기반 병원들
+  const filteredHospitals = testHospitalFromList
+    ? [testHospitalFromList, ...filteredOtherHospitals]
+    : filteredOtherHospitals;
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -741,15 +1034,12 @@ export function HospitalBooking({ petData, diagnosis, symptomData, onBack, onSel
               <div className="p-4 space-y-4">
                 {/* 반려동물 정보 */}
                 <div className="flex items-center gap-3">
-                  <div className="w-14 h-14 rounded-full bg-white shadow flex items-center justify-center overflow-hidden">
+                  <div className="w-14 h-14 rounded-full bg-white shadow overflow-hidden">
                     <img
-                      src={petData?.profileImage || ANIMAL_CHARACTER_IMAGES[petData?.species] || ANIMAL_CHARACTER_IMAGES.etc}
+                      src={getPetImage(petData, false)}
                       alt={petData?.petName || '반려동물'}
                       className="w-full h-full object-cover"
-                      onError={(e) => {
-                        e.target.style.display = 'none';
-                        e.target.parentElement.innerHTML = `<span class="text-2xl">${petData?.species === 'dog' ? '🐕' : petData?.species === 'cat' ? '🐈' : '🐾'}</span>`;
-                      }}
+                      style={{ objectPosition: 'center', display: 'block' }}
                     />
                   </div>
                   <div>
@@ -871,24 +1161,24 @@ export function HospitalBooking({ petData, diagnosis, symptomData, onBack, onSel
         </div>
 
         {/* 검색창 */}
-        <div className="flex gap-2">
-          <div className="relative flex-1">
+        <div className="flex gap-1.5 sm:gap-2">
+          <div className="relative flex-1 min-w-0">
             <input
               type="text"
-              placeholder="지역명 검색 (예: 부산, 해운대, 강남)"
+              placeholder="지역명 검색 (예: 부산, 강남)"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyDown={handleSearchKeyDown}
-              className="w-full px-4 py-3 pl-10 bg-white border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+              className="w-full px-3 sm:px-4 py-2.5 sm:py-3 pl-8 sm:pl-10 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
             />
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">🔍</span>
+            <span className="absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">🔍</span>
           </div>
           <button
             onClick={handleSearch}
             disabled={isSearching}
-            className="px-4 py-3 bg-sky-500 text-white font-bold rounded-xl hover:bg-sky-600 transition-colors disabled:opacity-50 whitespace-nowrap"
+            className="px-3 sm:px-4 py-2.5 sm:py-3 bg-sky-500 text-white text-xs sm:text-sm font-bold rounded-xl hover:bg-sky-600 transition-colors disabled:opacity-50 whitespace-nowrap flex-shrink-0"
           >
-            {isSearching ? '검색중...' : '검색'}
+            {isSearching ? '검색중' : '검색'}
           </button>
         </div>
 
@@ -908,27 +1198,27 @@ export function HospitalBooking({ petData, diagnosis, symptomData, onBack, onSel
             </div>
           ) : !isSearching && (
             filteredHospitals.map(hospital => (
-              <div key={hospital.id} className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
+              <div key={hospital.id} className="bg-white p-3 sm:p-4 rounded-2xl shadow-sm border border-slate-100">
                 {/* 병원명과 거리 */}
                 <div className="mb-2">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <h4 className="font-bold text-sky-600 text-base">{hospital.name}</h4>
+                  <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                    <h4 className="font-bold text-sky-600 text-sm sm:text-base leading-tight">{hospital.name}</h4>
                     <a
                       href={hospital.url || `https://map.kakao.com/link/search/${encodeURIComponent(hospital.name)}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="px-2 py-0.5 bg-[#FFEB00] text-[#3C1E1E] text-xs font-bold rounded hover:bg-[#F5E100] transition-colors"
+                      className="px-1.5 sm:px-2 py-0.5 bg-[#FFEB00] text-[#3C1E1E] text-[10px] sm:text-xs font-bold rounded hover:bg-[#F5E100] transition-colors flex-shrink-0"
                     >
                       상세정보
                     </a>
                     {hospital.is24Hours && (
-                      <span className="px-2 py-0.5 bg-red-500 text-white text-xs font-bold rounded">24시</span>
+                      <span className="px-1.5 sm:px-2 py-0.5 bg-red-500 text-white text-[10px] sm:text-xs font-bold rounded flex-shrink-0">24시</span>
                     )}
                   </div>
-                  <div className="flex items-center gap-2 mt-1">
-                    <p className="text-xs text-slate-500">{hospital.roadAddress || hospital.address}</p>
+                  <div className="flex items-center gap-1.5 sm:gap-2 mt-1 flex-wrap">
+                    <p className="text-[10px] sm:text-xs text-slate-500 leading-tight">{hospital.roadAddress || hospital.address}</p>
                     {hospital.distance && (
-                      <span className="text-sm font-bold text-red-500">{formatDistance(hospital.distance)}</span>
+                      <span className="text-xs sm:text-sm font-bold text-red-500 flex-shrink-0">{formatDistance(hospital.distance)}</span>
                     )}
                   </div>
                 </div>
@@ -951,19 +1241,19 @@ export function HospitalBooking({ petData, diagnosis, symptomData, onBack, onSel
                   ) : (
                     <button
                       onClick={() => generateReviewSummary(hospital)}
-                      className="text-sm text-sky-600 hover:text-sky-700 font-bold flex items-center gap-1.5 bg-sky-50 px-3 py-2 rounded-lg hover:bg-sky-100 transition-colors"
+                      className="text-xs text-sky-600 hover:text-sky-700 font-semibold flex items-center gap-1 bg-sky-50 px-2 py-1.5 rounded-lg hover:bg-sky-100 transition-colors"
                     >
-                      <span className="text-base">🤖</span>
-                      AI 병원 분석 보기
+                      <span className="text-xs">🤖</span>
+                      <span>AI 병원 분석</span>
                     </button>
                   )}
                 </div>
 
-                {/* 버튼 - 순서: 예약하기, 길찾기, T펫택시 예약 */}
-                <div className="flex gap-2">
+                {/* 버튼 - 순서: 예약하기, 길찾기, Kakao T 펫택시 */}
+                <div className="flex gap-1.5 sm:gap-2">
                   <button
                     onClick={() => handleBookAppointment(hospital)}
-                    className="flex-1 py-2.5 text-center bg-sky-500 text-white rounded-xl text-sm font-bold hover:bg-sky-600 transition-colors"
+                    className="flex-1 py-2 sm:py-2.5 text-center bg-sky-500 text-white rounded-xl text-xs sm:text-sm font-bold hover:bg-sky-600 transition-colors flex items-center justify-center min-w-0"
                   >
                     예약하기
                   </button>
@@ -974,18 +1264,19 @@ export function HospitalBooking({ petData, diagnosis, symptomData, onBack, onSel
                     }
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex-1 py-2.5 text-center border border-slate-200 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors"
+                    className="flex-1 py-2 sm:py-2.5 text-center bg-[#FEE500] rounded-xl text-[10px] sm:text-xs font-bold text-[#3C1E1E] hover:bg-[#F5DC00] transition-colors flex items-center justify-center gap-0.5 sm:gap-1 min-w-0"
                   >
-                    🗺️ 길찾기
+                    <span>📍</span>
+                    <span className="truncate">길찾기</span>
                   </a>
                   <a
                     href="https://service.kakaomobility.com/launch/kakaot"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex-1 py-2.5 text-center bg-[#1E1B4B] rounded-xl text-sm font-bold hover:bg-[#2d2a5a] transition-colors flex items-center justify-center gap-1"
+                    className="flex-1 py-2 sm:py-2.5 text-center bg-[#1E1B4B] rounded-xl text-[10px] sm:text-xs font-bold hover:bg-[#2d2a5a] transition-colors flex items-center justify-center gap-0.5 min-w-0"
                   >
-                    <span className="text-[#FACC15] font-black text-lg">T</span>
-                    <span className="text-white">펫택시</span>
+                    <span className="text-[#FACC15] truncate">Kakao T</span>
+                    <span className="text-white truncate hidden xs:inline">펫택시</span>
                   </a>
                 </div>
               </div>
@@ -996,8 +1287,12 @@ export function HospitalBooking({ petData, diagnosis, symptomData, onBack, onSel
 
       {/* 예약 모달 */}
       {showBookingModal && bookingHospital && (
-        <div className="fixed inset-0 bg-black/50 flex items-end justify-center z-50 animate-fade-in">
-          <div className="bg-white rounded-t-3xl w-full max-w-md p-6 pb-10 animate-slide-up max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[9999] animate-fade-in" onClick={(e) => {
+          if (e.target === e.currentTarget) {
+            setShowBookingModal(false);
+          }
+        }}>
+          <div className="bg-white rounded-3xl w-full max-w-md mx-4 p-4 pb-6 max-h-[90vh] overflow-y-auto" style={{ overscrollBehavior: 'contain' }}>
             {bookingSuccess ? (
               /* 예약 성공 화면 */
               <div className="text-center py-8">
@@ -1037,10 +1332,14 @@ export function HospitalBooking({ petData, diagnosis, symptomData, onBack, onSel
                   onClick={() => {
                     setShowBookingModal(false);
                     setBookingSuccess(false);
+                    // 마이페이지 > 내예약으로 이동
+                    if (onGoToMyBookings) {
+                      onGoToMyBookings();
+                    }
                   }}
                   className="w-full py-3 bg-primary text-white font-bold rounded-lg hover:bg-primary/90 transition-colors"
                 >
-                  확인
+                  내 예약 확인하기
                 </button>
               </div>
             ) : (
@@ -1057,122 +1356,82 @@ export function HospitalBooking({ petData, diagnosis, symptomData, onBack, onSel
                 </div>
 
                 {/* 선택된 병원 정보 */}
-                <div className="bg-slate-50 rounded-lg p-3 mb-4">
-                  <p className="font-bold text-slate-900">{bookingHospital.name}</p>
-                  <p className="text-sm text-slate-500">{bookingHospital.roadAddress || bookingHospital.address}</p>
+                <div className="bg-slate-50 rounded-lg p-2.5 mb-3">
+                  <p className="font-bold text-slate-900 text-sm">{bookingHospital.name}</p>
+                  <p className="text-xs text-slate-500">{bookingHospital.roadAddress || bookingHospital.address}</p>
                 </div>
 
-                {/* 날짜 선택 */}
-                <div className="mb-4">
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
-                    <span className="material-symbols-outlined text-sm align-middle mr-1">calendar_today</span>
-                    예약 날짜
-                  </label>
-                  <input
-                    type="date"
-                    value={bookingDate}
-                    onChange={(e) => setBookingDate(e.target.value)}
-                    min={new Date().toISOString().split('T')[0]}
-                    className="w-full p-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
-                  />
-                </div>
-
-                {/* 시간 선택 */}
-                <div className="mb-4">
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
-                    <span className="material-symbols-outlined text-sm align-middle mr-1">schedule</span>
-                    예약 시간
-                  </label>
-                  <div className="grid grid-cols-4 gap-2 max-h-32 overflow-y-auto">
-                    {getTimeSlots().map(time => (
-                      <button
-                        key={time}
-                        onClick={() => setBookingTime(time)}
-                        className={`py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
-                          bookingTime === time
-                            ? 'bg-primary text-white'
-                            : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                        }`}
-                      >
-                        {time}
-                      </button>
-                    ))}
+                {/* 날짜/시간 선택 - 한 줄에 */}
+                <div className="flex gap-2 mb-3">
+                  <div className="flex-1">
+                    <label className="block text-xs font-medium text-slate-700 mb-1">예약 날짜</label>
+                    <input
+                      type="date"
+                      value={bookingDate}
+                      onChange={(e) => setBookingDate(e.target.value)}
+                      min={new Date().toISOString().split('T')[0]}
+                      className="w-full p-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <label className="block text-xs font-medium text-slate-700 mb-1">예약 시간</label>
+                    <select
+                      value={bookingTime}
+                      onChange={(e) => setBookingTime(e.target.value)}
+                      className="w-full p-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
+                    >
+                      <option value="">시간 선택</option>
+                      {getTimeSlots().map(time => (
+                        <option key={time} value={time}>{time}</option>
+                      ))}
+                    </select>
                   </div>
                 </div>
 
                 {/* 메시지 입력 */}
-                <div className="mb-6">
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
-                    <span className="material-symbols-outlined text-sm align-middle mr-1">edit_note</span>
+                <div className="mb-3">
+                  <label className="block text-xs font-medium text-slate-700 mb-1">
                     병원에 전달할 메시지 (선택)
                   </label>
                   <textarea
                     value={bookingMessage}
                     onChange={(e) => setBookingMessage(e.target.value)}
                     placeholder="증상이나 요청사항을 입력해주세요"
-                    rows="3"
-                    className="w-full p-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary resize-none"
+                    rows="2"
+                    className="w-full p-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary resize-none"
                   />
                 </div>
 
                 {/* AI 진단서 첨부 옵션 */}
                 {diagnosis && (
-                  <div className="mb-4">
+                  <div className="mb-3">
                     <div
-                      className={`rounded-xl p-4 border-2 cursor-pointer transition-all ${
+                      className={`rounded-lg p-3 border-2 cursor-pointer transition-all ${
                         attachDiagnosis
-                          ? 'border-primary bg-primary/10 ring-2 ring-primary/30'
-                          : 'border-slate-300 bg-slate-50'
+                          ? 'border-primary bg-primary/10'
+                          : 'border-slate-200 bg-slate-50'
                       }`}
                       onClick={() => setAttachDiagnosis(!attachDiagnosis)}
                     >
-                      <div className="flex items-start gap-3">
-                        <div className={`w-7 h-7 rounded-lg flex items-center justify-center border-2 ${
-                          attachDiagnosis ? 'bg-primary border-primary' : 'bg-white border-slate-300'
+                      <div className="flex items-center gap-2">
+                        <div className={`w-5 h-5 rounded flex items-center justify-center ${
+                          attachDiagnosis ? 'bg-primary' : 'bg-white border border-slate-300'
                         }`}>
-                          {attachDiagnosis ? (
-                            <span className="material-symbols-outlined text-white text-lg font-bold">check</span>
-                          ) : (
-                            <span className="w-4 h-4"></span>
-                          )}
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="material-symbols-outlined text-primary text-lg">description</span>
-                            <span className="font-bold text-slate-800">AI 사전 진단서 첨부</span>
-                            <span className={`text-xs px-2 py-0.5 rounded-full ${attachDiagnosis ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>{attachDiagnosis ? '✓ 첨부됨' : '권장'}</span>
-                          </div>
-                          <p className="text-sm text-slate-600 mb-2">
-                            병원에서 사전에 진료 계획을 세울 수 있어요
-                          </p>
                           {attachDiagnosis && (
-                            <div className="bg-white rounded-lg p-3 space-y-2 text-sm">
-                              <div className="flex items-center gap-2 text-slate-700">
-                                <span className="material-symbols-outlined text-sm text-green-500">check_circle</span>
-                                반려동물 기본 정보
-                              </div>
-                              <div className="flex items-center gap-2 text-slate-700">
-                                <span className="material-symbols-outlined text-sm text-green-500">check_circle</span>
-                                증상 및 타임라인
-                              </div>
-                              <div className="flex items-center gap-2 text-slate-700">
-                                <span className="material-symbols-outlined text-sm text-green-500">check_circle</span>
-                                AI 감별진단 (Top 3 의심 질환)
-                              </div>
-                              <div className="flex items-center gap-2 text-slate-700">
-                                <span className="material-symbols-outlined text-sm text-green-500">check_circle</span>
-                                응급도 평가 및 권장 조치
-                              </div>
-                            </div>
+                            <span className="material-symbols-outlined text-white text-sm">check</span>
                           )}
                         </div>
+                        <span className="font-bold text-slate-800 text-sm">AI 사전 진단서 첨부</span>
+                        <span className={`text-xs px-2 py-0.5 rounded-full ml-auto ${attachDiagnosis ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
+                          {attachDiagnosis ? '✓ 첨부됨' : '권장'}
+                        </span>
                       </div>
+                      {!attachDiagnosis && (
+                        <p className="text-xs text-slate-500 mt-1.5 ml-7">
+                          진단서 없이 예약하면 증상을 다시 설명해야 할 수 있어요
+                        </p>
+                      )}
                     </div>
-                    {!attachDiagnosis && (
-                      <p className="text-xs text-slate-500 mt-2 ml-1">
-                        ⚠️ 진단서 없이 예약하면 병원에서 증상을 다시 설명해야 할 수 있어요
-                      </p>
-                    )}
                   </div>
                 )}
 

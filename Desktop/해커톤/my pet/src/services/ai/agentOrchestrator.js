@@ -8,6 +8,9 @@ import { calculateTriageScore } from './triageEngine';
 import { convertHealthFlagsFormat } from '../../utils/healthFlagsMapper';
 import { buildAIContext } from './dataContextService';
 import { runCollaborativeDiagnosis } from './collaborativeDiagnosis';
+import { getMedicationGuidance, formatMedicationMessage, getShortMedicationSummary } from './medicationService';
+// FAQ 서비스 - 진단서 작성 전 보호자 예상 질문 3개 표시
+import { getRecommendedFAQs, generateMultipleFAQAnswers, formatFAQsForUI, formatFAQAnswersMessage } from './faqService';
 
 export const runMultiAgentDiagnosis = async (petData, symptomData, onLogReceived, onWaitForGuardianResponse = null) => {
   const logs = [];
@@ -398,30 +401,19 @@ export const runMultiAgentDiagnosis = async (petData, symptomData, onLogReceived
 
     await new Promise(resolve => setTimeout(resolve, 2000));
 
-    // 치료 계획실 → 처방 관리실 이관
+    // 치료 계획실 → 처방 관리실 이관 (메시지 통합)
     onLogReceived({
       agent: 'Data Agent',
       role: '치료 계획 수립실',
       icon: '📋',
       type: 'data',
-      content: '치료 계획을 세웠어요. 약국에서 처방약과 복용법을 안내해 드릴게요.',
+      content: '진단서 생성 완료\n치료 계획을 세웠어요. 약국으로 안내해 드릴게요.',
       timestamp: Date.now()
     });
 
     await new Promise(resolve => setTimeout(resolve, 1200));
 
     // 6. Care Agent - 처방 · 약물 관리실
-    onLogReceived({
-      agent: 'Care Agent',
-      role: '처방 · 약물 관리실',
-      icon: '💊',
-      type: 'care',
-      content: '처방전 확인했습니다. 보호자님께 약물 복용법과 케어 가이드 안내해 드릴게요.',
-      timestamp: Date.now()
-    });
-
-    await new Promise(resolve => setTimeout(resolve, 1500));
-
     careResult = await callCareAgent(
       normalizedPetData,
       opsResult.json,
@@ -429,31 +421,103 @@ export const runMultiAgentDiagnosis = async (petData, symptomData, onLogReceived
       triageResult
     );
 
+    // 약물 안내 생성 (임시로 비활성화 - medicationService 파일 없음)
+    // const medicationGuidance = getMedicationGuidance(medicalResult.json, enrichedSymptomData);
+    // const medicationSummary = getShortMedicationSummary(medicationGuidance);
+    const medicationGuidance = null;
+
+    // 약물 안내가 있으면 포함
+    let careMessage = careResult.message;
+    // if (medicationGuidance && medicationGuidance.hasMedicationGuidance) {
+    //   const primaryMed = medicationGuidance.medications[0]?.medications[0];
+    //   careMessage = `${normalizedPetData.petName}를 위한 케어 플랜!\n\n💊 ${medicationGuidance.message}\n\n${primaryMed ? `• 복용: ${primaryMed.usage}\n• 기간: ${primaryMed.duration}` : ''}\n\n${medicationGuidance.disclaimer}`;
+    // }
+
     logs.push({
       agent: 'Care Agent',
       role: '처방 · 약물 관리실',
       icon: '💊',
       type: 'care',
-      content: careResult.message,
+      content: careMessage,
+      medicationGuidance: medicationGuidance,
       timestamp: Date.now()
     });
     onLogReceived(logs[logs.length - 1]);
 
     await new Promise(resolve => setTimeout(resolve, 2000));
 
-    // 처방실 → 진료요약실 이관
+    // 처방실 → FAQ 선택 단계
     onLogReceived({
       agent: 'Care Agent',
       role: '처방 · 약물 관리실',
       icon: '💊',
       type: 'care',
-      content: '약 안내를 마쳤어요. 진료 요약실에서 전체 내용을 정리해 드릴게요.',
+      content: '약 안내를 마쳤어요.',
       timestamp: Date.now()
     });
 
-    await new Promise(resolve => setTimeout(resolve, 1200));
+    await new Promise(resolve => setTimeout(resolve, 800));
 
-    // 7. Summary - 진료 요약 관리실
+    // FAQ 조회 및 보호자 선택 단계 (진단서 작성 전)
+    let recommendedFAQs = [];
+    let faqAnswers = [];
+
+    try {
+      // 증상 기반 FAQ 3개 조회
+      recommendedFAQs = await getRecommendedFAQs(
+        medicalResult.json,
+        normalizedSymptomData,
+        normalizedPetData.species
+      );
+      console.log('FAQ 조회 성공:', recommendedFAQs.length, '개');
+
+      // FAQ가 있고 보호자 응답 콜백이 있을 때만 FAQ 선택 UI 표시
+      if (recommendedFAQs.length > 0 && onWaitForGuardianResponse) {
+        // FAQ 선택 UI 표시 안내
+        onLogReceived({
+          agent: 'FAQ Agent',
+          role: '보호자 문의 안내',
+          icon: '❓',
+          type: 'faq',
+          content: `${normalizedPetData.petName}의 증상과 관련해 보호자분들이 자주 궁금해하시는 질문들이에요. 궁금한 내용이 있으시면 선택해 주세요!`,
+          timestamp: Date.now()
+        });
+
+        // FAQ UI 데이터 생성 및 보호자 응답 대기
+        const faqUIData = formatFAQsForUI(recommendedFAQs);
+        const selectedFAQIds = await onWaitForGuardianResponse(faqUIData, 'faq');
+
+        // 선택된 FAQ가 있으면 답변 생성
+        if (selectedFAQIds && selectedFAQIds.length > 0 && !selectedFAQIds.includes('skip')) {
+          faqAnswers = generateMultipleFAQAnswers(
+            selectedFAQIds,
+            recommendedFAQs,
+            medicalResult.json,
+            normalizedPetData
+          );
+
+          // FAQ 답변 메시지 표시
+          if (faqAnswers.length > 0) {
+            const faqAnswerMessage = formatFAQAnswersMessage(faqAnswers);
+            onLogReceived({
+              agent: 'FAQ Agent',
+              role: '보호자 문의 안내',
+              icon: '📚',
+              type: 'faq_answer',
+              content: faqAnswerMessage,
+              timestamp: Date.now()
+            });
+
+            await new Promise(resolve => setTimeout(resolve, 1500));
+          }
+        }
+      }
+    } catch (error) {
+      console.warn('FAQ 조회/처리 오류:', error);
+      // FAQ 오류가 발생해도 진단 과정은 계속 진행
+    }
+
+    // 8. Summary - 진료 요약 관리실
     onLogReceived({
       agent: 'summary',
       role: '진료 요약 · 관리실',
@@ -492,6 +556,11 @@ export const runMultiAgentDiagnosis = async (petData, symptomData, onLogReceived
       ownerSheet: ownerSheet,
       hospitalPacket: opsResult.json.hospital_previsit_packet,
       carePlan: careResult.json,
+      // 약물 안내 정보
+      medicationGuidance: medicationGuidance,
+      // FAQ 정보 (진단서 작성 전 조회된 보호자 예상 질문과 답변)
+      faqAnswers: faqAnswers.length > 0 ? faqAnswers : null,
+      recommendedFAQs: recommendedFAQs.length > 0 ? recommendedFAQs : null,
       // 협진 정보
       collaboration: collaborationResult ? {
         consensus_reached: collaborationResult.consensus.consensus_reached,

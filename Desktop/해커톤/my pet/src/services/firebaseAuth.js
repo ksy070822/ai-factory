@@ -145,41 +145,75 @@ export const authService = {
       // popup 방식 사용 (COOP 경고가 나와도 작동함)
       try {
         console.log('구글 로그인 팝업 시작');
-        const result = await signInWithPopup(auth, googleProvider);
-        const user = result.user;
-
-        // Firestore에 사용자 정보 저장
-        let userData = {};
+        
+        // COOP 오류를 무시하고 로그인 시도
+        const originalError = window.onerror;
+        window.onerror = (msg, url, line, col, err) => {
+          if (msg?.includes('Cross-Origin-Opener-Policy') || msg?.includes('window.closed')) {
+            console.warn('[Google Login] COOP 경고 무시:', msg);
+            return true; // 오류 무시
+          }
+          if (originalError) return originalError(msg, url, line, col, err);
+          return false;
+        };
+        
         try {
-          const existingUser = await userService.getUser(user.uid);
-          userData = existingUser.data || {};
-          if (!existingUser.data) {
-            await userService.saveUser(user.uid, {
+          const result = await signInWithPopup(auth, googleProvider);
+          window.onerror = originalError; // 원래 핸들러 복원
+          const user = result.user;
+
+          // Firestore에 사용자 정보 저장
+          let userData = {};
+          try {
+            const existingUser = await userService.getUser(user.uid);
+            userData = existingUser.data || {};
+            if (!existingUser.data) {
+              await userService.saveUser(user.uid, {
+                email: user.email,
+                displayName: user.displayName,
+                photoURL: user.photoURL,
+                userMode,
+                createdAt: new Date().toISOString()
+              });
+            }
+          } catch (e) {
+            console.warn('Firestore 오류 (무시):', e);
+          }
+
+          return {
+            success: true,
+            user: {
+              uid: user.uid,
               email: user.email,
               displayName: user.displayName,
               photoURL: user.photoURL,
-              userMode,
-              createdAt: new Date().toISOString()
-            });
-          }
-        } catch (e) {
-          console.warn('Firestore 오류 (무시):', e);
+              userMode: userData.userMode || userMode,
+              roles: userData.roles || [],
+              defaultClinicId: userData.defaultClinicId || null
+            }
+          };
+        } catch (popupError) {
+          window.onerror = originalError; // 원래 핸들러 복원
+          throw popupError;
         }
-
-        return {
-          success: true,
-          user: {
-            uid: user.uid,
-            email: user.email,
-            displayName: user.displayName,
-            photoURL: user.photoURL,
-            userMode: userData.userMode || userMode,
-            roles: userData.roles || [],
-            defaultClinicId: userData.defaultClinicId || null
-          }
-        };
       } catch (popupError) {
         console.error('팝업 로그인 실패:', popupError);
+        
+        // COOP 오류는 경고일 뿐이므로 무시하고 리다이렉트로 전환
+        if (
+          popupError.code === 'auth/popup-blocked' ||
+          popupError.code === 'auth/popup-closed-by-user' ||
+          popupError.message?.includes('Cross-Origin-Opener-Policy') ||
+          popupError.message?.includes('window.close') ||
+          popupError.message?.includes('window.closed')
+        ) {
+          console.log('[Google Login] 팝업 실패, 리다이렉트 방식으로 전환');
+          // 리다이렉트 전에 userMode 저장
+          sessionStorage.setItem('pendingUserMode', userMode);
+          await signInWithRedirect(auth, googleProvider);
+          return { success: false, redirecting: true };
+        }
+        
         return { success: false, error: '구글 로그인에 실패했습니다: ' + popupError.message };
       }
     } catch (error) {
