@@ -387,10 +387,23 @@ export const clinicResultService = {
   // 진료 결과 저장
   async saveResult(resultData) {
     try {
-      const docRef = await addDoc(collection(db, COLLECTIONS.CLINIC_RESULTS), {
+      // Firestore 권한 체크용 필수 필드 정규화
+      const payload = {
         ...resultData,
+        // clinicId: 병원 모드 기본 식별자 (예약/병원 정보에서 넘어온 값 우선)
+        clinicId: resultData.clinicId ?? null,
+        // ownerId: 보호자 uid (명시적으로 전달되지 않으면 userId 사용)
+        ownerId: resultData.ownerId || resultData.userId || null,
+        // petId: 진료 대상 반려동물
+        petId: resultData.petId ?? null,
+        // createdAt: 서버 타임스탬프 (중복 방지를 위해 여기서만 세팅)
         createdAt: serverTimestamp()
-      });
+      };
+
+      // 디버깅 로그: 실제 쓰기 직전 payload 확인
+      console.log('[saveResult] payload before write:', payload);
+
+      const docRef = await addDoc(collection(db, COLLECTIONS.CLINIC_RESULTS), payload);
       
       // 보호자에게 푸시 알림 전송
       if (resultData.userId) {

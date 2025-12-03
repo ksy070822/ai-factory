@@ -1,0 +1,136 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ============ 공통 헬퍼 ============
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // users/{uid} 문서
+    function userDoc() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+
+    // owner인지 (보호자 본인)
+    function isOwner(ownerId) {
+      return isSignedIn()
+        && ownerId != null
+        && request.auth.uid == ownerId;
+    }
+
+    // 병원 직원 여부 (defaultClinicId 기준)
+    function isClinicStaff(clinicId) {
+      return isSignedIn()
+        && clinicId != null
+        && userDoc().data.defaultClinicId == clinicId;
+    }
+
+    // ============ users 컬렉션 ============
+    // 각 사용자의 프로필 정보
+    match /users/{userId} {
+      // 자기 문서는 본인이 읽기/수정/삭제 가능
+      allow read, update, delete: if isSignedIn() && request.auth.uid == userId;
+
+      // 생성도 본인 uid로만 가능 (회원가입/첫 로그인 시)
+      allow create: if isSignedIn() && request.auth.uid == userId;
+    }
+
+    // ============ clinics 컬렉션 ============
+    match /clinics/{clinicId} {
+      // 병원 목록/정보는 로그인한 누구나 읽기 허용
+      allow read: if isSignedIn();
+
+      // 병원 정보 생성/수정/삭제는 병원 직원만 허용
+      allow create, update, delete: if isClinicStaff(clinicId);
+    }
+
+    // ============ clinicStaff (병원 스태프 연결) ============
+    match /clinicStaff/{staffId} {
+      // 읽기:
+      // - 본인(userId == uid)이 속한 병원 목록을 불러올 때
+      // - 또는 이미 그 병원의 스태프(isClinicStaff)일 때
+      allow read: if isSignedIn() && (
+        (resource.data.userId == request.auth.uid) ||
+        (resource.data.clinicId != null && isClinicStaff(resource.data.clinicId))
+      );
+
+      // 생성/수정/삭제:
+      // - 본인이 특정 병원에 staff로 등록될 때 (userId == uid)
+      // - 또는 해당 병원 직원이 스태프 정보를 관리할 때
+      allow create, update, delete: if isSignedIn() && (
+        (request.resource.data.userId == request.auth.uid) ||
+        (request.resource.data.clinicId != null && isClinicStaff(request.resource.data.clinicId))
+      );
+    }
+
+    // ============ bookings (예약) ============
+    match /bookings/{bookingId} {
+      // 읽기/업데이트: 병원 직원 (clinicId 기준)
+      allow read, update: if isSignedIn()
+        && resource.data.clinicId != null
+        && isClinicStaff(resource.data.clinicId);
+
+      // 생성: 로그인 사용자 허용 (보호자/병원에서 모두 예약 생성 가능)
+      allow create: if isSignedIn();
+    }
+
+    // ============ diagnoses (진단서) ============
+    match /diagnoses/{diagId} {
+      allow read: if isSignedIn() && (
+        (resource.data.clinicId != null && isClinicStaff(resource.data.clinicId)) ||
+        isOwner(resource.data.ownerId)
+      );
+
+      allow create, update: if isSignedIn() && (
+        (request.resource.data.clinicId != null && isClinicStaff(request.resource.data.clinicId)) ||
+        isOwner(request.resource.data.ownerId)
+      );
+    }
+
+    // ============ preQuestionnaires (사전 문진) ============
+    match /preQuestionnaires/{qId} {
+      allow read: if isSignedIn() && (
+        (resource.data.clinicId != null && isClinicStaff(resource.data.clinicId)) ||
+        isOwner(resource.data.ownerId)
+      );
+
+      allow create: if isSignedIn() && (
+        (request.resource.data.clinicId != null && isClinicStaff(request.resource.data.clinicId)) ||
+        isOwner(request.resource.data.ownerId)
+      );
+    }
+
+    // ============ medicalRecords (환자 기록) ============
+    match /medicalRecords/{mrId} {
+      allow read: if isSignedIn() && (
+        (resource.data.clinicId != null && isClinicStaff(resource.data.clinicId)) ||
+        isOwner(resource.data.ownerId)
+      );
+
+      // 생성/수정: 병원 직원만 (clinicId 기반)
+      allow create, update: if isSignedIn()
+        && request.resource.data.clinicId != null
+        && isClinicStaff(request.resource.data.clinicId);
+    }
+
+    // ============ clinicResults (병원 진료 결과) ============
+    match /clinicResults/{resultId} {
+      // 읽기: 병원 직원 또는 소유자
+      allow read: if isSignedIn() && (
+        (resource.data.clinicId != null && isClinicStaff(resource.data.clinicId)) ||
+        isOwner(resource.data.ownerId)
+      );
+
+      // 생성/수정: 병원 직원만 (clinicId 기준)
+      allow create, update: if isSignedIn()
+        && request.resource.data.clinicId != null
+        && isClinicStaff(request.resource.data.clinicId);
+    }
+
+    // ============ clinicStats (통계) ============
+    match /clinicStats/{clinicId} {
+      allow read: if isClinicStaff(clinicId);
+    }
+  }
+}
