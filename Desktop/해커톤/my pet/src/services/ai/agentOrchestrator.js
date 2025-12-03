@@ -421,17 +421,15 @@ export const runMultiAgentDiagnosis = async (petData, symptomData, onLogReceived
       triageResult
     );
 
-    // 약물 안내 생성 (임시로 비활성화 - medicationService 파일 없음)
-    // const medicationGuidance = getMedicationGuidance(medicalResult.json, enrichedSymptomData);
-    // const medicationSummary = getShortMedicationSummary(medicationGuidance);
-    const medicationGuidance = null;
+    // 약물 안내 생성
+    const medicationGuidance = getMedicationGuidance(medicalResult.json, enrichedSymptomData);
 
     // 약물 안내가 있으면 포함
     let careMessage = careResult.message;
-    // if (medicationGuidance && medicationGuidance.hasMedicationGuidance) {
-    //   const primaryMed = medicationGuidance.medications[0]?.medications[0];
-    //   careMessage = `${normalizedPetData.petName}를 위한 케어 플랜!\n\n💊 ${medicationGuidance.message}\n\n${primaryMed ? `• 복용: ${primaryMed.usage}\n• 기간: ${primaryMed.duration}` : ''}\n\n${medicationGuidance.disclaimer}`;
-    // }
+    if (medicationGuidance && medicationGuidance.hasMedicationGuidance) {
+      const primaryMed = medicationGuidance.medications[0]?.medications[0];
+      careMessage = `${normalizedPetData.petName}를 위한 케어 플랜!\n\n💊 ${medicationGuidance.message}\n\n${primaryMed ? `• 복용: ${primaryMed.usage}\n• 기간: ${primaryMed.duration}` : ''}\n\n${medicationGuidance.disclaimer}`;
+    }
 
     logs.push({
       agent: 'Care Agent',
