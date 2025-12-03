@@ -484,7 +484,6 @@ export function HospitalBooking({ petData, diagnosis, symptomData, onBack, onSel
       if (hospitalVisitTime) {
         defaultMessage += `[권장 방문] ${hospitalVisitTime}\n`;
       }
-      defaultMessage += '\n※ AI 진단서가 함께 전송됩니다.';
       setBookingMessage(defaultMessage.trim());
     } else {
       setBookingMessage('');
@@ -493,6 +492,21 @@ export function HospitalBooking({ petData, diagnosis, symptomData, onBack, onSel
 
   // AI 진단서 첨부 여부 (디폴트: 해제)
   const [attachDiagnosis, setAttachDiagnosis] = useState(false);
+
+  // AI 진단서 첨부 체크 시 메시지에 안내 추가
+  useEffect(() => {
+    if (showBookingModal && diagnosis) {
+      setBookingMessage(prev => {
+        // 기존 AI 진단서 안내 문구 제거
+        const withoutNotice = prev.replace(/\n*※ AI 진단서가 함께 전송됩니다\.?/g, '').trim();
+        // 첨부 시에만 문구 추가
+        if (attachDiagnosis) {
+          return withoutNotice + '\n\n※ AI 진단서가 함께 전송됩니다.';
+        }
+        return withoutNotice;
+      });
+    }
+  }, [attachDiagnosis, showBookingModal, diagnosis]);
 
   const handleConfirmBooking = async () => {
     if (!bookingDate || !bookingTime) {
@@ -1171,11 +1185,11 @@ export function HospitalBooking({ petData, diagnosis, symptomData, onBack, onSel
                   )}
                 </div>
 
-                {/* 버튼 - 순서: 예약하기, 길찾기, T펫택시 예약 */}
+                {/* 버튼 - 순서: 예약하기, 길찾기, Kakao T 펫택시 */}
                 <div className="flex gap-2">
                   <button
                     onClick={() => handleBookAppointment(hospital)}
-                    className="flex-1 py-2.5 text-center bg-sky-500 text-white rounded-xl text-sm font-bold hover:bg-sky-600 transition-colors"
+                    className="flex-1 py-2.5 text-center bg-sky-500 text-white rounded-xl text-sm font-bold hover:bg-sky-600 transition-colors flex items-center justify-center"
                   >
                     예약하기
                   </button>
@@ -1186,17 +1200,17 @@ export function HospitalBooking({ petData, diagnosis, symptomData, onBack, onSel
                     }
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex-1 py-2.5 text-center border border-slate-200 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors"
+                    className="flex-1 py-2.5 text-center bg-[#FEE500] rounded-xl text-xs font-bold text-[#3C1E1E] hover:bg-[#F5DC00] transition-colors flex items-center justify-center"
                   >
-                    🗺️ 길찾기
+                    길찾기
                   </a>
                   <a
                     href="https://service.kakaomobility.com/launch/kakaot"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex-1 py-2.5 text-center bg-[#1E1B4B] rounded-xl text-sm font-bold hover:bg-[#2d2a5a] transition-colors flex items-center justify-center gap-1"
+                    className="flex-1 py-2.5 text-center bg-[#1E1B4B] rounded-xl text-xs font-bold hover:bg-[#2d2a5a] transition-colors flex items-center justify-center gap-0.5"
                   >
-                    <span className="text-[#FACC15] font-black text-lg">T</span>
+                    <span className="text-[#FACC15]">Kakao T</span>
                     <span className="text-white">펫택시</span>
                   </a>
                 </div>
@@ -1209,7 +1223,7 @@ export function HospitalBooking({ petData, diagnosis, symptomData, onBack, onSel
       {/* 예약 모달 */}
       {showBookingModal && bookingHospital && (
         <div className="fixed inset-0 bg-black/50 flex items-end justify-center z-50 animate-fade-in">
-          <div className="bg-white rounded-t-3xl w-full max-w-md p-6 pb-10 animate-slide-up max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-t-3xl w-full max-w-md p-4 pb-6 animate-slide-up max-h-[85vh] overflow-y-auto">
             {bookingSuccess ? (
               /* 예약 성공 화면 */
               <div className="text-center py-8">
@@ -1269,122 +1283,82 @@ export function HospitalBooking({ petData, diagnosis, symptomData, onBack, onSel
                 </div>
 
                 {/* 선택된 병원 정보 */}
-                <div className="bg-slate-50 rounded-lg p-3 mb-4">
-                  <p className="font-bold text-slate-900">{bookingHospital.name}</p>
-                  <p className="text-sm text-slate-500">{bookingHospital.roadAddress || bookingHospital.address}</p>
+                <div className="bg-slate-50 rounded-lg p-2.5 mb-3">
+                  <p className="font-bold text-slate-900 text-sm">{bookingHospital.name}</p>
+                  <p className="text-xs text-slate-500">{bookingHospital.roadAddress || bookingHospital.address}</p>
                 </div>
 
-                {/* 날짜 선택 */}
-                <div className="mb-4">
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
-                    <span className="material-symbols-outlined text-sm align-middle mr-1">calendar_today</span>
-                    예약 날짜
-                  </label>
-                  <input
-                    type="date"
-                    value={bookingDate}
-                    onChange={(e) => setBookingDate(e.target.value)}
-                    min={new Date().toISOString().split('T')[0]}
-                    className="w-full p-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
-                  />
-                </div>
-
-                {/* 시간 선택 */}
-                <div className="mb-4">
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
-                    <span className="material-symbols-outlined text-sm align-middle mr-1">schedule</span>
-                    예약 시간
-                  </label>
-                  <div className="grid grid-cols-4 gap-2 max-h-32 overflow-y-auto">
-                    {getTimeSlots().map(time => (
-                      <button
-                        key={time}
-                        onClick={() => setBookingTime(time)}
-                        className={`py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
-                          bookingTime === time
-                            ? 'bg-primary text-white'
-                            : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                        }`}
-                      >
-                        {time}
-                      </button>
-                    ))}
+                {/* 날짜/시간 선택 - 한 줄에 */}
+                <div className="flex gap-2 mb-3">
+                  <div className="flex-1">
+                    <label className="block text-xs font-medium text-slate-700 mb-1">예약 날짜</label>
+                    <input
+                      type="date"
+                      value={bookingDate}
+                      onChange={(e) => setBookingDate(e.target.value)}
+                      min={new Date().toISOString().split('T')[0]}
+                      className="w-full p-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <label className="block text-xs font-medium text-slate-700 mb-1">예약 시간</label>
+                    <select
+                      value={bookingTime}
+                      onChange={(e) => setBookingTime(e.target.value)}
+                      className="w-full p-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
+                    >
+                      <option value="">시간 선택</option>
+                      {getTimeSlots().map(time => (
+                        <option key={time} value={time}>{time}</option>
+                      ))}
+                    </select>
                   </div>
                 </div>
 
                 {/* 메시지 입력 */}
-                <div className="mb-6">
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
-                    <span className="material-symbols-outlined text-sm align-middle mr-1">edit_note</span>
+                <div className="mb-3">
+                  <label className="block text-xs font-medium text-slate-700 mb-1">
                     병원에 전달할 메시지 (선택)
                   </label>
                   <textarea
                     value={bookingMessage}
                     onChange={(e) => setBookingMessage(e.target.value)}
                     placeholder="증상이나 요청사항을 입력해주세요"
-                    rows="3"
-                    className="w-full p-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary resize-none"
+                    rows="2"
+                    className="w-full p-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary resize-none"
                   />
                 </div>
 
                 {/* AI 진단서 첨부 옵션 */}
                 {diagnosis && (
-                  <div className="mb-4">
+                  <div className="mb-3">
                     <div
-                      className={`rounded-xl p-4 border-2 cursor-pointer transition-all ${
+                      className={`rounded-lg p-3 border-2 cursor-pointer transition-all ${
                         attachDiagnosis
-                          ? 'border-primary bg-primary/10 ring-2 ring-primary/30'
-                          : 'border-slate-300 bg-slate-50'
+                          ? 'border-primary bg-primary/10'
+                          : 'border-slate-200 bg-slate-50'
                       }`}
                       onClick={() => setAttachDiagnosis(!attachDiagnosis)}
                     >
-                      <div className="flex items-start gap-3">
-                        <div className={`w-7 h-7 rounded-lg flex items-center justify-center border-2 ${
-                          attachDiagnosis ? 'bg-primary border-primary' : 'bg-white border-slate-300'
+                      <div className="flex items-center gap-2">
+                        <div className={`w-5 h-5 rounded flex items-center justify-center ${
+                          attachDiagnosis ? 'bg-primary' : 'bg-white border border-slate-300'
                         }`}>
-                          {attachDiagnosis ? (
-                            <span className="material-symbols-outlined text-white text-lg font-bold">check</span>
-                          ) : (
-                            <span className="w-4 h-4"></span>
-                          )}
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="material-symbols-outlined text-primary text-lg">description</span>
-                            <span className="font-bold text-slate-800">AI 사전 진단서 첨부</span>
-                            <span className={`text-xs px-2 py-0.5 rounded-full ${attachDiagnosis ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>{attachDiagnosis ? '✓ 첨부됨' : '권장'}</span>
-                          </div>
-                          <p className="text-sm text-slate-600 mb-2">
-                            병원에서 사전에 진료 계획을 세울 수 있어요
-                          </p>
                           {attachDiagnosis && (
-                            <div className="bg-white rounded-lg p-3 space-y-2 text-sm">
-                              <div className="flex items-center gap-2 text-slate-700">
-                                <span className="material-symbols-outlined text-sm text-green-500">check_circle</span>
-                                반려동물 기본 정보
-                              </div>
-                              <div className="flex items-center gap-2 text-slate-700">
-                                <span className="material-symbols-outlined text-sm text-green-500">check_circle</span>
-                                증상 및 타임라인
-                              </div>
-                              <div className="flex items-center gap-2 text-slate-700">
-                                <span className="material-symbols-outlined text-sm text-green-500">check_circle</span>
-                                AI 감별진단 (Top 3 의심 질환)
-                              </div>
-                              <div className="flex items-center gap-2 text-slate-700">
-                                <span className="material-symbols-outlined text-sm text-green-500">check_circle</span>
-                                응급도 평가 및 권장 조치
-                              </div>
-                            </div>
+                            <span className="material-symbols-outlined text-white text-sm">check</span>
                           )}
                         </div>
+                        <span className="font-bold text-slate-800 text-sm">AI 사전 진단서 첨부</span>
+                        <span className={`text-xs px-2 py-0.5 rounded-full ml-auto ${attachDiagnosis ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
+                          {attachDiagnosis ? '✓ 첨부됨' : '권장'}
+                        </span>
                       </div>
+                      {!attachDiagnosis && (
+                        <p className="text-xs text-slate-500 mt-1.5 ml-7">
+                          진단서 없이 예약하면 증상을 다시 설명해야 할 수 있어요
+                        </p>
+                      )}
                     </div>
-                    {!attachDiagnosis && (
-                      <p className="text-xs text-slate-500 mt-2 ml-1">
-                        ⚠️ 진단서 없이 예약하면 병원에서 증상을 다시 설명해야 할 수 있어요
-                      </p>
-                    )}
                   </div>
                 )}
 
