@@ -214,68 +214,52 @@ export function LoginScreen({ onLogin, onGoToRegister, onSkipLogin }) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-blue-50 to-indigo-50 flex flex-col items-center justify-center p-6" style={{ WebkitFontSmoothing: 'antialiased', MozOsxFontSmoothing: 'grayscale' }}>
-      {/* 상단 헤더 */}
-      <div className="w-full max-w-md mb-8">
-        <div className="bg-gradient-to-r from-cyan-500 to-cyan-600 rounded-3xl p-6 shadow-lg">
-          <div className="flex items-center gap-3 justify-center">
-            <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-md">
-              <span className="text-2xl">🐾</span>
-            </div>
-            <div className="text-white">
-              <h1 className="text-2xl font-bold">PetMedical.AI</h1>
-              <p className="text-sm text-cyan-100">AI 기반 반려동물 건강 관리 서비스</p>
-            </div>
-          </div>
+    <div className="min-h-screen bg-background-light flex flex-col items-center justify-center p-6 pt-12">
+      {/* 로고 */}
+      <div className="text-center mb-8">
+        <div className="w-20 h-20 bg-white rounded-2xl shadow-lg mx-auto mb-4 flex items-center justify-center">
+          <span className="text-4xl">🐾</span>
         </div>
+        <h1 className="text-2xl font-bold text-slate-900 font-display">PetMedical.AI</h1>
+        <p className="text-slate-500 mt-1 text-sm">AI 기반 반려동물 건강 관리 서비스</p>
       </div>
 
       {/* 모드 선택 카드 */}
-      <div className="w-full max-w-md mb-6">
-        <div className="grid grid-cols-2 gap-4">
+      <div className="w-full max-w-sm mb-6">
+        <div className="flex gap-3">
           <button
             type="button"
             onClick={() => setUserMode('guardian')}
-            className={`relative bg-white rounded-2xl p-6 shadow-md transition-all duration-300 ${
+            className={`flex-1 py-5 px-4 rounded-xl bg-white shadow-md transition-all flex flex-col items-center gap-3 ${
               userMode === 'guardian'
-                ? 'ring-3 ring-cyan-400 shadow-lg scale-105'
-                : 'hover:shadow-lg hover:scale-102'
+                ? 'ring-2 ring-sky-500 bg-sky-50'
+                : 'hover:shadow-lg'
             }`}
           >
-            <div className="text-center">
-              <div className="text-5xl mb-3">🐕</div>
-              <h3 className="text-lg font-bold text-gray-800 mb-1">보호자</h3>
-              <p className="text-xs text-gray-500">반려동물 건강 관리</p>
-            </div>
-            {userMode === 'guardian' && (
-              <div className="absolute top-3 right-3 w-6 h-6 bg-cyan-500 rounded-full flex items-center justify-center">
-                <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                </svg>
-              </div>
-            )}
+            <img 
+              src="/icon/login/main_friend.png" 
+              alt="보호자" 
+              className="w-16 h-16 object-contain"
+            />
+            <span className="font-bold text-slate-800">보호자</span>
+            <span className="text-xs text-slate-500">반려동물 건강 관리</span>
           </button>
           <button
             type="button"
             onClick={() => setUserMode('clinic')}
-            className={`relative bg-white rounded-2xl p-6 shadow-md transition-all duration-300 ${
+            className={`flex-1 py-5 px-4 rounded-xl bg-white shadow-md transition-all flex flex-col items-center gap-3 ${
               userMode === 'clinic'
-                ? 'ring-3 ring-cyan-400 shadow-lg scale-105'
-                : 'hover:shadow-lg hover:scale-102'
+                ? 'ring-2 ring-sky-500 bg-sky-50'
+                : 'hover:shadow-lg'
             }`}
           >
-            <div className="text-center">
-              <div className="text-5xl mb-3">📋</div>
-              <h3 className="text-lg font-bold text-gray-800 mb-1">병원</h3>
-              <p className="text-xs text-gray-500">예약 및 환자 관리</p>
-            </div>
-            {userMode === 'clinic' && (
-              <div className="absolute top-3 right-3 w-6 h-6 bg-cyan-500 rounded-full flex items-center justify-center">
-                <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                </svg>
-              </div>
-            )}
+            <img 
+              src="/icon/login/main_hospital.png" 
+              alt="병원" 
+              className="w-16 h-16 object-contain"
+            />
+            <span className="font-bold text-slate-800">병원</span>
+            <span className="text-xs text-slate-500">예약 및 환자 관리</span>
           </button>
         </div>
       </div>
@@ -630,7 +614,7 @@ export function RegisterScreen({ onRegister, onGoToLogin }) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-sky-100 to-blue-50 flex flex-col items-center justify-center p-6 pt-12">
+    <div className="min-h-screen bg-background-light flex flex-col items-center justify-center p-6 pt-12">
       {/* 로고 */}
       <div className="text-center mb-6">
         <div className="w-16 h-16 bg-white rounded-2xl shadow-lg mx-auto mb-3 flex items-center justify-center">

@@ -42,6 +42,12 @@ export const userService = {
       }, { merge: true });
       return { success: true };
     } catch (error) {
+      // 권한 오류는 경고로 처리하고 계속 진행
+      if (error.code === 'permission-denied' || error.message?.includes('Missing or insufficient permissions')) {
+        console.warn('⚠️ 사용자 저장 권한 오류 (Firestore 보안 규칙 확인 필요):', error.message);
+        // 로그인은 계속 진행 가능하도록 성공으로 처리
+        return { success: true, warning: '사용자 정보 저장 실패 (권한 오류)' };
+      }
       console.error('사용자 저장 오류:', error);
       return { success: false, error };
     }
@@ -56,6 +62,11 @@ export const userService = {
       }
       return { success: false, data: null };
     } catch (error) {
+      // 권한 오류는 경고로 처리하고 빈 데이터 반환
+      if (error.code === 'permission-denied' || error.message?.includes('Missing or insufficient permissions')) {
+        console.warn('⚠️ 사용자 조회 권한 오류 (Firestore 보안 규칙 확인 필요):', error.message);
+        return { success: false, data: null, warning: '사용자 정보 조회 실패 (권한 오류)' };
+      }
       console.error('사용자 조회 오류:', error);
       return { success: false, error };
     }

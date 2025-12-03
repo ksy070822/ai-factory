@@ -17,6 +17,12 @@ export async function requestPushPermission(userId) {
   }
 
   try {
+    // Service Worker 확인
+    if (!('serviceWorker' in navigator)) {
+      console.warn('Service Worker를 지원하지 않는 브라우저입니다.');
+      return null;
+    }
+
     // 알림 권한 요청
     const permission = await Notification.requestPermission();
     if (permission !== 'granted') {
@@ -28,18 +34,33 @@ export async function requestPushPermission(userId) {
     const token = await getToken(messaging, { vapidKey: VAPID_KEY });
     
     if (token) {
-      // Firestore에 토큰 저장
-      await updateDoc(doc(db, 'users', userId), {
-        fcmToken: token,
-        fcmTokenUpdatedAt: new Date().toISOString()
-      });
-      
-      console.log('푸시 알림 토큰 저장 완료:', token);
+      // Firestore에 토큰 저장 (권한 오류는 무시)
+      try {
+        await updateDoc(doc(db, 'users', userId), {
+          fcmToken: token,
+          fcmTokenUpdatedAt: new Date().toISOString()
+        });
+        console.log('푸시 알림 토큰 저장 완료:', token);
+      } catch (saveError) {
+        // 권한 오류는 경고로만 처리
+        if (saveError.code === 'permission-denied' || saveError.message?.includes('Missing or insufficient permissions')) {
+          console.warn('⚠️ 푸시 알림 토큰 저장 권한 오류 (Firestore 보안 규칙 확인 필요):', saveError.message);
+        } else {
+          console.warn('푸시 알림 토큰 저장 실패:', saveError);
+        }
+      }
       return token;
     }
     
     return null;
   } catch (error) {
+    // Service Worker 관련 오류는 경고로만 처리
+    if (error.code === 'messaging/failed-service-worker-registration' || 
+        error.message?.includes('ServiceWorker') ||
+        error.message?.includes('404')) {
+      console.warn('⚠️ 푸시 알림 설정 실패 (Service Worker 없음). 앱은 정상 작동합니다.');
+      return null;
+    }
     console.error('푸시 알림 토큰 요청 오류:', error);
     return null;
   }
