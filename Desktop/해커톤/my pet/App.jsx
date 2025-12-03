@@ -708,6 +708,7 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
     grooming: 0,
     play: 0
   });
+  const [latestBooking, setLatestBooking] = useState(null);
 
   // 오늘 케어 기록 저장
   const saveTodayCare = () => {
@@ -801,6 +802,39 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
         .catch(err => console.error('패턴 분석 오류:', err));
     }
   }, [petData]);
+
+  // 최신 예약 정보 불러오기
+  useEffect(() => {
+    const loadLatestBooking = async () => {
+      if (!petData?.userId) return;
+
+      try {
+        const bookings = await bookingService.getByUser(petData.userId);
+        if (bookings && bookings.length > 0) {
+          // 미래 예약만 필터링하고 가장 가까운 것 선택
+          const now = new Date();
+          const futureBookings = bookings.filter(b => {
+            const bookingDate = b.bookingDate ? new Date(b.bookingDate) : null;
+            return bookingDate && bookingDate >= now;
+          }).sort((a, b) => new Date(a.bookingDate) - new Date(b.bookingDate));
+
+          if (futureBookings.length > 0) {
+            setLatestBooking(futureBookings[0]);
+          } else if (bookings.length > 0) {
+            // 미래 예약이 없으면 가장 최근 예약 표시
+            const sortedBookings = [...bookings].sort((a, b) =>
+              new Date(b.bookingDate) - new Date(a.bookingDate)
+            );
+            setLatestBooking(sortedBookings[0]);
+          }
+        }
+      } catch (error) {
+        console.error('예약 정보 불러오기 오류:', error);
+      }
+    };
+
+    loadLatestBooking();
+  }, [petData?.userId]);
 
   const handleLogUpdate = async (newLog) => {
     if (!petData) return;
@@ -1133,7 +1167,13 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
                           </div>
                           <div className="flex-1 text-left">
                             <h4 className="text-sm font-bold text-gray-800 mb-0.5">병원 예약일</h4>
-                            <p className="text-xs text-gray-500">다음 진료: 2025년 12월 15일</p>
+                            <p className="text-xs text-gray-500">
+                              {latestBooking ? (
+                                <>다음 진료: {new Date(latestBooking.bookingDate).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })} {latestBooking.bookingTime || ''}</>
+                              ) : (
+                                '예약된 진료가 없습니다'
+                              )}
+                            </p>
                           </div>
                           <span className="text-gray-400 text-lg">&gt;</span>
                         </button>
@@ -1275,7 +1315,13 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
                           <span className="text-2xl">📅</span>
                           <div className="flex-1">
                             <p className="font-medium text-gray-900">병원 예약일</p>
-                            <p className="text-sm text-gray-500">다음 진료: 2025년 12월 15일</p>
+                            <p className="text-sm text-gray-500">
+                              {latestBooking ? (
+                                <>다음 진료: {new Date(latestBooking.bookingDate).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })} {latestBooking.bookingTime || ''}</>
+                              ) : (
+                                '예약된 진료가 없습니다'
+                              )}
+                            </p>
                           </div>
                           <span className="text-gray-400 text-lg">&gt;</span>
                         </button>
@@ -1411,7 +1457,7 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
                   <img
                     src={getMainCharacterImagePath()}
                     alt={petData?.petName || '반려동물'}
-                    className="w-full h-full object-contain"
+                    className="w-full h-full object-cover"
                     style={{ objectPosition: 'center', display: 'block' }}
                     onError={(e) => {
                       // 무한 루프 방지: 이미 한 번 시도했으면 더 이상 시도하지 않음
@@ -1453,7 +1499,11 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
                       {getSpeciesDisplay()}
                     </span>
                     {getSexDisplay() && (
-                      <span className="text-[10px] sm:text-[11px] text-sky-700 font-semibold bg-sky-100 px-2 py-0.5 rounded-full border border-sky-200">
+                      <span className={`text-[10px] sm:text-[11px] font-semibold px-2 py-0.5 rounded-full border ${
+                        petData?.sex === 'F'
+                          ? 'text-red-600 bg-red-100 border-red-200'
+                          : 'text-sky-700 bg-sky-100 border-sky-200'
+                      }`}>
                         {getSexDisplay()}
                       </span>
                     )}
@@ -1467,7 +1517,8 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
                     )}
                     <button
                       onClick={() => onNavigate('profile-list')}
-                      className="px-2 py-0.5 bg-sky-500 text-white text-[10px] sm:text-[11px] font-bold rounded-full shadow-md hover:bg-sky-600 transition-colors"
+                      className="px-2 py-0.5 text-gray-900 text-[10px] sm:text-[11px] font-bold rounded-full shadow-md transition-colors"
+                      style={{ backgroundColor: '#FEE500' }}
                     >
                       변경
                     </button>
@@ -1514,16 +1565,32 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
 
               <div className="bg-white rounded-2xl p-4 shadow-lg border border-gray-200">
                 {/* 병원 예약일 */}
-                <div className="flex items-center gap-3 py-3 border-b border-gray-100">
+                <button
+                  onClick={() => {
+                    onNavigate('mypage');
+                    localStorage.setItem('mypage_initialTab', 'bookings');
+                    setTimeout(() => {
+                      const event = new CustomEvent('mypage-set-tab', { detail: 'bookings' });
+                      window.dispatchEvent(event);
+                    }, 100);
+                  }}
+                  className="w-full flex items-center gap-3 py-3 border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer"
+                >
                   <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center flex-shrink-0">
                     <span className="text-2xl">📅</span>
                   </div>
-                  <div className="flex-1">
+                  <div className="flex-1 text-left">
                     <h4 className="text-sm font-bold text-gray-800 mb-0.5">병원 예약일</h4>
-                    <p className="text-xs text-gray-500">다음 진료: 2025년 12월 15일</p>
+                    <p className="text-xs text-gray-500">
+                      {latestBooking ? (
+                        <>다음 진료: {new Date(latestBooking.bookingDate).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })} {latestBooking.bookingTime || ''}</>
+                      ) : (
+                        '예약된 진료가 없습니다'
+                      )}
+                    </p>
                   </div>
                   <span className="text-gray-400 text-lg">&gt;</span>
-                </div>
+                </button>
 
                 {/* 유의사항 */}
                 <div className="flex items-center gap-3 py-3">
