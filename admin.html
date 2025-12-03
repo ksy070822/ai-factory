@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Firestore 데이터 업로드 관리자</title>
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+    import { getFirestore, collection, addDoc, getDocs, query, serverTimestamp, doc, setDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+    // Firebase 설정
+    const firebaseConfig = {
+      apiKey: "AIzaSyAMubJk9qXmaz_V3uHiCGs0hRe6FSu9ji4",
+      authDomain: "ai-factory-c6d58.firebaseapp.com",
+      projectId: "ai-factory-c6d58",
+      storageBucket: "ai-factory-c6d58.firebasestorage.app",
+      messagingSenderId: "213197152130",
+      appId: "1:213197152130:web:7c19f9c3c88bea7cc1399b",
+      measurementId: "G-4D82WS9H7K"
+    };
+
+    // Firebase 초기화
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // 상태 관리
+    let loading = false;
+
+    // 로그 추가
+    function addLog(message, type = 'info') {
+      const logsDiv = document.getElementById('logs');
+      const logEntry = document.createElement('div');
+      logEntry.className = `log-entry log-${type}`;
+      logEntry.innerHTML = `<span class="log-time">[${new Date().toLocaleTimeString()}]</span> ${message}`;
+      logsDiv.appendChild(logEntry);
+      logsDiv.scrollTop = logsDiv.scrollHeight;
+    }
+
+    // FAQ 데이터 업로드
+    async function uploadFAQ(force = false) {
+      if (loading) return;
+      loading = true;
+      const statusDiv = document.getElementById('faq-status');
+      statusDiv.textContent = '업로드 중...';
+      statusDiv.className = 'status-loading';
+      addLog('📚 FAQ 데이터 업로드 시작', 'info');
+
+      try {
+        // 기존 데이터 확인
+        if (!force) {
+          const existingQuery = query(collection(db, 'owner_faq'));
+          const existingSnapshot = await getDocs(existingQuery);
+          if (!existingSnapshot.empty) {
+            throw new Error(`기존 FAQ 데이터가 ${existingSnapshot.size}개 있습니다. 강제 업로드를 원하면 체크박스를 선택하세요.`);
+          }
+        }
+
+        // JSON 파일 로드
+        const response = await fetch('/더미데이터/owner_faq_seed_260.json');
+        if (!response.ok) {
+          throw new Error(`FAQ 데이터 파일을 불러올 수 없습니다: ${response.statusText}`);
+        }
+        const faqData = await response.json();
+
+        if (!Array.isArray(faqData)) {
+          throw new Error('FAQ 데이터가 배열 형식이 아닙니다.');
+        }
+
+        addLog(`📦 ${faqData.length}개의 FAQ 데이터 업로드 시작...`, 'info');
+
+        // 배치로 업로드
+        const batchSize = 500;
+        let uploadedCount = 0;
+        for (let i = 0; i < faqData.length; i += batchSize) {
+          const batch = faqData.slice(i, i + batchSize);
+          const promises = batch.map(async (item) => {
+            try {
+              const dataToUpload = {
+                ...item,
+                createdAt: serverTimestamp(),
+                updatedAt: serverTimestamp()
+              };
+              await addDoc(collection(db, 'owner_faq'), dataToUpload);
+              uploadedCount++;
+            } catch (error) {
+              addLog(`❌ FAQ 항목 업로드 실패: ${error.message}`, 'error');
+            }
+          });
+
+          await Promise.all(promises);
+          addLog(`✅ ${Math.min(i + batchSize, faqData.length)}/${faqData.length} 업로드 완료`, 'success');
+        }
+
+        statusDiv.textContent = `✅ 완료: ${uploadedCount}개 업로드됨`;
+        statusDiv.className = 'status-success';
+        addLog(`🎉 FAQ 데이터 업로드 완료: ${uploadedCount}개`, 'success');
+      } catch (error) {
+        statusDiv.textContent = `❌ 오류: ${error.message}`;
+        statusDiv.className = 'status-error';
+        addLog(`❌ 오류: ${error.message}`, 'error');
+      } finally {
+        loading = false;
+      }
+    }
+
+    // 유저 데이터 업로드
+    async function uploadUsers(force = false) {
+      if (loading) return;
+      loading = true;
+      const statusDiv = document.getElementById('users-status');
+      statusDiv.textContent = '업로드 중...';
+      statusDiv.className = 'status-loading';
+      addLog('👥 유저 데이터 업로드 시작', 'info');
+
+      try {
+        // 기존 데이터 확인
+        if (!force) {
+          const existingQuery = query(collection(db, 'users'));
+          const existingSnapshot = await getDocs(existingQuery);
+          if (!existingSnapshot.empty) {
+            throw new Error(`기존 유저 데이터가 ${existingSnapshot.size}개 있습니다. 강제 업로드를 원하면 체크박스를 선택하세요.`);
+          }
+        }
+
+        // JSON 파일 로드
+        const response = await fetch('/더미데이터/users_seed_300_null_profile.json');
+        if (!response.ok) {
+          throw new Error(`유저 데이터 파일을 불러올 수 없습니다: ${response.statusText}`);
+        }
+        const userData = await response.json();
+
+        if (!Array.isArray(userData)) {
+          throw new Error('유저 데이터가 배열 형식이 아닙니다.');
+        }
+
+        addLog(`📦 ${userData.length}개의 유저 데이터 업로드 시작...`, 'info');
+
+        // 배치로 업로드
+        const batchSize = 500;
+        let uploadedCount = 0;
+        for (let i = 0; i < userData.length; i += batchSize) {
+          const batch = userData.slice(i, i + batchSize);
+          const promises = batch.map(async (item) => {
+            try {
+              const userId = item.uid || `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+              
+              const dataToUpload = {
+                ...item,
+                createdAt: item.created_at ? new Date(item.created_at) : serverTimestamp(),
+                updatedAt: serverTimestamp(),
+                lastLoginAt: item.last_login_at ? new Date(item.last_login_at) : null
+              };
+
+              delete dataToUpload.uid;
+              delete dataToUpload.created_at;
+              delete dataToUpload.last_login_at;
+
+              await setDoc(doc(db, 'users', userId), dataToUpload, { merge: true });
+              uploadedCount++;
+            } catch (error) {
+              addLog(`❌ 유저 항목 업로드 실패: ${error.message}`, 'error');
+            }
+          });
+
+          await Promise.all(promises);
+          addLog(`✅ ${Math.min(i + batchSize, userData.length)}/${userData.length} 업로드 완료`, 'success');
+        }
+
+        statusDiv.textContent = `✅ 완료: ${uploadedCount}개 업로드됨`;
+        statusDiv.className = 'status-success';
+        addLog(`🎉 유저 데이터 업로드 완료: ${uploadedCount}개`, 'success');
+      } catch (error) {
+        statusDiv.textContent = `❌ 오류: ${error.message}`;
+        statusDiv.className = 'status-error';
+        addLog(`❌ 오류: ${error.message}`, 'error');
+      } finally {
+        loading = false;
+      }
+    }
+
+    // 전체 업로드
+    async function uploadAll() {
+      const force = document.getElementById('force-upload').checked;
+      await uploadFAQ(force);
+      await uploadUsers(force);
+    }
+
+    // 이벤트 리스너 등록
+    document.getElementById('upload-faq').addEventListener('click', () => {
+      uploadFAQ(document.getElementById('force-upload').checked);
+    });
+
+    document.getElementById('upload-users').addEventListener('click', () => {
+      uploadUsers(document.getElementById('force-upload').checked);
+    });
+
+    document.getElementById('upload-all').addEventListener('click', uploadAll);
+
+    addLog('✅ 관리자 페이지 로드 완료', 'success');
+  </script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      overflow: hidden;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 30px;
+      text-align: center;
+    }
+
+    .header h1 {
+      font-size: 28px;
+      margin-bottom: 10px;
+    }
+
+    .header p {
+      opacity: 0.9;
+      font-size: 14px;
+    }
+
+    .content {
+      padding: 30px;
+    }
+
+    .section {
+      background: #f8f9fa;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .section h2 {
+      font-size: 20px;
+      margin-bottom: 15px;
+      color: #333;
+    }
+
+    .status {
+      padding: 10px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      font-weight: 500;
+    }
+
+    .status-loading {
+      background: #e3f2fd;
+      color: #1976d2;
+    }
+
+    .status-success {
+      background: #e8f5e9;
+      color: #2e7d32;
+    }
+
+    .status-error {
+      background: #ffebee;
+      color: #c62828;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-primary {
+      background: #667eea;
+      color: white;
+    }
+
+    .btn-success {
+      background: #4caf50;
+      color: white;
+    }
+
+    .btn-warning {
+      background: #ff9800;
+      color: white;
+    }
+
+    .checkbox-group {
+      margin: 15px 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .checkbox-group input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+    }
+
+    .logs {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      padding: 20px;
+      border-radius: 8px;
+      max-height: 400px;
+      overflow-y: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .log-entry {
+      margin-bottom: 5px;
+    }
+
+    .log-time {
+      color: #858585;
+      margin-right: 10px;
+    }
+
+    .log-info {
+      color: #d4d4d4;
+    }
+
+    .log-success {
+      color: #4ec9b0;
+    }
+
+    .log-error {
+      color: #f48771;
+    }
+
+    .log-warning {
+      color: #dcdcaa;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🔧 Firestore 데이터 업로드 관리자</h1>
+      <p>FAQ 및 유저 더미데이터를 Firestore에 업로드합니다</p>
+    </div>
+    <div class="content">
+      <div class="checkbox-group">
+        <input type="checkbox" id="force-upload">
+        <label for="force-upload">강제 업로드 (기존 데이터 무시)</label>
+      </div>
+
+      <div class="section">
+        <h2>📚 FAQ 데이터 (250개)</h2>
+        <div id="faq-status" class="status">대기 중</div>
+        <div class="button-group">
+          <button id="upload-faq" class="btn-primary">FAQ 업로드</button>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>👥 유저 데이터 (300개)</h2>
+        <div id="users-status" class="status">대기 중</div>
+        <div class="button-group">
+          <button id="upload-users" class="btn-success">유저 업로드</button>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>🚀 전체 업로드</h2>
+        <div class="button-group">
+          <button id="upload-all" class="btn-warning">전체 업로드 (FAQ + 유저)</button>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>📋 실행 로그</h2>
+        <div id="logs" class="logs"></div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+

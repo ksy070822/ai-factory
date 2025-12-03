@@ -1,0 +1,388 @@
+{
+  "species": {
+    "DOG": "dog",
+    "CAT": "cat",
+    "RABBIT": "rabbit",
+    "HAMSTER": "hamster",
+    "BIRD": "bird",
+    "HEDGEHOG": "hedgehog",
+    "REPTILE": "reptile"
+  },
+  "departments": {
+    "ORTHO": "ortho",
+    "DERM": "derm",
+    "DIGESTIVE": "digestive",
+    "RESP": "resp",
+    "URO": "uro",
+    "NEURO": "neuro",
+    "BEHAVIOR": "behavior",
+    "INFECTIOUS": "infectious",
+    "GENERAL": "general",
+    "ENV": "env",
+    "DENTAL": "dental"
+  },
+  "speciesInfo": {
+    "dog": {
+      "name": "강아지",
+      "icon": "🐶",
+      "color": "#FF9500",
+      "departments": [
+        "ortho",
+        "derm",
+        "digestive",
+        "resp",
+        "infectious"
+      ]
+    },
+    "cat": {
+      "name": "고양이",
+      "icon": "🐱",
+      "color": "#AF52DE",
+      "departments": [
+        "infectious",
+        "uro",
+        "derm",
+        "behavior",
+        "digestive",
+        "resp"
+      ]
+    },
+    "rabbit": {
+      "name": "토끼",
+      "icon": "🐰",
+      "color": "#FFB6C1",
+      "departments": [
+        "digestive",
+        "dental",
+        "resp",
+        "derm",
+        "uro"
+      ]
+    },
+    "hamster": {
+      "name": "햄스터",
+      "icon": "🐹",
+      "color": "#FFD700",
+      "departments": [
+        "derm",
+        "resp",
+        "digestive",
+        "dental"
+      ]
+    },
+    "bird": {
+      "name": "새",
+      "icon": "🐦",
+      "color": "#5AC8FA",
+      "departments": [
+        "resp",
+        "digestive",
+        "derm",
+        "uro"
+      ]
+    },
+    "hedgehog": {
+      "name": "고슴도치",
+      "icon": "🦔",
+      "color": "#8E8E93",
+      "departments": [
+        "digestive",
+        "derm",
+        "neuro",
+        "resp"
+      ]
+    },
+    "reptile": {
+      "name": "파충류",
+      "icon": "🦎",
+      "color": "#34C759",
+      "departments": [
+        "env",
+        "resp",
+        "digestive",
+        "derm"
+      ]
+    }
+  },
+  "departmentInfo": {
+    "ortho": {
+      "name": "정형외과",
+      "icon": "🦴",
+      "description": "뼈, 관절, 근육 문제"
+    },
+    "derm": {
+      "name": "피부과",
+      "icon": "🐾",
+      "description": "피부, 털, 알레르기"
+    },
+    "digestive": {
+      "name": "소화기과",
+      "icon": "🐟",
+      "description": "소화, 위장 문제"
+    },
+    "resp": {
+      "name": "호흡기과",
+      "icon": "🫁",
+      "description": "기침, 호흡 문제"
+    },
+    "uro": {
+      "name": "비뇨기과",
+      "icon": "🩸",
+      "description": "소변, 생식기 문제"
+    },
+    "neuro": {
+      "name": "신경과",
+      "icon": "🧠",
+      "description": "신경계 문제"
+    },
+    "behavior": {
+      "name": "행동",
+      "icon": "😿",
+      "description": "행동 변화, 스트레스"
+    },
+    "infectious": {
+      "name": "감염내과",
+      "icon": "🧪",
+      "description": "감염, 바이러스"
+    },
+    "general": {
+      "name": "일반",
+      "icon": "🏥",
+      "description": "기타 증상"
+    },
+    "env": {
+      "name": "환경성",
+      "icon": "🌡️",
+      "description": "사육 환경 문제"
+    },
+    "dental": {
+      "name": "치과",
+      "icon": "🦷",
+      "description": "치아, 턱 문제"
+    }
+  },
+  "symptomTags": {
+    "vomiting": {
+      "id": "vomiting",
+      "name": "구토",
+      "dept": "digestive",
+      "species": [
+        "dog",
+        "cat",
+        "rabbit",
+        "hamster",
+        "reptile"
+      ]
+    },
+    "diarrhea": {
+      "id": "diarrhea",
+      "name": "설사",
+      "dept": "digestive",
+      "species": [
+        "dog",
+        "cat",
+        "rabbit",
+        "hamster",
+        "hedgehog",
+        "reptile"
+      ]
+    },
+    "loss_appetite": {
+      "id": "loss_appetite",
+      "name": "식욕부진",
+      "dept": "digestive",
+      "species": [
+        "dog",
+        "cat",
+        "rabbit",
+        "hamster",
+        "hedgehog",
+        "reptile"
+      ]
+    },
+    "abdominal_pain": {
+      "id": "abdominal_pain",
+      "name": "복통",
+      "dept": "digestive",
+      "species": [
+        "dog",
+        "cat",
+        "rabbit",
+        "hamster"
+      ]
+    },
+    "coughing": {
+      "id": "coughing",
+      "name": "기침",
+      "dept": "resp",
+      "species": [
+        "dog",
+        "cat",
+        "rabbit",
+        "hamster",
+        "bird",
+        "hedgehog",
+        "reptile"
+      ]
+    },
+    "runny_nose": {
+      "id": "runny_nose",
+      "name": "콧물",
+      "dept": "resp",
+      "species": [
+        "dog",
+        "cat",
+        "rabbit",
+        "hamster",
+        "bird",
+        "reptile"
+      ]
+    },
+    "breathing_difficulty": {
+      "id": "breathing_difficulty",
+      "name": "호흡곤란",
+      "dept": "resp",
+      "species": [
+        "dog",
+        "cat",
+        "rabbit",
+        "hamster",
+        "bird",
+        "hedgehog",
+        "reptile"
+      ]
+    },
+    "sneezing": {
+      "id": "sneezing",
+      "name": "재채기",
+      "dept": "resp",
+      "species": [
+        "cat",
+        "rabbit",
+        "bird"
+      ]
+    },
+    "hair_loss": {
+      "id": "hair_loss",
+      "name": "탈모",
+      "dept": "derm",
+      "species": [
+        "dog",
+        "cat",
+        "hamster",
+        "hedgehog"
+      ]
+    },
+    "scratching": {
+      "id": "scratching",
+      "name": "가려움/긁음",
+      "dept": "derm",
+      "species": [
+        "dog",
+        "cat",
+        "rabbit",
+        "hamster"
+      ]
+    }
+  },
+  "followUpQuestions": {
+    "vomiting": [
+      {
+        "id": "vomit_duration",
+        "question": "언제부터 구토하나요?"
+      },
+      {
+        "id": "vomit_color",
+        "question": "토한 색깔은 어떤가요?"
+      },
+      {
+        "id": "vomit_frequency",
+        "question": "하루에 몇 번 구토하나요?"
+      }
+    ],
+    "diarrhea": [
+      {
+        "id": "diarrhea_freq",
+        "question": "하루 몇 번 설사하나요?"
+      },
+      {
+        "id": "diarrhea_color",
+        "question": "변 색깔은 어떤가요?"
+      }
+    ],
+    "breathing_difficulty": [
+      {
+        "id": "breath_severity",
+        "question": "호흡이 얼마나 힘들어 보이나요?"
+      },
+      {
+        "id": "breath_when",
+        "question": "언제 특히 심해지나요?"
+      }
+    ]
+  },
+  "conditions": {
+    "dog": [
+      {
+        "id": "dog_gastro",
+        "name_ko": "급성 위장염",
+        "dept": "digestive",
+        "typical_symptoms": [
+          "vomiting",
+          "diarrhea",
+          "loss_appetite"
+        ]
+      },
+      {
+        "id": "dog_allergy",
+        "name_ko": "알레르기 피부염",
+        "dept": "derm",
+        "typical_symptoms": [
+          "scratching",
+          "hair_loss"
+        ]
+      }
+    ],
+    "cat": [
+      {
+        "id": "cat_flutd",
+        "name_ko": "하부요로질환",
+        "dept": "uro",
+        "typical_symptoms": [
+          "loss_appetite"
+        ]
+      },
+      {
+        "id": "cat_uri",
+        "name_ko": "상부 호흡기 감염",
+        "dept": "resp",
+        "typical_symptoms": [
+          "runny_nose",
+          "sneezing",
+          "coughing"
+        ]
+      }
+    ],
+    "rabbit": [
+      {
+        "id": "rabbit_gi_stasis",
+        "name_ko": "위장정체",
+        "dept": "digestive",
+        "typical_symptoms": [
+          "loss_appetite",
+          "abdominal_pain",
+          "diarrhea"
+        ]
+      },
+      {
+        "id": "rabbit_snuffles",
+        "name_ko": "파스튜렐라 감염",
+        "dept": "resp",
+        "typical_symptoms": [
+          "runny_nose",
+          "breathing_difficulty"
+        ]
+      }
+    ]
+  }
+}

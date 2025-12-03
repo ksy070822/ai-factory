@@ -1,0 +1,7385 @@
+[
+  {
+    "uid": "U0001",
+    "name": "이서우",
+    "email": "user0001@example.com",
+    "phone": "010-5012-4657",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "kakao",
+    "linked_providers": {
+      "kakao": true,
+      "naver": true,
+      "google": true
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-09-22T12:00:00Z",
+    "last_login_at": "2024-10-16T12:00:00Z",
+    "preferred_species": [
+      "cat",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0002",
+    "name": "임서하",
+    "email": "user0002@example.com",
+    "phone": "010-4257-9928",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-05-02T12:00:00Z",
+    "last_login_at": "2024-11-18T12:00:00Z",
+    "preferred_species": [
+      "dog"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0003",
+    "name": "박준연",
+    "email": "user0003@example.com",
+    "phone": "010-5552-3547",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "naver",
+    "linked_providers": {
+      "kakao": false,
+      "naver": true,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-08-14T12:00:00Z",
+    "last_login_at": "2024-10-15T12:00:00Z",
+    "preferred_species": [
+      "dog"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0004",
+    "name": "윤아빈",
+    "email": "user0004@example.com",
+    "phone": "010-7201-2291",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-02-24T12:00:00Z",
+    "last_login_at": "2024-11-14T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0005",
+    "name": "임지빈",
+    "email": "user0005@example.com",
+    "phone": "010-1750-4733",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-07-07T12:00:00Z",
+    "last_login_at": "2024-11-27T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0006",
+    "name": "정수연",
+    "email": "user0006@example.com",
+    "phone": "010-3664-7065",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-06-04T12:00:00Z",
+    "last_login_at": "2024-11-19T12:00:00Z",
+    "preferred_species": [
+      "dog"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0007",
+    "name": "임민하",
+    "email": "user0007@example.com",
+    "phone": "010-5010-3677",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": true,
+      "naver": true,
+      "google": true
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-04-10T12:00:00Z",
+    "last_login_at": "2024-11-08T12:00:00Z",
+    "preferred_species": [
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0008",
+    "name": "김예진",
+    "email": "user0008@example.com",
+    "phone": "010-5386-2084",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-08-16T12:00:00Z",
+    "last_login_at": "2024-10-05T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0009",
+    "name": "최수진",
+    "email": "user0009@example.com",
+    "phone": "010-8517-3340",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": true,
+      "naver": true,
+      "google": true
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-07-20T12:00:00Z",
+    "last_login_at": "2024-11-24T12:00:00Z",
+    "preferred_species": [
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0010",
+    "name": "박아율",
+    "email": "user0010@example.com",
+    "phone": "010-2489-1771",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-10-07T12:00:00Z",
+    "last_login_at": "2024-11-23T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0011",
+    "name": "임하진",
+    "email": "user0011@example.com",
+    "phone": "010-7252-8668",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-03-07T12:00:00Z",
+    "last_login_at": "2024-11-16T12:00:00Z",
+    "preferred_species": [
+      "dog"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0012",
+    "name": "이아우",
+    "email": "user0012@example.com",
+    "phone": "010-6573-2827",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": true
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-07-05T12:00:00Z",
+    "last_login_at": "2024-11-05T12:00:00Z",
+    "preferred_species": [
+      "cat",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0013",
+    "name": "박아빈",
+    "email": "user0013@example.com",
+    "phone": "010-5889-9317",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": true
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-01-26T12:00:00Z",
+    "last_login_at": "2024-11-20T12:00:00Z",
+    "preferred_species": [
+      "dog"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0014",
+    "name": "임예율",
+    "email": "user0014@example.com",
+    "phone": "010-1319-2832",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-05-31T12:00:00Z",
+    "last_login_at": "2024-10-07T12:00:00Z",
+    "preferred_species": [
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0015",
+    "name": "김지민",
+    "email": "user0015@example.com",
+    "phone": "010-2290-2403",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": true,
+      "naver": true,
+      "google": true
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-03-29T12:00:00Z",
+    "last_login_at": "2024-10-11T12:00:00Z",
+    "preferred_species": [
+      "cat",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0016",
+    "name": "임준현",
+    "email": "user0016@example.com",
+    "phone": "010-9835-4295",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": true,
+      "naver": true,
+      "google": true
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2023-12-03T12:00:00Z",
+    "last_login_at": "2024-11-13T12:00:00Z",
+    "preferred_species": [
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0017",
+    "name": "최하연",
+    "email": "user0017@example.com",
+    "phone": "010-1344-4770",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "kakao",
+    "linked_providers": {
+      "kakao": true,
+      "naver": true,
+      "google": true
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-02-05T12:00:00Z",
+    "last_login_at": "2024-11-18T12:00:00Z",
+    "preferred_species": [
+      "dog"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0018",
+    "name": "장지우",
+    "email": "user0018@example.com",
+    "phone": "010-8953-4510",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-03-01T12:00:00Z",
+    "last_login_at": "2024-11-24T12:00:00Z",
+    "preferred_species": [
+      "cat",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0019",
+    "name": "윤지율",
+    "email": "user0019@example.com",
+    "phone": "010-7669-4119",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-10-15T12:00:00Z",
+    "last_login_at": "2024-11-26T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0020",
+    "name": "윤서빈",
+    "email": "user0020@example.com",
+    "phone": "010-1993-7596",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-06-12T12:00:00Z",
+    "last_login_at": "2024-10-12T12:00:00Z",
+    "preferred_species": [
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0021",
+    "name": "장수준",
+    "email": "user0021@example.com",
+    "phone": "010-7912-4006",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": true,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-07-13T12:00:00Z",
+    "last_login_at": "2024-11-03T12:00:00Z",
+    "preferred_species": [
+      "dog"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0022",
+    "name": "김아윤",
+    "email": "user0022@example.com",
+    "phone": "010-2528-4872",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-09-08T12:00:00Z",
+    "last_login_at": "2024-11-06T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0023",
+    "name": "김민진",
+    "email": "user0023@example.com",
+    "phone": "010-1035-7396",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-07-20T12:00:00Z",
+    "last_login_at": "2024-10-04T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0024",
+    "name": "장수준",
+    "email": "user0024@example.com",
+    "phone": "010-4111-5861",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-08-13T12:00:00Z",
+    "last_login_at": "2024-11-29T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0025",
+    "name": "김서민",
+    "email": "user0025@example.com",
+    "phone": "010-8811-9238",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": true,
+      "naver": true,
+      "google": true
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-03-06T12:00:00Z",
+    "last_login_at": "2024-11-22T12:00:00Z",
+    "preferred_species": [
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0026",
+    "name": "조하민",
+    "email": "user0026@example.com",
+    "phone": "010-5033-1651",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-01-20T12:00:00Z",
+    "last_login_at": "2024-11-27T12:00:00Z",
+    "preferred_species": [
+      "cat",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0027",
+    "name": "강도현",
+    "email": "user0027@example.com",
+    "phone": "010-6147-4910",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": true,
+      "naver": true,
+      "google": true
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-07-20T12:00:00Z",
+    "last_login_at": "2024-11-07T12:00:00Z",
+    "preferred_species": [
+      "dog"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0028",
+    "name": "윤유민",
+    "email": "user0028@example.com",
+    "phone": "010-2638-2200",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-03-02T12:00:00Z",
+    "last_login_at": "2024-11-19T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0029",
+    "name": "이지연",
+    "email": "user0029@example.com",
+    "phone": "010-5669-3584",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-04-22T12:00:00Z",
+    "last_login_at": "2024-10-10T12:00:00Z",
+    "preferred_species": [
+      "cat",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0030",
+    "name": "김아우",
+    "email": "user0030@example.com",
+    "phone": "010-2697-3200",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-07-20T12:00:00Z",
+    "last_login_at": "2024-11-25T12:00:00Z",
+    "preferred_species": [
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0031",
+    "name": "정도민",
+    "email": "user0031@example.com",
+    "phone": "010-4450-6617",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-08-20T12:00:00Z",
+    "last_login_at": "2024-10-20T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0032",
+    "name": "정서빈",
+    "email": "user0032@example.com",
+    "phone": "010-7939-5533",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": true
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-11-10T12:00:00Z",
+    "last_login_at": "2024-12-02T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0033",
+    "name": "장준하",
+    "email": "user0033@example.com",
+    "phone": "010-1158-2832",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-10-25T12:00:00Z",
+    "last_login_at": "2024-10-03T12:00:00Z",
+    "preferred_species": [
+      "cat",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0034",
+    "name": "김예민",
+    "email": "user0034@example.com",
+    "phone": "010-3426-8041",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "naver",
+    "linked_providers": {
+      "kakao": false,
+      "naver": true,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-09-28T12:00:00Z",
+    "last_login_at": "2024-11-30T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0035",
+    "name": "장준민",
+    "email": "user0035@example.com",
+    "phone": "010-3532-4878",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-09-10T12:00:00Z",
+    "last_login_at": "2024-10-12T12:00:00Z",
+    "preferred_species": [
+      "dog"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0036",
+    "name": "박예진",
+    "email": "user0036@example.com",
+    "phone": "010-5065-5371",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-09-12T12:00:00Z",
+    "last_login_at": "2024-10-13T12:00:00Z",
+    "preferred_species": [
+      "dog"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0037",
+    "name": "윤지현",
+    "email": "user0037@example.com",
+    "phone": "010-8541-6728",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-06-29T12:00:00Z",
+    "last_login_at": "2024-10-11T12:00:00Z",
+    "preferred_species": [
+      "dog"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0038",
+    "name": "최준연",
+    "email": "user0038@example.com",
+    "phone": "010-5564-2137",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-07-13T12:00:00Z",
+    "last_login_at": "2024-11-10T12:00:00Z",
+    "preferred_species": [
+      "cat",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0039",
+    "name": "강서빈",
+    "email": "user0039@example.com",
+    "phone": "010-5279-3925",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "google",
+    "linked_providers": {
+      "kakao": true,
+      "naver": true,
+      "google": true
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-02-09T12:00:00Z",
+    "last_login_at": "2024-11-16T12:00:00Z",
+    "preferred_species": [
+      "cat",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0040",
+    "name": "최도윤",
+    "email": "user0040@example.com",
+    "phone": "010-8144-1027",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-03-11T12:00:00Z",
+    "last_login_at": "2024-10-04T12:00:00Z",
+    "preferred_species": [
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0041",
+    "name": "강준빈",
+    "email": "user0041@example.com",
+    "phone": "010-6409-6143",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": true,
+      "google": true
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2023-12-29T12:00:00Z",
+    "last_login_at": "2024-10-09T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0042",
+    "name": "장민현",
+    "email": "user0042@example.com",
+    "phone": "010-7888-7211",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2023-12-22T12:00:00Z",
+    "last_login_at": "2024-10-16T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0043",
+    "name": "조아윤",
+    "email": "user0043@example.com",
+    "phone": "010-5978-5700",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-08-17T12:00:00Z",
+    "last_login_at": "2024-11-05T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0044",
+    "name": "윤수율",
+    "email": "user0044@example.com",
+    "phone": "010-4501-9375",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-04-04T12:00:00Z",
+    "last_login_at": "2024-10-13T12:00:00Z",
+    "preferred_species": [
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0045",
+    "name": "이도하",
+    "email": "user0045@example.com",
+    "phone": "010-6491-2530",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "kakao",
+    "linked_providers": {
+      "kakao": true,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-08-04T12:00:00Z",
+    "last_login_at": "2024-10-20T12:00:00Z",
+    "preferred_species": [
+      "cat",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0046",
+    "name": "이수진",
+    "email": "user0046@example.com",
+    "phone": "010-4185-7291",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": true,
+      "naver": true,
+      "google": true
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-03-24T12:00:00Z",
+    "last_login_at": "2024-11-07T12:00:00Z",
+    "preferred_species": [
+      "cat",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0047",
+    "name": "윤서하",
+    "email": "user0047@example.com",
+    "phone": "010-5082-2988",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-04-13T12:00:00Z",
+    "last_login_at": "2024-11-24T12:00:00Z",
+    "preferred_species": [
+      "cat",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0048",
+    "name": "임예율",
+    "email": "user0048@example.com",
+    "phone": "010-9270-7991",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-02-26T12:00:00Z",
+    "last_login_at": "2024-11-04T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0049",
+    "name": "윤도현",
+    "email": "user0049@example.com",
+    "phone": "010-5543-9540",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "naver",
+    "linked_providers": {
+      "kakao": true,
+      "naver": true,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-03-29T12:00:00Z",
+    "last_login_at": "2024-10-23T12:00:00Z",
+    "preferred_species": [
+      "cat",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0050",
+    "name": "이민준",
+    "email": "user0050@example.com",
+    "phone": "010-4788-7275",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2023-12-13T12:00:00Z",
+    "last_login_at": "2024-11-23T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0051",
+    "name": "강아율",
+    "email": "user0051@example.com",
+    "phone": "010-7812-2020",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-08-19T12:00:00Z",
+    "last_login_at": "2024-10-10T12:00:00Z",
+    "preferred_species": [
+      "cat",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0052",
+    "name": "김유진",
+    "email": "user0052@example.com",
+    "phone": "010-8814-1096",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-06-05T12:00:00Z",
+    "last_login_at": "2024-11-13T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0053",
+    "name": "장아민",
+    "email": "user0053@example.com",
+    "phone": "010-4613-8999",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-08-12T12:00:00Z",
+    "last_login_at": "2024-11-15T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0054",
+    "name": "조민율",
+    "email": "user0054@example.com",
+    "phone": "010-3091-9751",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": true,
+      "naver": true,
+      "google": true
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-11-19T12:00:00Z",
+    "last_login_at": "2024-10-05T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0055",
+    "name": "박서우",
+    "email": "user0055@example.com",
+    "phone": "010-7211-6363",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "naver",
+    "linked_providers": {
+      "kakao": false,
+      "naver": true,
+      "google": true
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-08-16T12:00:00Z",
+    "last_login_at": "2024-11-03T12:00:00Z",
+    "preferred_species": [
+      "cat",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0056",
+    "name": "김예현",
+    "email": "user0056@example.com",
+    "phone": "010-2124-1659",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "google",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": true
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-11-17T12:00:00Z",
+    "last_login_at": "2024-10-03T12:00:00Z",
+    "preferred_species": [
+      "dog"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0057",
+    "name": "임지율",
+    "email": "user0057@example.com",
+    "phone": "010-5198-7043",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-09-08T12:00:00Z",
+    "last_login_at": "2024-10-25T12:00:00Z",
+    "preferred_species": [
+      "dog"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0058",
+    "name": "박도빈",
+    "email": "user0058@example.com",
+    "phone": "010-1420-6111",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-02-12T12:00:00Z",
+    "last_login_at": "2024-10-20T12:00:00Z",
+    "preferred_species": [
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0059",
+    "name": "이유현",
+    "email": "user0059@example.com",
+    "phone": "010-2669-5941",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2023-12-18T12:00:00Z",
+    "last_login_at": "2024-10-25T12:00:00Z",
+    "preferred_species": [
+      "cat",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0060",
+    "name": "김예하",
+    "email": "user0060@example.com",
+    "phone": "010-8018-7071",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-10-28T12:00:00Z",
+    "last_login_at": "2024-10-31T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0061",
+    "name": "윤하진",
+    "email": "user0061@example.com",
+    "phone": "010-6934-8532",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2023-12-06T12:00:00Z",
+    "last_login_at": "2024-11-23T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0062",
+    "name": "임아율",
+    "email": "user0062@example.com",
+    "phone": "010-8616-8136",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "kakao",
+    "linked_providers": {
+      "kakao": true,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-02-03T12:00:00Z",
+    "last_login_at": "2024-11-15T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0063",
+    "name": "임유진",
+    "email": "user0063@example.com",
+    "phone": "010-6511-1470",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": true,
+      "naver": true,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-03-24T12:00:00Z",
+    "last_login_at": "2024-10-09T12:00:00Z",
+    "preferred_species": [
+      "cat",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0064",
+    "name": "정아윤",
+    "email": "user0064@example.com",
+    "phone": "010-9464-4130",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-10-20T12:00:00Z",
+    "last_login_at": "2024-11-17T12:00:00Z",
+    "preferred_species": [
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0065",
+    "name": "윤수율",
+    "email": "user0065@example.com",
+    "phone": "010-1282-2524",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-07-05T12:00:00Z",
+    "last_login_at": "2024-11-18T12:00:00Z",
+    "preferred_species": [
+      "cat",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0066",
+    "name": "강수하",
+    "email": "user0066@example.com",
+    "phone": "010-9698-6632",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-04-29T12:00:00Z",
+    "last_login_at": "2024-10-16T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0067",
+    "name": "정도우",
+    "email": "user0067@example.com",
+    "phone": "010-4777-2976",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "naver",
+    "linked_providers": {
+      "kakao": true,
+      "naver": true,
+      "google": true
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-08-26T12:00:00Z",
+    "last_login_at": "2024-11-12T12:00:00Z",
+    "preferred_species": [
+      "cat",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0068",
+    "name": "장유우",
+    "email": "user0068@example.com",
+    "phone": "010-2647-4180",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "kakao",
+    "linked_providers": {
+      "kakao": true,
+      "naver": false,
+      "google": true
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-07-04T12:00:00Z",
+    "last_login_at": "2024-11-18T12:00:00Z",
+    "preferred_species": [
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0069",
+    "name": "윤하윤",
+    "email": "user0069@example.com",
+    "phone": "010-5658-8690",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": true,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-04-01T12:00:00Z",
+    "last_login_at": "2024-11-04T12:00:00Z",
+    "preferred_species": [
+      "dog"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0070",
+    "name": "조수빈",
+    "email": "user0070@example.com",
+    "phone": "010-1878-3485",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-09-17T12:00:00Z",
+    "last_login_at": "2024-10-12T12:00:00Z",
+    "preferred_species": [
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0071",
+    "name": "이아진",
+    "email": "user0071@example.com",
+    "phone": "010-4697-9561",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-05-22T12:00:00Z",
+    "last_login_at": "2024-11-04T12:00:00Z",
+    "preferred_species": [
+      "cat",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0072",
+    "name": "조도민",
+    "email": "user0072@example.com",
+    "phone": "010-1986-2625",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "kakao",
+    "linked_providers": {
+      "kakao": true,
+      "naver": true,
+      "google": true
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-08-18T12:00:00Z",
+    "last_login_at": "2024-10-23T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0073",
+    "name": "윤유율",
+    "email": "user0073@example.com",
+    "phone": "010-5771-1534",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-08-06T12:00:00Z",
+    "last_login_at": "2024-11-14T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0074",
+    "name": "이지우",
+    "email": "user0074@example.com",
+    "phone": "010-4241-7965",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": true,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-10-05T12:00:00Z",
+    "last_login_at": "2024-10-29T12:00:00Z",
+    "preferred_species": [
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0075",
+    "name": "정유민",
+    "email": "user0075@example.com",
+    "phone": "010-5728-8195",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-09-30T12:00:00Z",
+    "last_login_at": "2024-11-03T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0076",
+    "name": "장아율",
+    "email": "user0076@example.com",
+    "phone": "010-8172-2317",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-01-31T12:00:00Z",
+    "last_login_at": "2024-11-30T12:00:00Z",
+    "preferred_species": [
+      "cat",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0077",
+    "name": "정서빈",
+    "email": "user0077@example.com",
+    "phone": "010-4750-1339",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "kakao",
+    "linked_providers": {
+      "kakao": true,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2023-12-24T12:00:00Z",
+    "last_login_at": "2024-10-11T12:00:00Z",
+    "preferred_species": [
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0078",
+    "name": "임준율",
+    "email": "user0078@example.com",
+    "phone": "010-2494-8700",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "naver",
+    "linked_providers": {
+      "kakao": true,
+      "naver": true,
+      "google": true
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-06-07T12:00:00Z",
+    "last_login_at": "2024-11-06T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0079",
+    "name": "장서율",
+    "email": "user0079@example.com",
+    "phone": "010-2442-6153",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": true,
+      "naver": false,
+      "google": true
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-07-26T12:00:00Z",
+    "last_login_at": "2024-11-12T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0080",
+    "name": "김지하",
+    "email": "user0080@example.com",
+    "phone": "010-6927-9167",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-01-17T12:00:00Z",
+    "last_login_at": "2024-11-04T12:00:00Z",
+    "preferred_species": [
+      "cat",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0081",
+    "name": "박도율",
+    "email": "user0081@example.com",
+    "phone": "010-8941-2989",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-11-18T12:00:00Z",
+    "last_login_at": "2024-10-23T12:00:00Z",
+    "preferred_species": [
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0082",
+    "name": "정아윤",
+    "email": "user0082@example.com",
+    "phone": "010-7684-2527",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-08-09T12:00:00Z",
+    "last_login_at": "2024-10-10T12:00:00Z",
+    "preferred_species": [
+      "dog"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0083",
+    "name": "박수우",
+    "email": "user0083@example.com",
+    "phone": "010-9337-5479",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-05-04T12:00:00Z",
+    "last_login_at": "2024-10-10T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0084",
+    "name": "장민진",
+    "email": "user0084@example.com",
+    "phone": "010-4122-9327",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": true,
+      "google": true
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-09-24T12:00:00Z",
+    "last_login_at": "2024-10-08T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0085",
+    "name": "임유율",
+    "email": "user0085@example.com",
+    "phone": "010-3434-8316",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": true,
+      "naver": true,
+      "google": true
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-03-02T12:00:00Z",
+    "last_login_at": "2024-11-02T12:00:00Z",
+    "preferred_species": [
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0086",
+    "name": "임준현",
+    "email": "user0086@example.com",
+    "phone": "010-7730-1715",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-06-23T12:00:00Z",
+    "last_login_at": "2024-10-16T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0087",
+    "name": "조민율",
+    "email": "user0087@example.com",
+    "phone": "010-1606-3068",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "naver",
+    "linked_providers": {
+      "kakao": false,
+      "naver": true,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-03-20T12:00:00Z",
+    "last_login_at": "2024-10-26T12:00:00Z",
+    "preferred_species": [
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0088",
+    "name": "조민빈",
+    "email": "user0088@example.com",
+    "phone": "010-8692-5342",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-06-12T12:00:00Z",
+    "last_login_at": "2024-10-24T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0089",
+    "name": "장준연",
+    "email": "user0089@example.com",
+    "phone": "010-8994-9864",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": true,
+      "naver": true,
+      "google": true
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-11-14T12:00:00Z",
+    "last_login_at": "2024-10-24T12:00:00Z",
+    "preferred_species": [
+      "dog"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0090",
+    "name": "이수준",
+    "email": "user0090@example.com",
+    "phone": "010-5906-1474",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-11-09T12:00:00Z",
+    "last_login_at": "2024-11-12T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0091",
+    "name": "조민현",
+    "email": "user0091@example.com",
+    "phone": "010-9702-7751",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-02-17T12:00:00Z",
+    "last_login_at": "2024-10-20T12:00:00Z",
+    "preferred_species": [
+      "dog"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0092",
+    "name": "임준민",
+    "email": "user0092@example.com",
+    "phone": "010-4945-9153",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": true,
+      "naver": true,
+      "google": true
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-02-08T12:00:00Z",
+    "last_login_at": "2024-11-23T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0093",
+    "name": "정아준",
+    "email": "user0093@example.com",
+    "phone": "010-2210-8237",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "google",
+    "linked_providers": {
+      "kakao": false,
+      "naver": true,
+      "google": true
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-06-09T12:00:00Z",
+    "last_login_at": "2024-10-26T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0094",
+    "name": "윤하현",
+    "email": "user0094@example.com",
+    "phone": "010-7248-6881",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-02-12T12:00:00Z",
+    "last_login_at": "2024-11-14T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0095",
+    "name": "정서민",
+    "email": "user0095@example.com",
+    "phone": "010-1803-9138",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-07-09T12:00:00Z",
+    "last_login_at": "2024-10-14T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0096",
+    "name": "최지민",
+    "email": "user0096@example.com",
+    "phone": "010-5106-3240",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-01-16T12:00:00Z",
+    "last_login_at": "2024-11-26T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0097",
+    "name": "윤서민",
+    "email": "user0097@example.com",
+    "phone": "010-6977-3153",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "google",
+    "linked_providers": {
+      "kakao": true,
+      "naver": true,
+      "google": true
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-10-17T12:00:00Z",
+    "last_login_at": "2024-10-05T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0098",
+    "name": "장아우",
+    "email": "user0098@example.com",
+    "phone": "010-3695-5210",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": true,
+      "naver": true,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-03-31T12:00:00Z",
+    "last_login_at": "2024-10-12T12:00:00Z",
+    "preferred_species": [
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0099",
+    "name": "조아연",
+    "email": "user0099@example.com",
+    "phone": "010-2479-7464",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-11-25T12:00:00Z",
+    "last_login_at": "2024-11-16T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0100",
+    "name": "임준연",
+    "email": "user0100@example.com",
+    "phone": "010-2775-4830",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-04-05T12:00:00Z",
+    "last_login_at": "2024-12-01T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0101",
+    "name": "임지빈",
+    "email": "user0101@example.com",
+    "phone": "010-8606-5951",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "kakao",
+    "linked_providers": {
+      "kakao": true,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-01-05T12:00:00Z",
+    "last_login_at": "2024-11-06T12:00:00Z",
+    "preferred_species": [
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0102",
+    "name": "장민진",
+    "email": "user0102@example.com",
+    "phone": "010-8432-7078",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2023-12-25T12:00:00Z",
+    "last_login_at": "2024-10-03T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0103",
+    "name": "임민진",
+    "email": "user0103@example.com",
+    "phone": "010-2622-9017",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-01-22T12:00:00Z",
+    "last_login_at": "2024-11-06T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0104",
+    "name": "최수율",
+    "email": "user0104@example.com",
+    "phone": "010-4868-6942",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "kakao",
+    "linked_providers": {
+      "kakao": true,
+      "naver": true,
+      "google": true
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-10-13T12:00:00Z",
+    "last_login_at": "2024-10-20T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0105",
+    "name": "이지민",
+    "email": "user0105@example.com",
+    "phone": "010-1349-1828",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-06-15T12:00:00Z",
+    "last_login_at": "2024-11-17T12:00:00Z",
+    "preferred_species": [
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0106",
+    "name": "이아현",
+    "email": "user0106@example.com",
+    "phone": "010-4538-4817",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": true,
+      "naver": true,
+      "google": true
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-06-17T12:00:00Z",
+    "last_login_at": "2024-10-14T12:00:00Z",
+    "preferred_species": [
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0107",
+    "name": "이서준",
+    "email": "user0107@example.com",
+    "phone": "010-1243-6869",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "naver",
+    "linked_providers": {
+      "kakao": false,
+      "naver": true,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-08-03T12:00:00Z",
+    "last_login_at": "2024-10-26T12:00:00Z",
+    "preferred_species": [
+      "dog"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0108",
+    "name": "윤수연",
+    "email": "user0108@example.com",
+    "phone": "010-9408-2786",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": true,
+      "naver": true,
+      "google": true
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-04-15T12:00:00Z",
+    "last_login_at": "2024-10-31T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0109",
+    "name": "조준빈",
+    "email": "user0109@example.com",
+    "phone": "010-9032-8267",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "google",
+    "linked_providers": {
+      "kakao": true,
+      "naver": true,
+      "google": true
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-10-26T12:00:00Z",
+    "last_login_at": "2024-10-06T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0110",
+    "name": "조유하",
+    "email": "user0110@example.com",
+    "phone": "010-5831-8433",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-03-19T12:00:00Z",
+    "last_login_at": "2024-10-25T12:00:00Z",
+    "preferred_species": [
+      "dog"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0111",
+    "name": "장지진",
+    "email": "user0111@example.com",
+    "phone": "010-8398-4743",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-05-05T12:00:00Z",
+    "last_login_at": "2024-11-11T12:00:00Z",
+    "preferred_species": [
+      "dog"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0112",
+    "name": "강준연",
+    "email": "user0112@example.com",
+    "phone": "010-5176-7132",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-09-15T12:00:00Z",
+    "last_login_at": "2024-10-20T12:00:00Z",
+    "preferred_species": [
+      "dog"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0113",
+    "name": "이준빈",
+    "email": "user0113@example.com",
+    "phone": "010-7105-3131",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-02-22T12:00:00Z",
+    "last_login_at": "2024-11-29T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0114",
+    "name": "이준연",
+    "email": "user0114@example.com",
+    "phone": "010-7929-1842",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": true
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-07-08T12:00:00Z",
+    "last_login_at": "2024-10-25T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0115",
+    "name": "최하연",
+    "email": "user0115@example.com",
+    "phone": "010-7022-2882",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": true,
+      "naver": false,
+      "google": true
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-07-13T12:00:00Z",
+    "last_login_at": "2024-10-27T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0116",
+    "name": "김민우",
+    "email": "user0116@example.com",
+    "phone": "010-6062-6567",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": true
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-06-06T12:00:00Z",
+    "last_login_at": "2024-12-02T12:00:00Z",
+    "preferred_species": [
+      "dog"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0117",
+    "name": "이아현",
+    "email": "user0117@example.com",
+    "phone": "010-7163-7878",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": true,
+      "google": true
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-04-14T12:00:00Z",
+    "last_login_at": "2024-11-11T12:00:00Z",
+    "preferred_species": [
+      "dog"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0118",
+    "name": "김민준",
+    "email": "user0118@example.com",
+    "phone": "010-1815-2336",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-07-16T12:00:00Z",
+    "last_login_at": "2024-11-04T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0119",
+    "name": "조도현",
+    "email": "user0119@example.com",
+    "phone": "010-9394-2864",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "naver",
+    "linked_providers": {
+      "kakao": true,
+      "naver": true,
+      "google": true
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-06-09T12:00:00Z",
+    "last_login_at": "2024-11-05T12:00:00Z",
+    "preferred_species": [
+      "dog"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0120",
+    "name": "김지우",
+    "email": "user0120@example.com",
+    "phone": "010-4460-3248",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": true,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-07-25T12:00:00Z",
+    "last_login_at": "2024-11-14T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0121",
+    "name": "장지하",
+    "email": "user0121@example.com",
+    "phone": "010-6802-2180",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-05-13T12:00:00Z",
+    "last_login_at": "2024-10-08T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0122",
+    "name": "이예민",
+    "email": "user0122@example.com",
+    "phone": "010-8033-7626",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2023-12-05T12:00:00Z",
+    "last_login_at": "2024-10-23T12:00:00Z",
+    "preferred_species": [
+      "dog"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0123",
+    "name": "강민민",
+    "email": "user0123@example.com",
+    "phone": "010-8538-6928",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-10-18T12:00:00Z",
+    "last_login_at": "2024-11-05T12:00:00Z",
+    "preferred_species": [
+      "cat",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0124",
+    "name": "조아빈",
+    "email": "user0124@example.com",
+    "phone": "010-7484-6083",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": true,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-06-12T12:00:00Z",
+    "last_login_at": "2024-11-18T12:00:00Z",
+    "preferred_species": [
+      "cat",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0125",
+    "name": "최예연",
+    "email": "user0125@example.com",
+    "phone": "010-3419-4871",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "google",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": true
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-10-11T12:00:00Z",
+    "last_login_at": "2024-11-23T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0126",
+    "name": "윤유민",
+    "email": "user0126@example.com",
+    "phone": "010-8354-6295",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "naver",
+    "linked_providers": {
+      "kakao": false,
+      "naver": true,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-01-16T12:00:00Z",
+    "last_login_at": "2024-11-12T12:00:00Z",
+    "preferred_species": [
+      "cat",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0127",
+    "name": "김예하",
+    "email": "user0127@example.com",
+    "phone": "010-2215-6085",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": true,
+      "naver": true,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-04-10T12:00:00Z",
+    "last_login_at": "2024-11-04T12:00:00Z",
+    "preferred_species": [
+      "dog"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0128",
+    "name": "임유하",
+    "email": "user0128@example.com",
+    "phone": "010-7299-8581",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-02-09T12:00:00Z",
+    "last_login_at": "2024-10-28T12:00:00Z",
+    "preferred_species": [
+      "dog"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0129",
+    "name": "윤유현",
+    "email": "user0129@example.com",
+    "phone": "010-6267-8792",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-03-21T12:00:00Z",
+    "last_login_at": "2024-11-23T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0130",
+    "name": "이아준",
+    "email": "user0130@example.com",
+    "phone": "010-1641-5059",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2023-12-06T12:00:00Z",
+    "last_login_at": "2024-11-04T12:00:00Z",
+    "preferred_species": [
+      "cat",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0131",
+    "name": "박예연",
+    "email": "user0131@example.com",
+    "phone": "010-5634-7347",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "google",
+    "linked_providers": {
+      "kakao": true,
+      "naver": true,
+      "google": true
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-05-07T12:00:00Z",
+    "last_login_at": "2024-10-14T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0132",
+    "name": "정유준",
+    "email": "user0132@example.com",
+    "phone": "010-6461-2335",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "naver",
+    "linked_providers": {
+      "kakao": false,
+      "naver": true,
+      "google": true
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-02-08T12:00:00Z",
+    "last_login_at": "2024-10-21T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0133",
+    "name": "강민하",
+    "email": "user0133@example.com",
+    "phone": "010-2531-7937",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "google",
+    "linked_providers": {
+      "kakao": true,
+      "naver": false,
+      "google": true
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-03-17T12:00:00Z",
+    "last_login_at": "2024-11-09T12:00:00Z",
+    "preferred_species": [
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0134",
+    "name": "박하우",
+    "email": "user0134@example.com",
+    "phone": "010-2657-9317",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-03-01T12:00:00Z",
+    "last_login_at": "2024-10-10T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0135",
+    "name": "임민민",
+    "email": "user0135@example.com",
+    "phone": "010-7172-3527",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-09-10T12:00:00Z",
+    "last_login_at": "2024-11-21T12:00:00Z",
+    "preferred_species": [
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0136",
+    "name": "윤서진",
+    "email": "user0136@example.com",
+    "phone": "010-6968-4891",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "naver",
+    "linked_providers": {
+      "kakao": true,
+      "naver": true,
+      "google": true
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-04-19T12:00:00Z",
+    "last_login_at": "2024-10-24T12:00:00Z",
+    "preferred_species": [
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0137",
+    "name": "강유율",
+    "email": "user0137@example.com",
+    "phone": "010-8564-5616",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-05-21T12:00:00Z",
+    "last_login_at": "2024-10-31T12:00:00Z",
+    "preferred_species": [
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0138",
+    "name": "임민우",
+    "email": "user0138@example.com",
+    "phone": "010-1854-8873",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-05-26T12:00:00Z",
+    "last_login_at": "2024-10-28T12:00:00Z",
+    "preferred_species": [
+      "cat",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0139",
+    "name": "이도빈",
+    "email": "user0139@example.com",
+    "phone": "010-3626-5469",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-04-16T12:00:00Z",
+    "last_login_at": "2024-10-06T12:00:00Z",
+    "preferred_species": [
+      "dog"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0140",
+    "name": "최수연",
+    "email": "user0140@example.com",
+    "phone": "010-1436-7797",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-11-05T12:00:00Z",
+    "last_login_at": "2024-11-07T12:00:00Z",
+    "preferred_species": [
+      "dog"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0141",
+    "name": "강지윤",
+    "email": "user0141@example.com",
+    "phone": "010-6221-2623",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "kakao",
+    "linked_providers": {
+      "kakao": true,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2023-12-03T12:00:00Z",
+    "last_login_at": "2024-10-22T12:00:00Z",
+    "preferred_species": [
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0142",
+    "name": "윤수민",
+    "email": "user0142@example.com",
+    "phone": "010-1086-2298",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": true
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-11-23T12:00:00Z",
+    "last_login_at": "2024-11-16T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0143",
+    "name": "이도현",
+    "email": "user0143@example.com",
+    "phone": "010-5934-2996",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-11-08T12:00:00Z",
+    "last_login_at": "2024-11-17T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0144",
+    "name": "이하율",
+    "email": "user0144@example.com",
+    "phone": "010-9782-1269",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-01-14T12:00:00Z",
+    "last_login_at": "2024-10-31T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0145",
+    "name": "조서민",
+    "email": "user0145@example.com",
+    "phone": "010-6780-4941",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": true,
+      "naver": true,
+      "google": true
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-02-14T12:00:00Z",
+    "last_login_at": "2024-11-06T12:00:00Z",
+    "preferred_species": [
+      "cat",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0146",
+    "name": "장서진",
+    "email": "user0146@example.com",
+    "phone": "010-8702-1713",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-01-12T12:00:00Z",
+    "last_login_at": "2024-11-08T12:00:00Z",
+    "preferred_species": [
+      "dog"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0147",
+    "name": "강하연",
+    "email": "user0147@example.com",
+    "phone": "010-4950-2698",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-02-09T12:00:00Z",
+    "last_login_at": "2024-10-16T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0148",
+    "name": "장예준",
+    "email": "user0148@example.com",
+    "phone": "010-8612-8840",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-01-14T12:00:00Z",
+    "last_login_at": "2024-11-21T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0149",
+    "name": "김도현",
+    "email": "user0149@example.com",
+    "phone": "010-1717-4268",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-11-11T12:00:00Z",
+    "last_login_at": "2024-11-12T12:00:00Z",
+    "preferred_species": [
+      "cat",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0150",
+    "name": "윤도윤",
+    "email": "user0150@example.com",
+    "phone": "010-4131-5687",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-06-03T12:00:00Z",
+    "last_login_at": "2024-10-08T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0151",
+    "name": "정하연",
+    "email": "user0151@example.com",
+    "phone": "010-8159-7553",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-04-21T12:00:00Z",
+    "last_login_at": "2024-10-06T12:00:00Z",
+    "preferred_species": [
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0152",
+    "name": "윤수연",
+    "email": "user0152@example.com",
+    "phone": "010-9507-5369",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-10-21T12:00:00Z",
+    "last_login_at": "2024-10-17T12:00:00Z",
+    "preferred_species": [
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0153",
+    "name": "장도연",
+    "email": "user0153@example.com",
+    "phone": "010-2680-2311",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "google",
+    "linked_providers": {
+      "kakao": false,
+      "naver": true,
+      "google": true
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-06-18T12:00:00Z",
+    "last_login_at": "2024-10-21T12:00:00Z",
+    "preferred_species": [
+      "dog"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0154",
+    "name": "강유진",
+    "email": "user0154@example.com",
+    "phone": "010-5498-1939",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-10-25T12:00:00Z",
+    "last_login_at": "2024-10-21T12:00:00Z",
+    "preferred_species": [
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0155",
+    "name": "김민민",
+    "email": "user0155@example.com",
+    "phone": "010-8179-1570",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": true,
+      "naver": true,
+      "google": true
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-09-29T12:00:00Z",
+    "last_login_at": "2024-11-28T12:00:00Z",
+    "preferred_species": [
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0156",
+    "name": "윤예연",
+    "email": "user0156@example.com",
+    "phone": "010-8273-2259",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-02-13T12:00:00Z",
+    "last_login_at": "2024-11-24T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0157",
+    "name": "최하윤",
+    "email": "user0157@example.com",
+    "phone": "010-4048-9176",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-03-12T12:00:00Z",
+    "last_login_at": "2024-11-08T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0158",
+    "name": "윤지민",
+    "email": "user0158@example.com",
+    "phone": "010-5678-9047",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "naver",
+    "linked_providers": {
+      "kakao": false,
+      "naver": true,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-08-22T12:00:00Z",
+    "last_login_at": "2024-11-25T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0159",
+    "name": "강하하",
+    "email": "user0159@example.com",
+    "phone": "010-9882-5757",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": true,
+      "naver": true,
+      "google": true
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-07-02T12:00:00Z",
+    "last_login_at": "2024-10-09T12:00:00Z",
+    "preferred_species": [
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0160",
+    "name": "박지율",
+    "email": "user0160@example.com",
+    "phone": "010-1430-6912",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "google",
+    "linked_providers": {
+      "kakao": true,
+      "naver": true,
+      "google": true
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-02-23T12:00:00Z",
+    "last_login_at": "2024-10-27T12:00:00Z",
+    "preferred_species": [
+      "cat",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0161",
+    "name": "조준민",
+    "email": "user0161@example.com",
+    "phone": "010-2208-3053",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "naver",
+    "linked_providers": {
+      "kakao": false,
+      "naver": true,
+      "google": true
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-06-23T12:00:00Z",
+    "last_login_at": "2024-10-22T12:00:00Z",
+    "preferred_species": [
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0162",
+    "name": "조아윤",
+    "email": "user0162@example.com",
+    "phone": "010-3034-9488",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "google",
+    "linked_providers": {
+      "kakao": true,
+      "naver": false,
+      "google": true
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-09-15T12:00:00Z",
+    "last_login_at": "2024-11-13T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0163",
+    "name": "최아우",
+    "email": "user0163@example.com",
+    "phone": "010-3050-5961",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": true,
+      "naver": true,
+      "google": true
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-01-23T12:00:00Z",
+    "last_login_at": "2024-10-29T12:00:00Z",
+    "preferred_species": [
+      "cat",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0164",
+    "name": "강유윤",
+    "email": "user0164@example.com",
+    "phone": "010-1464-2330",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-11-09T12:00:00Z",
+    "last_login_at": "2024-10-03T12:00:00Z",
+    "preferred_species": [
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0165",
+    "name": "임준민",
+    "email": "user0165@example.com",
+    "phone": "010-1496-9159",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": true,
+      "naver": true,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-01-16T12:00:00Z",
+    "last_login_at": "2024-10-29T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0166",
+    "name": "윤하윤",
+    "email": "user0166@example.com",
+    "phone": "010-3589-8202",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-05-04T12:00:00Z",
+    "last_login_at": "2024-11-02T12:00:00Z",
+    "preferred_species": [
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0167",
+    "name": "강예연",
+    "email": "user0167@example.com",
+    "phone": "010-7532-3142",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-05-27T12:00:00Z",
+    "last_login_at": "2024-10-31T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0168",
+    "name": "이도율",
+    "email": "user0168@example.com",
+    "phone": "010-5061-3308",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "naver",
+    "linked_providers": {
+      "kakao": false,
+      "naver": true,
+      "google": true
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-10-14T12:00:00Z",
+    "last_login_at": "2024-11-29T12:00:00Z",
+    "preferred_species": [
+      "cat",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0169",
+    "name": "강지준",
+    "email": "user0169@example.com",
+    "phone": "010-9163-9433",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-04-07T12:00:00Z",
+    "last_login_at": "2024-11-01T12:00:00Z",
+    "preferred_species": [
+      "dog"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0170",
+    "name": "조아율",
+    "email": "user0170@example.com",
+    "phone": "010-4944-4524",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "naver",
+    "linked_providers": {
+      "kakao": false,
+      "naver": true,
+      "google": true
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-02-08T12:00:00Z",
+    "last_login_at": "2024-11-10T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0171",
+    "name": "박도연",
+    "email": "user0171@example.com",
+    "phone": "010-7606-6995",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "google",
+    "linked_providers": {
+      "kakao": true,
+      "naver": true,
+      "google": true
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-11-09T12:00:00Z",
+    "last_login_at": "2024-11-07T12:00:00Z",
+    "preferred_species": [
+      "cat",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0172",
+    "name": "정유민",
+    "email": "user0172@example.com",
+    "phone": "010-2946-3108",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": true,
+      "google": true
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-10-14T12:00:00Z",
+    "last_login_at": "2024-11-07T12:00:00Z",
+    "preferred_species": [
+      "cat",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0173",
+    "name": "조아윤",
+    "email": "user0173@example.com",
+    "phone": "010-1742-1637",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "naver",
+    "linked_providers": {
+      "kakao": false,
+      "naver": true,
+      "google": true
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-09-23T12:00:00Z",
+    "last_login_at": "2024-10-18T12:00:00Z",
+    "preferred_species": [
+      "cat",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0174",
+    "name": "강민진",
+    "email": "user0174@example.com",
+    "phone": "010-5902-6511",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-03-18T12:00:00Z",
+    "last_login_at": "2024-10-10T12:00:00Z",
+    "preferred_species": [
+      "cat",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0175",
+    "name": "정수윤",
+    "email": "user0175@example.com",
+    "phone": "010-7035-6427",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2023-12-24T12:00:00Z",
+    "last_login_at": "2024-11-25T12:00:00Z",
+    "preferred_species": [
+      "dog"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0176",
+    "name": "임수우",
+    "email": "user0176@example.com",
+    "phone": "010-4728-1841",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": true,
+      "naver": true,
+      "google": true
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-02-08T12:00:00Z",
+    "last_login_at": "2024-11-02T12:00:00Z",
+    "preferred_species": [
+      "cat",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0177",
+    "name": "이지윤",
+    "email": "user0177@example.com",
+    "phone": "010-8225-6139",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-05-02T12:00:00Z",
+    "last_login_at": "2024-11-23T12:00:00Z",
+    "preferred_species": [
+      "cat",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0178",
+    "name": "임수윤",
+    "email": "user0178@example.com",
+    "phone": "010-3262-9498",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": true,
+      "naver": true,
+      "google": true
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-08-18T12:00:00Z",
+    "last_login_at": "2024-10-28T12:00:00Z",
+    "preferred_species": [
+      "cat",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0179",
+    "name": "강아연",
+    "email": "user0179@example.com",
+    "phone": "010-5331-8932",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": true,
+      "naver": true,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-08-26T12:00:00Z",
+    "last_login_at": "2024-11-17T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0180",
+    "name": "강수연",
+    "email": "user0180@example.com",
+    "phone": "010-5480-5715",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-10-01T12:00:00Z",
+    "last_login_at": "2024-10-27T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0181",
+    "name": "강민우",
+    "email": "user0181@example.com",
+    "phone": "010-1689-5712",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": true,
+      "google": true
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2023-12-03T12:00:00Z",
+    "last_login_at": "2024-11-27T12:00:00Z",
+    "preferred_species": [
+      "cat",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0182",
+    "name": "정아우",
+    "email": "user0182@example.com",
+    "phone": "010-3249-2789",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-01-22T12:00:00Z",
+    "last_login_at": "2024-10-16T12:00:00Z",
+    "preferred_species": [
+      "cat",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0183",
+    "name": "최지윤",
+    "email": "user0183@example.com",
+    "phone": "010-2641-7771",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-06-16T12:00:00Z",
+    "last_login_at": "2024-10-18T12:00:00Z",
+    "preferred_species": [
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0184",
+    "name": "김아준",
+    "email": "user0184@example.com",
+    "phone": "010-7666-8793",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": true,
+      "google": true
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-04-02T12:00:00Z",
+    "last_login_at": "2024-10-22T12:00:00Z",
+    "preferred_species": [
+      "dog"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0185",
+    "name": "임지하",
+    "email": "user0185@example.com",
+    "phone": "010-1611-3868",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-05-03T12:00:00Z",
+    "last_login_at": "2024-10-07T12:00:00Z",
+    "preferred_species": [
+      "dog"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0186",
+    "name": "조수준",
+    "email": "user0186@example.com",
+    "phone": "010-5742-1613",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-11-28T12:00:00Z",
+    "last_login_at": "2024-11-13T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0187",
+    "name": "정수하",
+    "email": "user0187@example.com",
+    "phone": "010-9590-9092",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-09-25T12:00:00Z",
+    "last_login_at": "2024-10-09T12:00:00Z",
+    "preferred_species": [
+      "dog"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0188",
+    "name": "강민율",
+    "email": "user0188@example.com",
+    "phone": "010-5215-4050",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "google",
+    "linked_providers": {
+      "kakao": true,
+      "naver": false,
+      "google": true
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-11-25T12:00:00Z",
+    "last_login_at": "2024-10-16T12:00:00Z",
+    "preferred_species": [
+      "cat",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0189",
+    "name": "강하진",
+    "email": "user0189@example.com",
+    "phone": "010-2562-4027",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "kakao",
+    "linked_providers": {
+      "kakao": true,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-09-22T12:00:00Z",
+    "last_login_at": "2024-11-02T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0190",
+    "name": "강도민",
+    "email": "user0190@example.com",
+    "phone": "010-1187-5285",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-01-03T12:00:00Z",
+    "last_login_at": "2024-11-09T12:00:00Z",
+    "preferred_species": [
+      "dog"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0191",
+    "name": "윤도준",
+    "email": "user0191@example.com",
+    "phone": "010-7642-9233",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": true
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2023-12-08T12:00:00Z",
+    "last_login_at": "2024-10-14T12:00:00Z",
+    "preferred_species": [
+      "cat",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0192",
+    "name": "최지준",
+    "email": "user0192@example.com",
+    "phone": "010-8834-3509",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-04-14T12:00:00Z",
+    "last_login_at": "2024-10-16T12:00:00Z",
+    "preferred_species": [
+      "cat",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0193",
+    "name": "윤아현",
+    "email": "user0193@example.com",
+    "phone": "010-5054-2341",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-03-08T12:00:00Z",
+    "last_login_at": "2024-11-04T12:00:00Z",
+    "preferred_species": [
+      "cat",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0194",
+    "name": "이서하",
+    "email": "user0194@example.com",
+    "phone": "010-9281-4312",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "naver",
+    "linked_providers": {
+      "kakao": false,
+      "naver": true,
+      "google": true
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-02-13T12:00:00Z",
+    "last_login_at": "2024-10-29T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0195",
+    "name": "이아율",
+    "email": "user0195@example.com",
+    "phone": "010-1911-8429",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-09-26T12:00:00Z",
+    "last_login_at": "2024-10-31T12:00:00Z",
+    "preferred_species": [
+      "cat",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0196",
+    "name": "윤도윤",
+    "email": "user0196@example.com",
+    "phone": "010-7487-5169",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "kakao",
+    "linked_providers": {
+      "kakao": true,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-12-01T12:00:00Z",
+    "last_login_at": "2024-10-16T12:00:00Z",
+    "preferred_species": [
+      "dog"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0197",
+    "name": "이수윤",
+    "email": "user0197@example.com",
+    "phone": "010-5703-7698",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": true,
+      "naver": true,
+      "google": true
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-09-01T12:00:00Z",
+    "last_login_at": "2024-10-14T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0198",
+    "name": "조하하",
+    "email": "user0198@example.com",
+    "phone": "010-3178-6697",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-10-03T12:00:00Z",
+    "last_login_at": "2024-11-21T12:00:00Z",
+    "preferred_species": [
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0199",
+    "name": "최서윤",
+    "email": "user0199@example.com",
+    "phone": "010-5888-8585",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2023-12-24T12:00:00Z",
+    "last_login_at": "2024-10-17T12:00:00Z",
+    "preferred_species": [
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0200",
+    "name": "최수연",
+    "email": "user0200@example.com",
+    "phone": "010-3541-5516",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-08-28T12:00:00Z",
+    "last_login_at": "2024-10-04T12:00:00Z",
+    "preferred_species": [
+      "dog"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0201",
+    "name": "조유윤",
+    "email": "user0201@example.com",
+    "phone": "010-4943-4376",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-10-29T12:00:00Z",
+    "last_login_at": "2024-11-26T12:00:00Z",
+    "preferred_species": [
+      "dog"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0202",
+    "name": "최서진",
+    "email": "user0202@example.com",
+    "phone": "010-8191-4839",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-03-01T12:00:00Z",
+    "last_login_at": "2024-11-19T12:00:00Z",
+    "preferred_species": [
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0203",
+    "name": "장도현",
+    "email": "user0203@example.com",
+    "phone": "010-6224-6253",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-08-03T12:00:00Z",
+    "last_login_at": "2024-11-13T12:00:00Z",
+    "preferred_species": [
+      "cat",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0204",
+    "name": "최준우",
+    "email": "user0204@example.com",
+    "phone": "010-5508-1998",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-02-21T12:00:00Z",
+    "last_login_at": "2024-10-03T12:00:00Z",
+    "preferred_species": [
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0205",
+    "name": "조아율",
+    "email": "user0205@example.com",
+    "phone": "010-1768-6642",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "naver",
+    "linked_providers": {
+      "kakao": true,
+      "naver": true,
+      "google": true
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-01-08T12:00:00Z",
+    "last_login_at": "2024-10-21T12:00:00Z",
+    "preferred_species": [
+      "cat",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0206",
+    "name": "윤지현",
+    "email": "user0206@example.com",
+    "phone": "010-5927-3365",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "naver",
+    "linked_providers": {
+      "kakao": true,
+      "naver": true,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-04-09T12:00:00Z",
+    "last_login_at": "2024-10-05T12:00:00Z",
+    "preferred_species": [
+      "dog"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0207",
+    "name": "윤예빈",
+    "email": "user0207@example.com",
+    "phone": "010-9775-4120",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "google",
+    "linked_providers": {
+      "kakao": true,
+      "naver": true,
+      "google": true
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-11-06T12:00:00Z",
+    "last_login_at": "2024-11-15T12:00:00Z",
+    "preferred_species": [
+      "cat",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0208",
+    "name": "최수현",
+    "email": "user0208@example.com",
+    "phone": "010-6455-5967",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-11-25T12:00:00Z",
+    "last_login_at": "2024-11-19T12:00:00Z",
+    "preferred_species": [
+      "dog"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0209",
+    "name": "윤지민",
+    "email": "user0209@example.com",
+    "phone": "010-4350-7498",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": true,
+      "google": true
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-08-02T12:00:00Z",
+    "last_login_at": "2024-10-28T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0210",
+    "name": "강아율",
+    "email": "user0210@example.com",
+    "phone": "010-8635-2615",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-04-06T12:00:00Z",
+    "last_login_at": "2024-10-15T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0211",
+    "name": "강준윤",
+    "email": "user0211@example.com",
+    "phone": "010-4625-3390",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-11-24T12:00:00Z",
+    "last_login_at": "2024-11-16T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0212",
+    "name": "정민현",
+    "email": "user0212@example.com",
+    "phone": "010-6404-4768",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-05-22T12:00:00Z",
+    "last_login_at": "2024-10-27T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0213",
+    "name": "정수율",
+    "email": "user0213@example.com",
+    "phone": "010-8550-3756",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": true,
+      "naver": true,
+      "google": true
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-06-05T12:00:00Z",
+    "last_login_at": "2024-11-22T12:00:00Z",
+    "preferred_species": [
+      "dog"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0214",
+    "name": "김서진",
+    "email": "user0214@example.com",
+    "phone": "010-3252-4791",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "google",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": true
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-10-29T12:00:00Z",
+    "last_login_at": "2024-10-18T12:00:00Z",
+    "preferred_species": [
+      "cat",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0215",
+    "name": "윤수윤",
+    "email": "user0215@example.com",
+    "phone": "010-1108-9719",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "google",
+    "linked_providers": {
+      "kakao": true,
+      "naver": true,
+      "google": true
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-02-24T12:00:00Z",
+    "last_login_at": "2024-11-06T12:00:00Z",
+    "preferred_species": [
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0216",
+    "name": "이하하",
+    "email": "user0216@example.com",
+    "phone": "010-3439-4948",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-08-26T12:00:00Z",
+    "last_login_at": "2024-10-24T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0217",
+    "name": "조하연",
+    "email": "user0217@example.com",
+    "phone": "010-7652-8520",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-02-17T12:00:00Z",
+    "last_login_at": "2024-11-17T12:00:00Z",
+    "preferred_species": [
+      "dog"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0218",
+    "name": "김하진",
+    "email": "user0218@example.com",
+    "phone": "010-7213-7179",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "google",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": true
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-02-24T12:00:00Z",
+    "last_login_at": "2024-11-02T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0219",
+    "name": "임하하",
+    "email": "user0219@example.com",
+    "phone": "010-1697-4764",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-08-16T12:00:00Z",
+    "last_login_at": "2024-10-06T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0220",
+    "name": "정서빈",
+    "email": "user0220@example.com",
+    "phone": "010-5593-9897",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": true,
+      "naver": false,
+      "google": true
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-02-18T12:00:00Z",
+    "last_login_at": "2024-10-21T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0221",
+    "name": "이도준",
+    "email": "user0221@example.com",
+    "phone": "010-4939-7375",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2023-12-22T12:00:00Z",
+    "last_login_at": "2024-10-06T12:00:00Z",
+    "preferred_species": [
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0222",
+    "name": "이아연",
+    "email": "user0222@example.com",
+    "phone": "010-1879-2600",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-04-23T12:00:00Z",
+    "last_login_at": "2024-11-18T12:00:00Z",
+    "preferred_species": [
+      "cat",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0223",
+    "name": "임준연",
+    "email": "user0223@example.com",
+    "phone": "010-1485-5478",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": true,
+      "naver": true,
+      "google": true
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-04-16T12:00:00Z",
+    "last_login_at": "2024-11-01T12:00:00Z",
+    "preferred_species": [
+      "dog"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0224",
+    "name": "임도현",
+    "email": "user0224@example.com",
+    "phone": "010-2204-2344",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "kakao",
+    "linked_providers": {
+      "kakao": true,
+      "naver": true,
+      "google": true
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-07-18T12:00:00Z",
+    "last_login_at": "2024-11-23T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0225",
+    "name": "윤예우",
+    "email": "user0225@example.com",
+    "phone": "010-2674-3170",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-10-19T12:00:00Z",
+    "last_login_at": "2024-11-21T12:00:00Z",
+    "preferred_species": [
+      "cat",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0226",
+    "name": "조하윤",
+    "email": "user0226@example.com",
+    "phone": "010-2468-6798",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-02-23T12:00:00Z",
+    "last_login_at": "2024-11-27T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0227",
+    "name": "김도진",
+    "email": "user0227@example.com",
+    "phone": "010-7353-2387",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-02-20T12:00:00Z",
+    "last_login_at": "2024-10-06T12:00:00Z",
+    "preferred_species": [
+      "cat",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0228",
+    "name": "박준준",
+    "email": "user0228@example.com",
+    "phone": "010-3274-5405",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-07-01T12:00:00Z",
+    "last_login_at": "2024-11-15T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0229",
+    "name": "정준우",
+    "email": "user0229@example.com",
+    "phone": "010-8933-2260",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-06-01T12:00:00Z",
+    "last_login_at": "2024-11-16T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0230",
+    "name": "임유현",
+    "email": "user0230@example.com",
+    "phone": "010-8501-2752",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": true,
+      "google": true
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-09-24T12:00:00Z",
+    "last_login_at": "2024-11-13T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0231",
+    "name": "조유준",
+    "email": "user0231@example.com",
+    "phone": "010-5922-6253",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-01-29T12:00:00Z",
+    "last_login_at": "2024-10-03T12:00:00Z",
+    "preferred_species": [
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0232",
+    "name": "조예우",
+    "email": "user0232@example.com",
+    "phone": "010-9044-4971",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": true,
+      "naver": true,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-06-19T12:00:00Z",
+    "last_login_at": "2024-11-08T12:00:00Z",
+    "preferred_species": [
+      "cat",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0233",
+    "name": "박아윤",
+    "email": "user0233@example.com",
+    "phone": "010-8563-4434",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "naver",
+    "linked_providers": {
+      "kakao": true,
+      "naver": true,
+      "google": true
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-04-22T12:00:00Z",
+    "last_login_at": "2024-10-12T12:00:00Z",
+    "preferred_species": [
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0234",
+    "name": "조준빈",
+    "email": "user0234@example.com",
+    "phone": "010-8357-8851",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-02-08T12:00:00Z",
+    "last_login_at": "2024-11-07T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0235",
+    "name": "장서연",
+    "email": "user0235@example.com",
+    "phone": "010-9796-2392",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": true,
+      "naver": true,
+      "google": true
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-10-08T12:00:00Z",
+    "last_login_at": "2024-10-14T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0236",
+    "name": "강준빈",
+    "email": "user0236@example.com",
+    "phone": "010-1172-2615",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-07-23T12:00:00Z",
+    "last_login_at": "2024-11-18T12:00:00Z",
+    "preferred_species": [
+      "cat",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0237",
+    "name": "임지율",
+    "email": "user0237@example.com",
+    "phone": "010-7129-7408",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-04-09T12:00:00Z",
+    "last_login_at": "2024-10-14T12:00:00Z",
+    "preferred_species": [
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0238",
+    "name": "강서율",
+    "email": "user0238@example.com",
+    "phone": "010-2712-5840",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-05-04T12:00:00Z",
+    "last_login_at": "2024-10-05T12:00:00Z",
+    "preferred_species": [
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0239",
+    "name": "강도연",
+    "email": "user0239@example.com",
+    "phone": "010-8460-4389",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": true,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-03-11T12:00:00Z",
+    "last_login_at": "2024-11-02T12:00:00Z",
+    "preferred_species": [
+      "dog"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0240",
+    "name": "정서빈",
+    "email": "user0240@example.com",
+    "phone": "010-1370-6620",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-01-06T12:00:00Z",
+    "last_login_at": "2024-11-26T12:00:00Z",
+    "preferred_species": [
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0241",
+    "name": "장민하",
+    "email": "user0241@example.com",
+    "phone": "010-3623-6422",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-02-20T12:00:00Z",
+    "last_login_at": "2024-11-05T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0242",
+    "name": "박민진",
+    "email": "user0242@example.com",
+    "phone": "010-7481-1478",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": true,
+      "naver": true,
+      "google": true
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-01-23T12:00:00Z",
+    "last_login_at": "2024-10-07T12:00:00Z",
+    "preferred_species": [
+      "dog"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0243",
+    "name": "임하하",
+    "email": "user0243@example.com",
+    "phone": "010-4063-6993",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-06-19T12:00:00Z",
+    "last_login_at": "2024-11-20T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0244",
+    "name": "장예민",
+    "email": "user0244@example.com",
+    "phone": "010-7367-7431",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": true,
+      "naver": false,
+      "google": true
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-02-06T12:00:00Z",
+    "last_login_at": "2024-11-25T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0245",
+    "name": "임유빈",
+    "email": "user0245@example.com",
+    "phone": "010-3194-6131",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": true,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-10-03T12:00:00Z",
+    "last_login_at": "2024-11-17T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0246",
+    "name": "임민민",
+    "email": "user0246@example.com",
+    "phone": "010-7286-7931",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-08-29T12:00:00Z",
+    "last_login_at": "2024-11-01T12:00:00Z",
+    "preferred_species": [
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0247",
+    "name": "장민율",
+    "email": "user0247@example.com",
+    "phone": "010-5732-3298",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-08-29T12:00:00Z",
+    "last_login_at": "2024-11-12T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0248",
+    "name": "김수준",
+    "email": "user0248@example.com",
+    "phone": "010-4196-7290",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-02-19T12:00:00Z",
+    "last_login_at": "2024-10-31T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0249",
+    "name": "조수율",
+    "email": "user0249@example.com",
+    "phone": "010-3740-2354",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-02-17T12:00:00Z",
+    "last_login_at": "2024-12-01T12:00:00Z",
+    "preferred_species": [
+      "dog"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0250",
+    "name": "정지하",
+    "email": "user0250@example.com",
+    "phone": "010-5729-3755",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-04-12T12:00:00Z",
+    "last_login_at": "2024-10-27T12:00:00Z",
+    "preferred_species": [
+      "cat",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0251",
+    "name": "장하민",
+    "email": "user0251@example.com",
+    "phone": "010-2871-5389",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-02-28T12:00:00Z",
+    "last_login_at": "2024-10-11T12:00:00Z",
+    "preferred_species": [
+      "dog"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0252",
+    "name": "윤아현",
+    "email": "user0252@example.com",
+    "phone": "010-7965-2677",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "naver",
+    "linked_providers": {
+      "kakao": false,
+      "naver": true,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-01-03T12:00:00Z",
+    "last_login_at": "2024-10-15T12:00:00Z",
+    "preferred_species": [
+      "dog"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0253",
+    "name": "최지민",
+    "email": "user0253@example.com",
+    "phone": "010-6744-8015",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": true,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-09-09T12:00:00Z",
+    "last_login_at": "2024-10-24T12:00:00Z",
+    "preferred_species": [
+      "cat",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0254",
+    "name": "정유하",
+    "email": "user0254@example.com",
+    "phone": "010-3758-6302",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "google",
+    "linked_providers": {
+      "kakao": true,
+      "naver": false,
+      "google": true
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2023-12-08T12:00:00Z",
+    "last_login_at": "2024-11-14T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0255",
+    "name": "박민현",
+    "email": "user0255@example.com",
+    "phone": "010-3396-6277",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-07-29T12:00:00Z",
+    "last_login_at": "2024-10-15T12:00:00Z",
+    "preferred_species": [
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0256",
+    "name": "임도진",
+    "email": "user0256@example.com",
+    "phone": "010-7146-8405",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-10-25T12:00:00Z",
+    "last_login_at": "2024-10-23T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0257",
+    "name": "장도연",
+    "email": "user0257@example.com",
+    "phone": "010-8449-8996",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": true,
+      "naver": true,
+      "google": true
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-06-18T12:00:00Z",
+    "last_login_at": "2024-10-26T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0258",
+    "name": "최준현",
+    "email": "user0258@example.com",
+    "phone": "010-9105-5399",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": true,
+      "naver": true,
+      "google": true
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-06-20T12:00:00Z",
+    "last_login_at": "2024-10-10T12:00:00Z",
+    "preferred_species": [
+      "dog"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0259",
+    "name": "김하율",
+    "email": "user0259@example.com",
+    "phone": "010-1266-3035",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-09-13T12:00:00Z",
+    "last_login_at": "2024-11-04T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0260",
+    "name": "최민우",
+    "email": "user0260@example.com",
+    "phone": "010-3604-5489",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": true,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-10-16T12:00:00Z",
+    "last_login_at": "2024-10-22T12:00:00Z",
+    "preferred_species": [
+      "dog"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0261",
+    "name": "조도현",
+    "email": "user0261@example.com",
+    "phone": "010-8032-2494",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": true,
+      "naver": false,
+      "google": true
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2023-12-08T12:00:00Z",
+    "last_login_at": "2024-11-26T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0262",
+    "name": "김서연",
+    "email": "user0262@example.com",
+    "phone": "010-2975-7919",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2023-12-13T12:00:00Z",
+    "last_login_at": "2024-11-24T12:00:00Z",
+    "preferred_species": [
+      "dog"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0263",
+    "name": "이하연",
+    "email": "user0263@example.com",
+    "phone": "010-7022-5902",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-09-23T12:00:00Z",
+    "last_login_at": "2024-11-08T12:00:00Z",
+    "preferred_species": [
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0264",
+    "name": "박하하",
+    "email": "user0264@example.com",
+    "phone": "010-1138-3688",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-04-21T12:00:00Z",
+    "last_login_at": "2024-11-10T12:00:00Z",
+    "preferred_species": [
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0265",
+    "name": "조유율",
+    "email": "user0265@example.com",
+    "phone": "010-4559-2420",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-10-12T12:00:00Z",
+    "last_login_at": "2024-11-24T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0266",
+    "name": "강준연",
+    "email": "user0266@example.com",
+    "phone": "010-3290-5059",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": true,
+      "naver": true,
+      "google": true
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-07-14T12:00:00Z",
+    "last_login_at": "2024-10-22T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0267",
+    "name": "최아민",
+    "email": "user0267@example.com",
+    "phone": "010-9348-4090",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-05-16T12:00:00Z",
+    "last_login_at": "2024-11-14T12:00:00Z",
+    "preferred_species": [
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0268",
+    "name": "윤준빈",
+    "email": "user0268@example.com",
+    "phone": "010-4949-9185",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": true,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-01-11T12:00:00Z",
+    "last_login_at": "2024-10-25T12:00:00Z",
+    "preferred_species": [
+      "cat",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0269",
+    "name": "조예하",
+    "email": "user0269@example.com",
+    "phone": "010-3830-8717",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-10-26T12:00:00Z",
+    "last_login_at": "2024-12-01T12:00:00Z",
+    "preferred_species": [
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0270",
+    "name": "김서진",
+    "email": "user0270@example.com",
+    "phone": "010-9300-5693",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-01-16T12:00:00Z",
+    "last_login_at": "2024-10-18T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0271",
+    "name": "이아하",
+    "email": "user0271@example.com",
+    "phone": "010-3501-5546",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": true,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-10-21T12:00:00Z",
+    "last_login_at": "2024-11-13T12:00:00Z",
+    "preferred_species": [
+      "dog"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0272",
+    "name": "정준현",
+    "email": "user0272@example.com",
+    "phone": "010-1948-5005",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-10-19T12:00:00Z",
+    "last_login_at": "2024-10-04T12:00:00Z",
+    "preferred_species": [
+      "cat",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0273",
+    "name": "김도준",
+    "email": "user0273@example.com",
+    "phone": "010-2956-1207",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2023-12-06T12:00:00Z",
+    "last_login_at": "2024-11-24T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0274",
+    "name": "장아우",
+    "email": "user0274@example.com",
+    "phone": "010-3735-7092",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-09-29T12:00:00Z",
+    "last_login_at": "2024-10-16T12:00:00Z",
+    "preferred_species": [
+      "dog"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0275",
+    "name": "김예진",
+    "email": "user0275@example.com",
+    "phone": "010-5456-9582",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-10-31T12:00:00Z",
+    "last_login_at": "2024-11-16T12:00:00Z",
+    "preferred_species": [
+      "dog"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0276",
+    "name": "윤수하",
+    "email": "user0276@example.com",
+    "phone": "010-6900-1908",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-03-22T12:00:00Z",
+    "last_login_at": "2024-10-09T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0277",
+    "name": "이유빈",
+    "email": "user0277@example.com",
+    "phone": "010-4742-9336",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-12-01T12:00:00Z",
+    "last_login_at": "2024-11-30T12:00:00Z",
+    "preferred_species": [
+      "dog"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0278",
+    "name": "윤예진",
+    "email": "user0278@example.com",
+    "phone": "010-3458-3932",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-11-14T12:00:00Z",
+    "last_login_at": "2024-10-28T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0279",
+    "name": "최예현",
+    "email": "user0279@example.com",
+    "phone": "010-7819-6241",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "kakao",
+    "linked_providers": {
+      "kakao": true,
+      "naver": false,
+      "google": true
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-07-17T12:00:00Z",
+    "last_login_at": "2024-10-11T12:00:00Z",
+    "preferred_species": [
+      "dog"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0280",
+    "name": "윤도우",
+    "email": "user0280@example.com",
+    "phone": "010-6362-2415",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": true,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-02-23T12:00:00Z",
+    "last_login_at": "2024-11-03T12:00:00Z",
+    "preferred_species": [
+      "cat",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0281",
+    "name": "최수연",
+    "email": "user0281@example.com",
+    "phone": "010-9083-4201",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-02-27T12:00:00Z",
+    "last_login_at": "2024-10-15T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0282",
+    "name": "김지하",
+    "email": "user0282@example.com",
+    "phone": "010-6675-1157",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-06-14T12:00:00Z",
+    "last_login_at": "2024-12-02T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0283",
+    "name": "이지하",
+    "email": "user0283@example.com",
+    "phone": "010-4902-7878",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-03-26T12:00:00Z",
+    "last_login_at": "2024-11-29T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0284",
+    "name": "이서현",
+    "email": "user0284@example.com",
+    "phone": "010-9515-7767",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": true,
+      "naver": true,
+      "google": true
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2023-12-10T12:00:00Z",
+    "last_login_at": "2024-10-06T12:00:00Z",
+    "preferred_species": [
+      "cat",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0285",
+    "name": "임서진",
+    "email": "user0285@example.com",
+    "phone": "010-3141-4879",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-07-06T12:00:00Z",
+    "last_login_at": "2024-11-16T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0286",
+    "name": "강예율",
+    "email": "user0286@example.com",
+    "phone": "010-5455-4827",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "naver",
+    "linked_providers": {
+      "kakao": true,
+      "naver": true,
+      "google": true
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-10-25T12:00:00Z",
+    "last_login_at": "2024-10-03T12:00:00Z",
+    "preferred_species": [
+      "dog"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0287",
+    "name": "장예현",
+    "email": "user0287@example.com",
+    "phone": "010-8404-6051",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-04-09T12:00:00Z",
+    "last_login_at": "2024-11-16T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0288",
+    "name": "임서현",
+    "email": "user0288@example.com",
+    "phone": "010-6370-3430",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": true,
+      "naver": true,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-10-17T12:00:00Z",
+    "last_login_at": "2024-10-18T12:00:00Z",
+    "preferred_species": [
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0289",
+    "name": "김준율",
+    "email": "user0289@example.com",
+    "phone": "010-5093-2551",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-04-10T12:00:00Z",
+    "last_login_at": "2024-11-26T12:00:00Z",
+    "preferred_species": [
+      "dog"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0290",
+    "name": "김지준",
+    "email": "user0290@example.com",
+    "phone": "010-4246-7563",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-05-26T12:00:00Z",
+    "last_login_at": "2024-10-20T12:00:00Z",
+    "preferred_species": [
+      "cat",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0291",
+    "name": "임도빈",
+    "email": "user0291@example.com",
+    "phone": "010-1357-2056",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-08-23T12:00:00Z",
+    "last_login_at": "2024-10-06T12:00:00Z",
+    "preferred_species": [
+      "dog"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0292",
+    "name": "강하윤",
+    "email": "user0292@example.com",
+    "phone": "010-8552-1829",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-09-07T12:00:00Z",
+    "last_login_at": "2024-10-04T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0293",
+    "name": "윤서진",
+    "email": "user0293@example.com",
+    "phone": "010-7990-3831",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-06-04T12:00:00Z",
+    "last_login_at": "2024-11-19T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0294",
+    "name": "박서민",
+    "email": "user0294@example.com",
+    "phone": "010-5026-5835",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-03-22T12:00:00Z",
+    "last_login_at": "2024-11-06T12:00:00Z",
+    "preferred_species": [
+      "dog"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0295",
+    "name": "정준준",
+    "email": "user0295@example.com",
+    "phone": "010-7868-4267",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-01-08T12:00:00Z",
+    "last_login_at": "2024-10-07T12:00:00Z",
+    "preferred_species": [
+      "cat",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0296",
+    "name": "김준연",
+    "email": "user0296@example.com",
+    "phone": "010-8859-9921",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-03-29T12:00:00Z",
+    "last_login_at": "2024-11-10T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0297",
+    "name": "정민윤",
+    "email": "user0297@example.com",
+    "phone": "010-6224-4588",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-11-17T12:00:00Z",
+    "last_login_at": "2024-10-06T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "other"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0298",
+    "name": "장예민",
+    "email": "user0298@example.com",
+    "phone": "010-4813-3615",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-10-12T12:00:00Z",
+    "last_login_at": "2024-11-17T12:00:00Z",
+    "preferred_species": [
+      "dog"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0299",
+    "name": "최유진",
+    "email": "user0299@example.com",
+    "phone": "010-6813-3846",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "email",
+    "linked_providers": {
+      "kakao": false,
+      "naver": false,
+      "google": false
+    },
+    "has_password": true,
+    "marketing_consent": false,
+    "created_at": "2024-09-03T12:00:00Z",
+    "last_login_at": "2024-11-17T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "cat"
+    ],
+    "role": "owner"
+  },
+  {
+    "uid": "U0300",
+    "name": "임서연",
+    "email": "user0300@example.com",
+    "phone": "010-3328-4084",
+    "gender": null,
+    "birth_year": null,
+    "age_group": null,
+    "signup_method": "email",
+    "last_login_provider": "kakao",
+    "linked_providers": {
+      "kakao": true,
+      "naver": false,
+      "google": true
+    },
+    "has_password": true,
+    "marketing_consent": true,
+    "created_at": "2024-03-25T12:00:00Z",
+    "last_login_at": "2024-10-29T12:00:00Z",
+    "preferred_species": [
+      "dog",
+      "other"
+    ],
+    "role": "owner"
+  }
+]
