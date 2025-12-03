@@ -215,20 +215,20 @@ const PET_CHARACTERS = {
   ]
 };
 
-// 동물 종류 옵션
-const SPECIES_OPTIONS = [
-  { id: 'dog', label: '강아지', emoji: '🐕', icon: '/icon/profile_background_less/dog-removebg-preview.png' },
-  { id: 'cat', label: '고양이', emoji: '🐈', icon: '/icon/profile_background_less/cat-removebg-preview.png' },
-  { id: 'rabbit', label: '토끼', emoji: '🐰', icon: '/icon/profile_background_less/rabbit-removebg-preview.png' },
-  { id: 'hamster', label: '햄스터', emoji: '🐹', icon: '/icon/profile_background_less/hamster-removebg-preview.png' },
-  { id: 'bird', label: '새', emoji: '🦜', icon: '/icon/profile_background_less/bird-removebg-preview.png' },
-  { id: 'hedgehog', label: '고슴도치', emoji: '🦔', icon: '/icon/profile_background_less/hedgehog-removebg-preview.png' },
-  { id: 'reptile', label: '파충류', emoji: '🦎', icon: '/icon/profile_background_less/reptile-removebg-preview.png' },
-  { id: 'other', label: '기타', emoji: '🐾', icon: '/icon/profile_background_less/etc-removebg-preview.png' },
-];
-
 // 동물 이미지 경로 유틸리티 import
-import { getMainCharacterImage, getPetImage } from './src/utils/imagePaths';
+import { getMainCharacterImage, getPetImage, PROFILE_IMAGES } from './src/utils/imagePaths';
+
+// 동물 종류 옵션 - PROFILE_IMAGES 사용하여 배포 환경 호환
+const SPECIES_OPTIONS = [
+  { id: 'dog', label: '강아지', emoji: '🐕', icon: PROFILE_IMAGES.dog },
+  { id: 'cat', label: '고양이', emoji: '🐈', icon: PROFILE_IMAGES.cat },
+  { id: 'rabbit', label: '토끼', emoji: '🐰', icon: PROFILE_IMAGES.rabbit },
+  { id: 'hamster', label: '햄스터', emoji: '🐹', icon: PROFILE_IMAGES.hamster },
+  { id: 'bird', label: '새', emoji: '🦜', icon: PROFILE_IMAGES.bird },
+  { id: 'hedgehog', label: '고슴도치', emoji: '🦔', icon: PROFILE_IMAGES.hedgehog },
+  { id: 'reptile', label: '파충류', emoji: '🦎', icon: PROFILE_IMAGES.reptile },
+  { id: 'other', label: '기타', emoji: '🐾', icon: PROFILE_IMAGES.etc },
+];
 
 // 개/고양이 대표 품종 목록
 const DOG_BREEDS = [
