@@ -678,7 +678,7 @@ function ProfileList({ pets, onSelectPet, onAddNew, onNavigate }) {
 }
 
 // Dashboard Screen
-function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
+function Dashboard({ petData, pets, onNavigate, onSelectPet, userId, onViewDiagnosis }) {
   const [healthFlags, setHealthFlags] = useState(null);
   const [dailyLogs, setDailyLogs] = useState([]);
   const [patternAnalysis, setPatternAnalysis] = useState(null);
@@ -696,6 +696,11 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
     grooming: 0,
     play: 0
   });
+
+  // 예약 데이터, 최근 진단, AI 코멘트 state
+  const [nextBooking, setNextBooking] = useState(null);
+  const [latestDiagnosisData, setLatestDiagnosisData] = useState(null);
+  const [aiDailyComment, setAiDailyComment] = useState(null);
 
   // 오늘 케어 기록 저장
   const saveTodayCare = () => {
@@ -789,6 +794,82 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
         .catch(err => console.error('패턴 분석 오류:', err));
     }
   }, [petData]);
+
+  // 예약 데이터, 최근 진단, AI 코멘트 로드
+  useEffect(() => {
+    const loadMainScreenData = async () => {
+      if (!petData?.id) return;
+
+      // 1. 예약 데이터 로드 (localStorage에서)
+      try {
+        const bookingsKey = userId ? `petMedical_bookings_${userId}` : 'petMedical_bookings';
+        const bookings = JSON.parse(localStorage.getItem(bookingsKey) || '[]');
+        // 현재 반려동물의 예약 중 미래 예약만 필터링
+        const now = new Date();
+        const futureBookings = bookings
+          .filter(b => b.petId === petData.id || b.petName === petData.petName || b.petName === petData.name)
+          .filter(b => new Date(b.date) >= now && b.status !== 'cancelled' && b.status !== 'completed')
+          .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+        if (futureBookings.length > 0) {
+          setNextBooking(futureBookings[0]);
+        } else {
+          setNextBooking(null);
+        }
+      } catch (error) {
+        console.error('예약 데이터 로드 오류:', error);
+      }
+
+      // 2. 최근 진단 데이터 로드
+      try {
+        const latestDiagnosis = getLatestDiagnosisRecord(petData.id);
+        setLatestDiagnosisData(latestDiagnosis);
+      } catch (error) {
+        console.error('최근 진단 데이터 로드 오류:', error);
+      }
+
+      // 3. AI 일일 코멘트 생성 (하루에 1회)
+      try {
+        const todayKey = new Date().toISOString().split('T')[0];
+        const commentKey = `petMedical_aiComment_${petData.id}_${todayKey}`;
+        const savedComment = localStorage.getItem(commentKey);
+
+        if (savedComment) {
+          setAiDailyComment(savedComment);
+        } else {
+          // AI 진단기록, 돌봄기록, 병원예약정보를 고려해서 간단한 코멘트 생성
+          const latestDiagnosis = getLatestDiagnosisRecord(petData.id);
+          const bookingsKey = userId ? `petMedical_bookings_${userId}` : 'petMedical_bookings';
+          const bookings = JSON.parse(localStorage.getItem(bookingsKey) || '[]');
+          const careRecords = JSON.parse(localStorage.getItem(`petMedical_careRecords_${petData.id}`) || '[]');
+
+          // 간단한 코멘트 생성 로직
+          let comment = '';
+          const petName = petData?.petName || petData?.name || '반려동물';
+
+          if (latestDiagnosis?.riskLevel === 'high' || latestDiagnosis?.riskLevel === 'Emergency') {
+            comment = `${petName}의 최근 건강 상태가 주의가 필요합니다. 병원 방문을 권장합니다.`;
+          } else if (latestDiagnosis?.riskLevel === 'medium' || latestDiagnosis?.riskLevel === 'Moderate') {
+            comment = `${petName}의 건강 상태를 계속 모니터링해 주세요.`;
+          } else if (bookings.some(b => new Date(b.date) <= new Date(Date.now() + 7 * 24 * 60 * 60 * 1000))) {
+            comment = `${petName}의 병원 예약이 곧 있습니다. 준비해 주세요.`;
+          } else if (careRecords.length === 0) {
+            comment = `${petName}의 일일 케어 기록을 시작해 보세요!`;
+          } else {
+            comment = `${petName}와 함께 건강한 하루 되세요!`;
+          }
+
+          setAiDailyComment(comment);
+          localStorage.setItem(commentKey, comment);
+        }
+      } catch (error) {
+        console.error('AI 코멘트 생성 오류:', error);
+        setAiDailyComment('오늘도 건강한 하루 되세요!');
+      }
+    };
+
+    loadMainScreenData();
+  }, [petData, userId]);
 
   const handleLogUpdate = async (newLog) => {
     if (!petData) return;
@@ -1070,16 +1151,14 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
                       </button>
                     </div>
 
-                    {/* AI 건강 문진 카드 */}
+                    {/* AI 건강 문진 카드 - 2줄 컴팩트 */}
                     <div className="bg-amber-50 rounded-2xl p-4 shadow-lg border-2 border-amber-200 relative overflow-hidden mb-4">
-                      <div className="relative flex flex-col items-center text-center gap-2">
-                        <div className="w-12 h-12 flex items-center justify-center">
-                          <span className="text-3xl">🤖</span>
-                        </div>
-                        <div>
+                      <div className="relative flex flex-col items-center text-center gap-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-2xl">🤖</span>
                           <h3 className="text-gray-800 font-bold text-base">AI 건강 문진</h3>
-                          <p className="text-gray-600 text-xs">{petData?.petName || petData?.name || '반려동물'} 건강기록 주요알림</p>
                         </div>
+                        <p className="text-gray-600 text-xs">{petData?.petName || petData?.name || '반려동물'} 건강기록 주요알림</p>
                       </div>
                       <button
                         onClick={() => onNavigate('ai-consultation')}
@@ -1091,8 +1170,8 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
 
                     {/* 케어 주요 알림 섹션 */}
                     <div className="mb-4">
-                      <div className="flex flex-col items-center mb-3">
-                        <div className="flex items-center gap-2 mb-1">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-2">
                           <span className="text-lg">🔔</span>
                           <h3 className="text-base font-bold text-gray-800">{petData?.petName || petData?.name || '반려동물'} 케어 주요알림</h3>
                         </div>
@@ -1105,37 +1184,53 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
                       </div>
 
                       <div className="bg-white rounded-2xl p-4 shadow-lg border border-gray-200">
-                        <div className="flex items-center gap-3 py-3 border-b border-gray-100">
+                        {/* 병원 예약일 - 동적 데이터 */}
+                        <div
+                          className="flex items-center gap-3 py-3 border-b border-gray-100 cursor-pointer hover:bg-gray-50 rounded-lg transition-colors"
+                          onClick={() => onNavigate('mypage-bookings')}
+                        >
                           <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center flex-shrink-0">
                             <span className="text-2xl">📅</span>
                           </div>
                           <div className="flex-1">
                             <h4 className="text-sm font-bold text-gray-800 mb-0.5">병원 예약일</h4>
-                            <p className="text-xs text-gray-500">다음 진료: 2025년 12월 15일</p>
+                            <p className="text-xs text-gray-500">
+                              {nextBooking
+                                ? `다음 진료: ${new Date(nextBooking.date).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })}`
+                                : '예약된 일정이 없습니다'}
+                            </p>
                           </div>
                           <span className="text-gray-400 text-lg">&gt;</span>
                         </div>
 
-                        <div className="flex items-center gap-3 py-3 border-b border-gray-100">
+                        {/* 최근 진단이력 - 접종예정 대체 */}
+                        <div
+                          className="flex items-center gap-3 py-3 border-b border-gray-100 cursor-pointer hover:bg-gray-50 rounded-lg transition-colors"
+                          onClick={() => latestDiagnosisData && onViewDiagnosis && onViewDiagnosis(latestDiagnosisData)}
+                        >
                           <div className="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center flex-shrink-0">
-                            <span className="text-2xl">💉</span>
+                            <span className="text-2xl">🩺</span>
                           </div>
                           <div className="flex-1">
-                            <h4 className="text-sm font-bold text-gray-800 mb-0.5">접종 예정</h4>
-                            <p className="text-xs text-gray-500">광견병 백신 (2주 후)</p>
+                            <h4 className="text-sm font-bold text-gray-800 mb-0.5">최근 진단이력</h4>
+                            <p className="text-xs text-gray-500">
+                              {latestDiagnosisData
+                                ? `${latestDiagnosisData.diagnosis || latestDiagnosisData.suspectedConditions?.[0]?.name || '일반 건강 상담'}`
+                                : '진단 기록이 없습니다'}
+                            </p>
                           </div>
-                          <span className="text-gray-400 text-lg">&gt;</span>
+                          {latestDiagnosisData && <span className="text-gray-400 text-lg">&gt;</span>}
                         </div>
 
+                        {/* AI 일일 코멘트 - 유의사항 대체 (상세페이지 랜딩 제거) */}
                         <div className="flex items-center gap-3 py-3">
                           <div className="w-12 h-12 bg-orange-50 rounded-xl flex items-center justify-center flex-shrink-0">
-                            <span className="text-2xl">⚠️</span>
+                            <span className="text-2xl">💡</span>
                           </div>
                           <div className="flex-1">
-                            <h4 className="text-sm font-bold text-gray-800 mb-0.5">유의사항</h4>
-                            <p className="text-xs text-gray-500">피부 알레르기 주의 필요</p>
+                            <h4 className="text-sm font-bold text-gray-800 mb-0.5">오늘의 팁</h4>
+                            <p className="text-xs text-gray-500">{aiDailyComment || '오늘도 건강한 하루 되세요!'}</p>
                           </div>
-                          <span className="text-gray-400 text-lg">&gt;</span>
                         </div>
                       </div>
                     </div>
@@ -1250,25 +1345,42 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
                         </button>
                       </div>
                       <div className="space-y-3">
-                        <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-xl">
+                        {/* 병원 예약일 - 동적 데이터 */}
+                        <div
+                          className="flex items-center gap-3 p-3 bg-blue-50 rounded-xl cursor-pointer hover:bg-blue-100 transition-colors"
+                          onClick={() => onNavigate('mypage-bookings')}
+                        >
                           <span className="text-2xl">📅</span>
                           <div>
                             <p className="font-medium text-gray-900">병원 예약일</p>
-                            <p className="text-sm text-gray-500">다음 진료: 2025년 12월 15일</p>
+                            <p className="text-sm text-gray-500">
+                              {nextBooking
+                                ? `다음 진료: ${new Date(nextBooking.date).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })}`
+                                : '예약된 일정이 없습니다'}
+                            </p>
                           </div>
                         </div>
-                        <div className="flex items-center gap-3 p-3 bg-green-50 rounded-xl">
-                          <span className="text-2xl">💉</span>
+                        {/* 최근 진단이력 - 접종예정 대체 */}
+                        <div
+                          className="flex items-center gap-3 p-3 bg-green-50 rounded-xl cursor-pointer hover:bg-green-100 transition-colors"
+                          onClick={() => latestDiagnosisData && onViewDiagnosis && onViewDiagnosis(latestDiagnosisData)}
+                        >
+                          <span className="text-2xl">🩺</span>
                           <div>
-                            <p className="font-medium text-gray-900">접종 예정</p>
-                            <p className="text-sm text-gray-500">광견병 백신 (2주 후)</p>
+                            <p className="font-medium text-gray-900">최근 진단이력</p>
+                            <p className="text-sm text-gray-500">
+                              {latestDiagnosisData
+                                ? `${latestDiagnosisData.diagnosis || latestDiagnosisData.suspectedConditions?.[0]?.name || '일반 건강 상담'}`
+                                : '진단 기록이 없습니다'}
+                            </p>
                           </div>
                         </div>
+                        {/* AI 일일 코멘트 - 유의사항 대체 */}
                         <div className="flex items-center gap-3 p-3 bg-orange-50 rounded-xl">
-                          <span className="text-2xl">⚠️</span>
+                          <span className="text-2xl">💡</span>
                           <div>
-                            <p className="font-medium text-gray-900">유의사항</p>
-                            <p className="text-sm text-gray-500">피부 알레르기 주의 필요</p>
+                            <p className="font-medium text-gray-900">오늘의 팁</p>
+                            <p className="text-sm text-gray-500">{aiDailyComment || '오늘도 건강한 하루 되세요!'}</p>
                           </div>
                         </div>
                       </div>
@@ -1466,16 +1578,14 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
               </button>
             </div>
 
-            {/* AI 건강 문진 카드 - 컴팩트 레이아웃 */}
+            {/* AI 건강 문진 카드 - 2줄 컴팩트 */}
             <div className="bg-amber-50 rounded-2xl p-4 shadow-lg border-2 border-amber-200 relative overflow-hidden mb-4">
-              <div className="relative flex flex-col items-center text-center gap-2">
-                <div className="w-12 h-12 flex items-center justify-center">
-                  <span className="text-3xl">🤖</span>
-                </div>
-                <div>
+              <div className="relative flex flex-col items-center text-center gap-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl">🤖</span>
                   <h3 className="text-gray-800 font-bold text-base">AI 건강 문진</h3>
-                  <p className="text-gray-600 text-xs">{petData?.petName || petData?.name || '반려동물'} 건강기록 주요알림</p>
                 </div>
+                <p className="text-gray-600 text-xs">{petData?.petName || petData?.name || '반려동물'} 건강기록 주요알림</p>
               </div>
               <button
                 onClick={() => onNavigate('ai-consultation')}
@@ -1487,8 +1597,8 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
 
             {/* 케어 주요 알림 섹션 */}
             <div className="mb-4">
-              <div className="flex flex-col items-center mb-3">
-                <div className="flex items-center gap-2 mb-1">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
                   <span className="text-lg">🔔</span>
                   <h3 className="text-base font-bold text-gray-800">{petData?.petName || petData?.name || '반려동물'} 케어 주요알림</h3>
                 </div>
@@ -1501,40 +1611,53 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
               </div>
 
               <div className="bg-white rounded-2xl p-4 shadow-lg border border-gray-200">
-                {/* 병원 예약일 */}
-                <div className="flex items-center gap-3 py-3 border-b border-gray-100">
+                {/* 병원 예약일 - 동적 데이터 */}
+                <div
+                  className="flex items-center gap-3 py-3 border-b border-gray-100 cursor-pointer hover:bg-gray-50 rounded-lg transition-colors"
+                  onClick={() => onNavigate('mypage-bookings')}
+                >
                   <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center flex-shrink-0">
                     <span className="text-2xl">📅</span>
                   </div>
                   <div className="flex-1">
                     <h4 className="text-sm font-bold text-gray-800 mb-0.5">병원 예약일</h4>
-                    <p className="text-xs text-gray-500">다음 진료: 2025년 12월 15일</p>
+                    <p className="text-xs text-gray-500">
+                      {nextBooking
+                        ? `다음 진료: ${new Date(nextBooking.date).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })}`
+                        : '예약된 일정이 없습니다'}
+                    </p>
                   </div>
                   <span className="text-gray-400 text-lg">&gt;</span>
                 </div>
 
-                {/* 접종 예정 */}
-                <div className="flex items-center gap-3 py-3 border-b border-gray-100">
+                {/* 최근 진단이력 - 접종예정 대체 */}
+                <div
+                  className="flex items-center gap-3 py-3 border-b border-gray-100 cursor-pointer hover:bg-gray-50 rounded-lg transition-colors"
+                  onClick={() => latestDiagnosisData && onViewDiagnosis && onViewDiagnosis(latestDiagnosisData)}
+                >
                   <div className="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center flex-shrink-0">
-                    <span className="text-2xl">💉</span>
+                    <span className="text-2xl">🩺</span>
                   </div>
                   <div className="flex-1">
-                    <h4 className="text-sm font-bold text-gray-800 mb-0.5">접종 예정</h4>
-                    <p className="text-xs text-gray-500">광견병 백신 (2주 후)</p>
+                    <h4 className="text-sm font-bold text-gray-800 mb-0.5">최근 진단이력</h4>
+                    <p className="text-xs text-gray-500">
+                      {latestDiagnosisData
+                        ? `${latestDiagnosisData.diagnosis || latestDiagnosisData.suspectedConditions?.[0]?.name || '일반 건강 상담'}`
+                        : '진단 기록이 없습니다'}
+                    </p>
                   </div>
-                  <span className="text-gray-400 text-lg">&gt;</span>
+                  {latestDiagnosisData && <span className="text-gray-400 text-lg">&gt;</span>}
                 </div>
 
-                {/* 유의사항 */}
+                {/* AI 일일 코멘트 - 유의사항 대체 (상세페이지 랜딩 제거) */}
                 <div className="flex items-center gap-3 py-3">
                   <div className="w-12 h-12 bg-orange-50 rounded-xl flex items-center justify-center flex-shrink-0">
-                    <span className="text-2xl">⚠️</span>
+                    <span className="text-2xl">💡</span>
                   </div>
                   <div className="flex-1">
-                    <h4 className="text-sm font-bold text-gray-800 mb-0.5">유의사항</h4>
-                    <p className="text-xs text-gray-500">피부 알레르기 주의 필요</p>
+                    <h4 className="text-sm font-bold text-gray-800 mb-0.5">오늘의 팁</h4>
+                    <p className="text-xs text-gray-500">{aiDailyComment || '오늘도 건강한 하루 되세요!'}</p>
                   </div>
-                  <span className="text-gray-400 text-lg">&gt;</span>
                 </div>
               </div>
             </div>
@@ -4641,18 +4764,26 @@ function App() {
         <div className="main-content" style={{ paddingBottom: '80px' }}>
           {/* 내 동물 돌보기 탭 */}
           {currentTab === 'care' && petData && (
-            <Dashboard 
-              petData={petData} 
+            <Dashboard
+              petData={petData}
               pets={pets}
+              userId={currentUser?.uid}
               onNavigate={(view) => {
                 // 'hospital', 'records'는 탭으로 이동
                 if (view === 'hospital' || view === 'records') {
                   setCurrentTab(view);
+                } else if (view === 'mypage-bookings') {
+                  // 마이페이지 내 예약 탭으로 이동
+                  setCurrentView('mypage');
                 } else {
                   setCurrentView(view);
                 }
               }}
               onSelectPet={handleSelectPet}
+              onViewDiagnosis={(diagnosis) => {
+                setLastDiagnosis(diagnosis);
+                setCurrentView('diagnosis-result');
+              }}
             />
           )}
 

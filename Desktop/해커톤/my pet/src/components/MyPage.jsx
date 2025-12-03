@@ -296,14 +296,14 @@ export function MyPage({ onBack, onSelectPet, onViewDiagnosis, onAddPet, onClini
           )}
         </button>
         <button
-          onClick={() => setActiveTab('records')}
+          onClick={() => setActiveTab('info')}
           className={`flex-1 py-3 px-3 rounded-lg font-medium text-sm transition-colors whitespace-nowrap ${
-            activeTab === 'records'
+            activeTab === 'info'
               ? 'bg-primary text-white'
               : 'bg-surface-light text-slate-600'
           }`}
         >
-          진료 기록
+          내정보
         </button>
       </div>
 
@@ -607,62 +607,60 @@ export function MyPage({ onBack, onSelectPet, onViewDiagnosis, onAddPet, onClini
         </div>
       )}
 
-      {activeTab === 'records' && (
+      {activeTab === 'info' && (
         <div className="px-4 pt-4 pb-40">
-          {diagnoses.length === 0 ? (
-            <div className="text-center py-20">
-              <div className="text-6xl mb-4">📋</div>
-              <p className="text-slate-500 mb-2">아직 진료 기록이 없습니다</p>
-              <p className="text-slate-400 text-sm">AI 진료를 받으면 기록이 저장됩니다</p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {diagnoses.map(record => (
-                <div
-                  key={record.id}
-                  className="bg-surface-light rounded-lg p-4 shadow-soft cursor-pointer hover:shadow-md transition-all"
-                  onClick={() => onViewDiagnosis && onViewDiagnosis(record)}
-                >
-                  <div className="flex justify-between items-start mb-3">
-                    <div>
-                      <p className="text-slate-500 text-sm mb-1">{formatDate(record.created_at || record.date)}</p>
-                      <h3 className="text-slate-900 font-bold text-base mb-1 font-display">
-                        {record.petName || '반려동물'}
-                      </h3>
-                    </div>
-                    <div
-                      className="px-3 py-1 rounded-full text-xs font-bold text-white"
-                      style={{ backgroundColor: getRiskColor(record.riskLevel || record.emergency) }}
-                    >
-                      {getRiskLabel(record.riskLevel || record.emergency)}
-                    </div>
-                  </div>
-                  <div className="mb-2">
-                    <strong className="text-slate-700">진단:</strong>{' '}
-                    <span className="text-slate-600">
-                      {record.diagnosis || record.suspectedConditions?.[0]?.name || '일반 건강 이상'}
-                    </span>
-                  </div>
-                  {record.symptom && (
-                    <div className="mb-3">
-                      <strong className="text-slate-700">증상:</strong>{' '}
-                      <span className="text-slate-600">{record.symptom}</span>
-                    </div>
-                  )}
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onViewDiagnosis && onViewDiagnosis(record);
-                    }}
-                    className="text-primary text-sm font-medium flex items-center gap-1"
-                  >
-                    상세 보기
-                    <span className="material-symbols-outlined text-sm">arrow_forward_ios</span>
-                  </button>
+          <div className="space-y-4">
+            {/* 사용자 정보 카드 */}
+            <div className="bg-surface-light rounded-lg p-4 shadow-soft">
+              <div className="flex items-center gap-4 mb-4">
+                <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center">
+                  <span className="material-symbols-outlined text-3xl text-primary">person</span>
                 </div>
-              ))}
+                <div>
+                  <h3 className="text-slate-900 font-bold text-lg font-display">내 정보</h3>
+                  <p className="text-slate-500 text-sm">PetMedical.AI 회원</p>
+                </div>
+              </div>
             </div>
-          )}
+
+            {/* 통계 요약 */}
+            <div className="bg-surface-light rounded-lg p-4 shadow-soft">
+              <h4 className="text-slate-800 font-bold mb-3">활동 요약</h4>
+              <div className="grid grid-cols-3 gap-3">
+                <div className="text-center p-3 bg-slate-50 rounded-lg">
+                  <p className="text-2xl font-bold text-primary">{pets.length}</p>
+                  <p className="text-xs text-slate-500">반려동물</p>
+                </div>
+                <div className="text-center p-3 bg-slate-50 rounded-lg">
+                  <p className="text-2xl font-bold text-green-600">{diagnoses.length}</p>
+                  <p className="text-xs text-slate-500">진단 기록</p>
+                </div>
+                <div className="text-center p-3 bg-slate-50 rounded-lg">
+                  <p className="text-2xl font-bold text-amber-600">{bookings.length}</p>
+                  <p className="text-xs text-slate-500">예약 내역</p>
+                </div>
+              </div>
+            </div>
+
+            {/* 앱 정보 */}
+            <div className="bg-surface-light rounded-lg p-4 shadow-soft">
+              <h4 className="text-slate-800 font-bold mb-3">앱 정보</h4>
+              <div className="space-y-3">
+                <div className="flex justify-between items-center py-2 border-b border-slate-100">
+                  <span className="text-slate-600">버전</span>
+                  <span className="text-slate-800 font-medium">1.0.0</span>
+                </div>
+                <div className="flex justify-between items-center py-2 border-b border-slate-100">
+                  <span className="text-slate-600">서비스</span>
+                  <span className="text-slate-800 font-medium">PetMedical.AI</span>
+                </div>
+                <div className="flex justify-between items-center py-2">
+                  <span className="text-slate-600">문의</span>
+                  <span className="text-primary font-medium">support@petmedical.ai</span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 
