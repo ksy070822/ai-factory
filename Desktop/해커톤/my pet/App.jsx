@@ -243,6 +243,20 @@ const SPECIES_OPTIONS = [
   { id: 'other', label: '기타', emoji: '🐾', icon: PROFILE_IMAGES.etc },
 ];
 
+<<<<<<< HEAD
+// 동물 종류별 메인 캐릭터 이미지 (프로필 배너용)
+const MAIN_CHARACTER_IMAGES = {
+  dog: '/icon/main-image/dog_main-removebg-preview.png',
+  cat: '/icon/main-image/Cat_main-removebg-preview.png',
+  rabbit: '/icon/main-image/rabbit_main-removebg-preview.png',
+  hamster: '/icon/main-image/hamster_main-removebg-preview.png',
+  bird: '/icon/main-image/bird_main-removebg-preview.png',
+  hedgehog: '/icon/main-image/hedgehog_main-removebg-preview.png',
+  reptile: '/icon/main-image/reptile_main-removebg-preview.png',
+  other: '/icon/main-image/etc_main-removebg-preview.png'
+};
+
+// 동물 종류별 프로필 아이콘 이미지 (원형 배경 포함)
 // 개/고양이 대표 품종 목록
 const DOG_BREEDS = [
   '믹스견', '말티즈', '푸들', '포메라니안', '치와와', '시츄', '요크셔테리어',
@@ -648,7 +662,9 @@ function ProfileList({ pets, onSelectPet, onAddNew, onNavigate }) {
       <div className="pt-20 p-4 max-w-md mx-auto space-y-4">
         {pets.length === 0 ? (
           <div className="text-center py-20 animate-fade-in">
-            <div className="text-6xl mb-4">🐾</div>
+            <div className="w-24 h-24 mx-auto mb-4 rounded-full overflow-hidden">
+              <img src={PROFILE_ICON_IMAGES.other} alt="Pet" className="w-full h-full object-cover" />
+            </div>
             <h2 className="text-xl font-bold text-gray-900 mb-2">등록된 반려동물이 없습니다</h2>
             <p className="text-gray-500 mb-6">새 반려동물을 등록해주세요</p>
             <button 
@@ -671,6 +687,7 @@ function ProfileList({ pets, onSelectPet, onAddNew, onNavigate }) {
                     src={getPetImage(pet, false)}
                     alt={pet.petName || pet.name}
                     className="w-full h-full object-cover"
+                    style={{ objectPosition: 'center', display: 'block' }}
                   />
                 </div>
                 <div className="flex-1">
@@ -972,6 +989,7 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
         <div className="flex-shrink-0 flex items-center justify-center">
           <div className="relative w-[430px] h-[932px] rounded-[3rem] shadow-2xl border-8 border-gray-800 overflow-hidden bg-white">
             {/* 모바일 컨텐츠 */}
+<<<<<<< HEAD
             <div className="h-full overflow-y-auto overflow-x-hidden bg-slate-50 pb-20">
               {/* Header - 회사 로고 가운데 배치 */}
               <header className="bg-gradient-to-r from-sky-500 to-sky-600 text-white px-4 pt-4 pb-4 shadow-lg">
@@ -982,6 +1000,7 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
                       alt="PetMedical.AI"
                       className="w-6 h-6 object-contain"
                     />
+>>>>>>> origin/main
                   </div>
                   <div className="text-center ml-2">
                     <h1 className="text-xl font-bold tracking-tight">PetMedical.AI</h1>
@@ -1216,7 +1235,9 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
               {!petData ? (
                 <div className="bg-white rounded-2xl p-8 shadow-lg">
                   <div className="text-center">
-                    <div className="text-6xl mb-4">🐾</div>
+                    <div className="w-24 h-24 mx-auto mb-4 rounded-full overflow-hidden">
+                      <img src={PROFILE_ICON_IMAGES.other} alt="Pet" className="w-full h-full object-cover" />
+                    </div>
                     <h3 className="text-xl font-bold text-gray-900 mb-2">반려동물을 등록해주세요</h3>
                     <p className="text-gray-500 mb-6">맞춤형 AI 건강관리 서비스를 시작하세요</p>
                     <button
@@ -1369,6 +1390,10 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
         </div>
 
         <div className="relative md:w-[430px] md:h-[932px] md:rounded-[3rem] md:shadow-2xl md:border-8 md:border-gray-800 overflow-hidden">
+<<<<<<< HEAD
+          {/* 노치 (태블릿에서만) */}
+          <div className="hidden md:block absolute top-0 left-1/2 -translate-x-1/2 w-32 h-7 bg-gray-800 rounded-b-2xl z-50"></div>
+
           <div className="h-full overflow-y-auto overflow-x-hidden bg-slate-50 pb-20">
       {/* Header - 회사 로고 가운데 배치 */}
       <header className="bg-gradient-to-r from-sky-500 to-sky-600 text-white px-4 pt-4 pb-4 shadow-lg">
@@ -4638,7 +4663,7 @@ function HomeTreatmentGuide({ petData, diagnosisResult, onBack, onGoToHospital }
               <p style={{
                 fontSize: '28px',
                 fontWeight: 'bold',
-                color: '#0891b2',
+                color: '#0ea5e9',
                 margin: 0
               }}>
                 {recoveryTime}
@@ -5072,11 +5097,76 @@ function App() {
     // userMode를 localStorage에 저장
     localStorage.setItem('petMedical_userMode', mode);
 
-    // 로그인한 사용자의 반려동물 데이터 로드
-    const userPets = getPetsForUser(user.uid);
+    // 로그인한 사용자의 반려동물 데이터 로드 (Firestore 우선)
+    let userPets = [];
+    try {
+      // Firestore에서 동물 데이터 가져오기
+      const petsResult = await petService.getPetsByUser(user.uid);
+      if (petsResult.success && petsResult.data && petsResult.data.length > 0) {
+        userPets = petsResult.data;
+        // localStorage에도 저장 (오프라인 지원)
+        savePetsForUser(user.uid, userPets);
+        console.log(`✅ Firestore에서 ${userPets.length}마리 반려동물 로드 완료`);
+      } else {
+        // Firestore에 데이터가 없으면 localStorage 확인
+        userPets = getPetsForUser(user.uid);
+        
+        // 보호자 모드이고 동물 데이터가 없으면 시드 데이터 생성
+        if (mode === 'guardian' && userPets.length === 0) {
+          console.log('🐾 보호자 테스트 계정: 동물 데이터 자동 생성 중...');
+          try {
+            await seedGuardianData(user.uid, user.email);
+            // 시드 데이터 생성 후 다시 Firestore에서 가져오기
+            const seedResult = await petService.getPetsByUser(user.uid);
+            if (seedResult.success && seedResult.data && seedResult.data.length > 0) {
+              userPets = seedResult.data;
+              savePetsForUser(user.uid, userPets);
+              console.log(`✅ 시드 데이터 생성 완료: ${userPets.length}마리 반려동물`);
+            }
+          } catch (seedError) {
+            console.warn('시드 데이터 생성 실패:', seedError);
+          }
+        }
+      }
+    } catch (error) {
+      console.warn('동물 데이터 로드 실패, localStorage 확인:', error);
+      userPets = getPetsForUser(user.uid);
+    }
+
     setPets(userPets);
     if (userPets.length > 0) {
       setPetData(userPets[0]);
+      
+      // 테스트 계정 보호자이고 약물 처방 정보가 없으면 자동 추가
+      if (mode === 'guardian' && (user.email === 'guardian@test.com' || user.email?.includes('test'))) {
+        try {
+          // medicationLogs 컬렉션에서 기존 약물 정보 확인
+          const { collection, query, where, getDocs } = await import('firebase/firestore');
+          const { db } = await import('./src/lib/firebase');
+          const medicationQuery = query(
+            collection(db, 'medicationLogs'),
+            where('userId', '==', user.uid)
+          );
+          const medicationSnapshot = await getDocs(medicationQuery);
+          
+          // 약물 정보가 없으면 자동 추가 (또는 5개 미만이면 추가)
+          if (medicationSnapshot.empty || medicationSnapshot.size < 5) {
+            console.log(`💊 테스트 계정: 약물 처방 정보 자동 추가 중... (현재: ${medicationSnapshot.size}개)`);
+            try {
+              await seedMedicationData(user.uid);
+              console.log('✅ 약물 처방 정보 추가 완료');
+            } catch (seedError) {
+              console.error('❌ 약물 처방 정보 추가 실패:', seedError);
+              console.log('💡 브라우저 콘솔에서 수동으로 실행: await window.seedMedicationData(user.uid)');
+            }
+          } else {
+            console.log(`✅ 기존 약물 처방 정보 ${medicationSnapshot.size}개 확인됨`);
+          }
+        } catch (medError) {
+          console.error('❌ 약물 처방 정보 확인/추가 실패:', medError);
+          console.log('💡 브라우저 콘솔에서 수동으로 실행: await window.seedMedicationData(user.uid)');
+        }
+      }
     } else {
       setPetData(null);
     }
@@ -5256,16 +5346,22 @@ function App() {
               );
               const medicationSnapshot = await getDocs(medicationQuery);
               
-              // 약물 정보가 없으면 자동 추가
-              if (medicationSnapshot.empty) {
-                console.log('💊 테스트 계정: 약물 처방 정보 자동 추가 중...');
-                await seedMedicationData(user.uid);
-                console.log('✅ 약물 처방 정보 추가 완료');
+              // 약물 정보가 없으면 자동 추가 (또는 5개 미만이면 추가)
+              if (medicationSnapshot.empty || medicationSnapshot.size < 5) {
+                console.log(`💊 테스트 계정: 약물 처방 정보 자동 추가 중... (현재: ${medicationSnapshot.size}개)`);
+                try {
+                  await seedMedicationData(user.uid);
+                  console.log('✅ 약물 처방 정보 추가 완료');
+                } catch (seedError) {
+                  console.error('❌ 약물 처방 정보 추가 실패:', seedError);
+                  console.log('💡 브라우저 콘솔에서 수동으로 실행: await window.seedMedicationData(user.uid)');
+                }
               } else {
                 console.log(`✅ 기존 약물 처방 정보 ${medicationSnapshot.size}개 확인됨`);
               }
             } catch (medError) {
-              console.warn('약물 처방 정보 확인/추가 실패:', medError);
+              console.error('❌ 약물 처방 정보 확인/추가 실패:', medError);
+              console.log('💡 브라우저 콘솔에서 수동으로 실행: await window.seedMedicationData(user.uid)');
             }
           }
         } else {
@@ -5877,7 +5973,9 @@ function App() {
             ) : (
               <div className="min-h-screen bg-background-light flex items-center justify-center p-4">
                 <div className="text-center">
-                  <div className="text-6xl mb-4">🐾</div>
+                  <div className="w-24 h-24 mx-auto mb-4 rounded-full overflow-hidden">
+                    <img src={PROFILE_ICON_IMAGES.other} alt="Pet" className="w-full h-full object-cover" />
+                  </div>
                   <h2 className="text-xl font-bold text-slate-900 mb-2">반려동물을 등록해주세요</h2>
                   <button
                     onClick={() => setCurrentView('registration')}
@@ -5933,7 +6031,9 @@ function App() {
             <div className="page-container">
               <div className="px-4 pt-8 pb-24">
                 <div className="text-center mb-8">
-                  <div className="text-6xl mb-4">🐾</div>
+                  <div className="w-24 h-24 mx-auto mb-4 rounded-full overflow-hidden">
+                    <img src={PROFILE_ICON_IMAGES.other} alt="Pet" className="w-full h-full object-cover" />
+                  </div>
                   <h2 className="text-2xl font-bold text-slate-900 mb-2">환영합니다!</h2>
                   <p className="text-slate-600">반려동물을 등록하고 AI 건강 관리를 시작하세요</p>
                 </div>

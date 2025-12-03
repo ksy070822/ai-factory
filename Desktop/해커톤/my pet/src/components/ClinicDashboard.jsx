@@ -58,7 +58,7 @@ const getLocalDateString = (date = new Date()) => {
   return `${year}-${month}-${day}`; // 예: "2025-12-03"
 };
 
-export function ClinicDashboard({ currentUser, onBack }) {
+export function ClinicDashboard({ currentUser, onBack, onModeSwitch }) {
   const [loading, setLoading] = useState(true);
   const [currentClinic, setCurrentClinic] = useState(null);
   const [clinics, setClinics] = useState([]);
@@ -1519,6 +1519,7 @@ export function ClinicDashboard({ currentUser, onBack }) {
           </div>
         </div>
       )}
+>>>>>>> origin/main
     </div>
   );
 }
