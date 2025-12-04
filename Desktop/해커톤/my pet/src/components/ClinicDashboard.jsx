@@ -274,7 +274,8 @@ export function ClinicDashboard({ currentUser, onBack, onModeSwitch }) {
         const userData = userDoc.data || {};
         const migrationResult = await migrateExistingClinicUser(currentUser.uid, {
           ...userData,
-          displayName: currentUser.displayName || userData.displayName
+          displayName: currentUser.displayName || userData.displayName,
+          email: currentUser.email || userData.email  // 🔧 테스트 계정 식별을 위해 이메일 전달
         });
         if (migrationResult.success) {
           userClinics = await getUserClinics(currentUser.uid);
