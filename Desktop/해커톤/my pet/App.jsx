@@ -32,6 +32,7 @@ import { OCRUpload } from './src/components/OCRUpload'
 import { ClinicAdmin } from './src/components/ClinicAdmin'
 import { seedGuardianData, seedClinicData } from './src/utils/seedTestDataUtils'
 import { seedMedicationData } from './src/utils/seedMedicationData'
+import { fixPpukuData, shareAllResults } from './src/utils/fixDemoData'
 import { auth } from './src/lib/firebase'
 import { ClinicDashboard } from './src/components/ClinicDashboard'
 import { AICareConsultation } from './src/components/AICareConsultation'
@@ -5467,10 +5468,52 @@ function App() {
       }
     };
     
+    // 🔧 발표 전 긴급 데이터 수정 함수 (뿌꾸 진료 결과 생성)
+    window.fixPpukuData = async () => {
+      try {
+        console.log('🔧 뿌꾸 진료 결과 수정 시작...');
+        const result = await fixPpukuData();
+        if (result.success) {
+          console.log(`✅ 완료: ${result.message}`);
+          alert(`✅ ${result.message}\n\n이제 보호자 앱에서 뿌꾸의 진료 기록을 확인할 수 있습니다.`);
+        } else {
+          console.error('❌ 실패:', result.message || result.error);
+          alert(`❌ 실패: ${result.message || result.error}`);
+        }
+        return result;
+      } catch (error) {
+        console.error('❌ 오류:', error);
+        throw error;
+      }
+    };
+
+    // 📤 미공유 진료 결과 모두 공유 처리
+    window.shareAllResults = async () => {
+      try {
+        console.log('📤 미공유 진료 결과 공유 처리 시작...');
+        const result = await shareAllResults();
+        if (result.success) {
+          console.log(`✅ 완료: ${result.message}`);
+          alert(`✅ ${result.message}`);
+        } else {
+          console.error('❌ 실패:', result.message || result.error);
+          alert(`❌ 실패: ${result.message || result.error}`);
+        }
+        return result;
+      } catch (error) {
+        console.error('❌ 오류:', error);
+        throw error;
+      }
+    };
+
     console.log('💡 테스트 데이터 시드 함수가 등록되었습니다.');
     console.log('   사용법: const user = window.auth.currentUser; await window.seedGuardianData(user.uid, user.email);');
     console.log('   약물 처방 정보 추가: await window.seedMedicationData(user.uid);');
     console.log('   반려동물 정리 (뿌꾸, 몽미, 도마만 유지): await window.cleanupTestPets();');
+    console.log('');
+    console.log('🔧 발표 준비 함수:');
+    console.log('   뿌꾸 진료 결과 생성: await window.fixPpukuData();');
+    console.log('   모든 진료 결과 공유: await window.shareAllResults();');
   }, []);
 
   // 로그인 성공 핸들러
