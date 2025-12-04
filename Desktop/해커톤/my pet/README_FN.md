@@ -40,9 +40,9 @@ const laplacian = 4 * gray[idx] - gray[idx-1] - gray[idx+1] - gray[idx-width] - 
 const variance = laplacianSqSum / count - mean * mean;  // variance < 100 = 흐림
 ```
 
-**GPT-4o Vision 6가지 카테고리 분석**
+**GPT-4o Vision 멀티모달 증상 분석**
 
-반려동물 사진을 외상, 부종, 피부, 안구, 자세, 고통 6가지 카테고리로 체계적 분석한다. 각 항목에 1-5점 심각도를 부여하며, 구조화된 형식으로 Medical Agent에 전달된다.
+수의학 임상 프로토콜 기반의 6가지 필수 확인 카테고리를 구현했다. 이미지가 입력되면 외상(Wounds), 부종(Swelling), 피부이상(Skin), 안구이상(Eyes), 자세이상(Posture), 고통신호(Pain)를 누락 없이 체계적으로 스캔한다. 각 항목에 1-5점 심각도 점수를 부여하여 정량적 평가가 가능하며, 구조화된 `visual_findings` 형식으로 Medical Agent에 전달되어 진단 정확도를 높인다.
 
 ```
 visual_findings: "[외상] 없음 | [부종] 좌측 귀 부기(3점) | [피부] 발적(4점) | [안구] 정상 | [자세] 머리 기울임(2점) | [고통] 귀 긁는 행동(3점)"
@@ -115,11 +115,13 @@ Firestore Update
 
 **기술 스택**
 
-- Frontend: React 18, Vite 5, TailwindCSS 3
+- Frontend: React 18, Vite 5, TailwindCSS 3, Canvas API
 - Backend: FastAPI, LangGraph, LangChain, Python 3.12
-- Database: Firestore (NoSQL), Google Sheets
+- Database: Firebase Firestore (NoSQL), Google Sheets
+- Auth: Firebase Authentication
 - AI: Claude Sonnet 4, Claude 3.5 Sonnet, GPT-4o, GPT-4o-mini, Gemini 2.0 Flash, Gemini 1.5 Flash/Pro
 - API: Anthropic API, OpenAI API, Google AI API, Kakao Map API
+- Image Processing: Canvas API (Laplacian Variance), Base64 Encoding
 - Deploy: GitHub Pages (Frontend), Railway (Backend)
 
 **핵심 구현 파일**
