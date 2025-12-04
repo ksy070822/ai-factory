@@ -190,13 +190,16 @@ ${combinedSymptoms}`;
       }
     }
 
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    // Firebase Cloud Function 프록시 사용 (CORS 우회)
+    const functionUrl = import.meta.env.VITE_OPENAI_PROXY_URL || 'https://us-central1-ai-factory-c6d58.cloudfunctions.net/openaiProxy';
+
+    const response = await fetch(functionUrl, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({
+        apiKey: apiKey,
         model: 'gpt-4o',
         messages: [
           {
