@@ -1275,6 +1275,9 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet, onLogout }) {
 
   return (
     <div className="min-h-screen bg-slate-100">
+      {/* 디버그: Dashboard가 렌더링되었음을 표시 */}
+      {console.log('Dashboard 렌더링 - petData:', petData?.petName, 'species:', petData?.species)}
+
       {/* PC 레이아웃 (임시 비활성화) */}
       <div className="hidden">
         {/* 좌측: 모바일 화면 미리보기 */}
@@ -6349,6 +6352,25 @@ function App() {
               onSelectPet={handleSelectPet}
               onLogout={handleLogout}
             />
+          )}
+
+          {/* petData가 없을 때 반려동물 등록 안내 */}
+          {currentTab === 'care' && !petData && (
+            <div className="min-h-screen bg-gradient-to-b from-sky-50 to-white flex items-center justify-center p-4">
+              <div className="bg-white rounded-2xl p-8 shadow-lg border border-slate-100 max-w-sm w-full text-center">
+                <div className="text-6xl mb-4">🐾</div>
+                <h2 className="text-xl font-bold text-slate-900 mb-2">반려동물을 등록해주세요</h2>
+                <p className="text-sm text-slate-500 mb-6">
+                  반려동물 정보를 등록하면 맞춤형 건강 관리 서비스를 이용할 수 있어요
+                </p>
+                <button
+                  onClick={() => setCurrentView('registration')}
+                  className="w-full py-3 bg-gradient-to-r from-sky-500 to-blue-600 text-white font-bold rounded-xl hover:shadow-lg transition-all"
+                >
+                  반려동물 등록하기
+                </button>
+              </div>
+            </div>
           )}
 
           {/* 병원예약하기 탭 */}
