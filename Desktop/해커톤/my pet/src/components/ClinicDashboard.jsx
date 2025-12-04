@@ -468,9 +468,16 @@ export function ClinicDashboard({ currentUser, onBack }) {
       return;
     }
 
+    // 오늘 예약 목록 업데이트
     setTodayBookings(prev =>
       prev.map(b => b.id === targetId ? { ...b, status: 'confirmed' } : b)
     );
+
+    // 월별 예약 목록도 업데이트 (달력 반영)
+    setMonthlyBookings(prev =>
+      prev.map(b => b.id === targetId ? { ...b, status: 'confirmed' } : b)
+    );
+
     alert('예약이 확정되었습니다.');
   };
 
