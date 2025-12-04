@@ -2669,8 +2669,6 @@ function MultiAgentDiagnosis({ petData, symptomData, onComplete, onBack, onDiagn
         });
 
         // 프론트엔드 모드로 직접 실행 (백엔드 API 사용 안 함)
-        console.log('[MultiAgentDiagnosis] 프론트엔드 모드로 진단 시작');
-        
         if (!isMounted) return;
 
         // 프론트엔드 모드로 실행 (agentOrchestrator 사용)

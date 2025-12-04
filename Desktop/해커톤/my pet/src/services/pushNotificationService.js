@@ -54,14 +54,12 @@ export async function requestPushPermission(userId) {
     
     return null;
   } catch (error) {
-    // Service Worker 관련 오류는 경고로만 처리
-    if (error.code === 'messaging/failed-service-worker-registration' || 
+    // Service Worker 관련 오류는 무시 (앱 정상 작동)
+    if (error.code === 'messaging/failed-service-worker-registration' ||
         error.message?.includes('ServiceWorker') ||
         error.message?.includes('404')) {
-      console.warn('⚠️ 푸시 알림 설정 실패 (Service Worker 없음). 앱은 정상 작동합니다.');
       return null;
     }
-    console.error('푸시 알림 토큰 요청 오류:', error);
     return null;
   }
 }
