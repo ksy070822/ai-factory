@@ -2358,6 +2358,7 @@ function SymptomInput({ petData, onComplete, onBack, onRegister }) {
             {currentDepartments.map(dept => {
               const info = DEPARTMENT_INFO[dept] || { icon: '🏥', desc: '일반 진료' };
               const isSelected = selectedDepartment === dept;
+              const isImageHelpful = IMAGE_HELPFUL_DEPARTMENTS.includes(dept);
               return (
                 <button
                   key={dept}
@@ -2373,7 +2374,12 @@ function SymptomInput({ petData, onComplete, onBack, onRegister }) {
                     <span className={`font-bold text-xs sm:text-sm ${isSelected ? 'text-sky-700' : 'text-slate-800'}`}>
                       {dept}
                     </span>
-          </div>
+                    {isImageHelpful && (
+                      <span className="px-1.5 py-0.5 bg-amber-100 text-amber-700 text-[8px] sm:text-[9px] font-medium rounded-full whitespace-nowrap">
+                        📷 사진추천
+                      </span>
+                    )}
+                  </div>
                   <p className={`text-[10px] sm:text-xs ${isSelected ? 'text-sky-600' : 'text-slate-500'} leading-tight`}>
                     {info.desc}
                   </p>
