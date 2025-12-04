@@ -25,6 +25,8 @@ import { CareActionButton } from './src/components/CareActionButton'
 import { loadDailyLog, saveDailyLog, getTodayKey } from './src/lib/careLogs'
 import DiagnosisReport from './src/components/DiagnosisReport'
 import { getApiKey, API_KEY_TYPES } from './src/services/apiKeyManager'
+// 이미지 품질 검증 유틸리티
+import { validateImageQuality } from './src/utils/imageQuality'
 // 더미 데이터 비활성화 - 실제 서비스용
 // import { initializeDummyData, DUMMY_PETS, DUMMY_MEDICAL_RECORDS } from './src/lib/dummyData'
 import { LoginScreen, RegisterScreen, getAuthSession, clearAuthSession } from './src/components/Auth'
@@ -2098,6 +2100,7 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet, onLogout }) {
 function SymptomInput({ petData, onComplete, onBack, onRegister }) {
   const [symptomText, setSymptomText] = useState('');
   const [images, setImages] = useState([]);
+  const [imageQualities, setImageQualities] = useState([]); // 이미지 품질 검증 결과
   const [loading, setLoading] = useState(false);
   const [selectedDepartment, setSelectedDepartment] = useState('');
   const [selectedSymptoms, setSelectedSymptoms] = useState([]);
@@ -2233,8 +2236,13 @@ function SymptomInput({ petData, onComplete, onBack, onRegister }) {
   const animalSymptoms = SYMPTOMS_BY_DEPT[petData.species] || SYMPTOMS_BY_DEPT.other;
   const currentSymptoms = selectedDepartment ? (animalSymptoms[selectedDepartment] || []) : [];
 
-  const handleImageUpload = (e) => {
+  // 사진이 진단에 도움되는 진료과목 (피부, 눈, 외상 관련)
+  const IMAGE_HELPFUL_DEPARTMENTS = ['피부과', '안과', '외과', '치과', '정형외과', '종양과'];
+
+  const handleImageUpload = async (e) => {
     const files = Array.from(e.target.files);
+
+    // Base64 변환 (기존 로직 유지)
     const imagePromises = files.map(file => {
       return new Promise((resolve) => {
         const reader = new FileReader();
@@ -2243,13 +2251,38 @@ function SymptomInput({ petData, onComplete, onBack, onRegister }) {
       });
     });
 
-    Promise.all(imagePromises).then(previews => {
-      setImages(prev => [...prev, ...previews]);
-    });
+    const previews = await Promise.all(imagePromises);
+
+    // 이미지 추가 (기존 로직 - 품질 검증과 무관하게 항상 실행)
+    setImages(prev => [...prev, ...previews]);
+
+    // 사진이 도움되는 진료과목인 경우에만 품질 검증 수행
+    const shouldValidateQuality = IMAGE_HELPFUL_DEPARTMENTS.includes(selectedDepartment);
+
+    if (shouldValidateQuality) {
+      // 품질 검증 (비동기, 에러 시에도 업로드에 영향 없음)
+      const qualityPromises = previews.map(async (base64) => {
+        try {
+          const result = await validateImageQuality(base64);
+          return result;
+        } catch (error) {
+          console.warn('이미지 품질 검증 실패 (무시됨):', error);
+          return { isValid: true, qualityScore: null, issues: [], recommendation: '' };
+        }
+      });
+
+      const qualities = await Promise.all(qualityPromises);
+      setImageQualities(prev => [...prev, ...qualities]);
+    } else {
+      // 품질 검증 불필요한 진료과목 - 기본값 추가
+      const defaultQualities = previews.map(() => ({ isValid: true, qualityScore: null, issues: [], recommendation: '' }));
+      setImageQualities(prev => [...prev, ...defaultQualities]);
+    }
   };
 
   const removeImage = (index) => {
     setImages(prev => prev.filter((_, i) => i !== index));
+    setImageQualities(prev => prev.filter((_, i) => i !== index));
   };
 
   const handleSubmit = () => {
@@ -2398,17 +2431,41 @@ function SymptomInput({ petData, onComplete, onBack, onRegister }) {
         <div className="bg-white rounded-2xl p-3 sm:p-4 shadow-sm border border-slate-100">
           <h3 className="font-bold text-slate-800 mb-2 sm:mb-3 text-xs sm:text-sm">증상 사진 첨부 (선택)</h3>
           <div className="flex gap-2 sm:gap-3 overflow-x-auto pb-2">
-            {images.map((img, idx) => (
-              <div key={idx} className="relative shrink-0">
-                <img src={img} alt={`증상 사진 ${idx + 1}`} className="w-16 h-16 sm:w-20 sm:h-20 object-cover rounded-xl" />
-                <button
-                  onClick={() => removeImage(idx)}
-                  className="absolute -top-1.5 -right-1.5 sm:-top-2 sm:-right-2 w-5 h-5 sm:w-6 sm:h-6 bg-red-500 text-white rounded-full text-[10px] sm:text-xs flex items-center justify-center"
-                >
-                  ✕
-                </button>
-              </div>
-            ))}
+            {images.map((img, idx) => {
+              const quality = imageQualities[idx];
+              const hasQuality = quality && quality.qualityScore !== null;
+              const isGood = hasQuality && quality.qualityScore >= 60;
+              const isWarning = hasQuality && quality.qualityScore < 60 && quality.qualityScore >= 40;
+              const isBad = hasQuality && quality.qualityScore < 40;
+
+              return (
+                <div key={idx} className="relative shrink-0">
+                  <img
+                    src={img}
+                    alt={`증상 사진 ${idx + 1}`}
+                    className={`w-16 h-16 sm:w-20 sm:h-20 object-cover rounded-xl ${isBad ? 'border-2 border-red-400' : isWarning ? 'border-2 border-yellow-400' : ''}`}
+                  />
+                  <button
+                    onClick={() => removeImage(idx)}
+                    className="absolute -top-1.5 -right-1.5 sm:-top-2 sm:-right-2 w-5 h-5 sm:w-6 sm:h-6 bg-red-500 text-white rounded-full text-[10px] sm:text-xs flex items-center justify-center"
+                  >
+                    ✕
+                  </button>
+                  {/* 품질 뱃지 */}
+                  {hasQuality && (
+                    <div className={`absolute -bottom-1 left-1/2 -translate-x-1/2 px-1.5 py-0.5 rounded-full text-[8px] sm:text-[9px] font-bold whitespace-nowrap ${
+                      isGood ? 'bg-green-500 text-white' :
+                      isWarning ? 'bg-yellow-500 text-white' :
+                      'bg-red-500 text-white'
+                    }`}>
+                      {isGood ? `✓ ${quality.qualityScore}점` :
+                       isWarning ? `⚠️ ${quality.qualityScore}점` :
+                       `⚠️ ${quality.qualityScore}점`}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
             <label className="w-16 h-16 sm:w-20 sm:h-20 shrink-0 border-2 border-dashed border-slate-300 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:border-sky-500 hover:bg-sky-50 transition-all">
               <span className="text-xl sm:text-2xl text-slate-400">📷</span>
               <span className="text-[9px] sm:text-[10px] text-slate-400 mt-0.5 sm:mt-1">추가</span>
@@ -2420,7 +2477,22 @@ function SymptomInput({ petData, onComplete, onBack, onRegister }) {
                 className="hidden"
               />
             </label>
-              </div>
+          </div>
+          {/* 품질 낮은 이미지 경고 메시지 */}
+          {imageQualities.some(q => q && q.qualityScore !== null && q.qualityScore < 40) && (
+            <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-[10px] sm:text-xs text-red-600 font-medium">
+                ⚠️ 일부 사진의 품질이 낮습니다. 흐릿하거나 어두운 사진은 정확한 분석이 어려울 수 있어요. 다시 촬영해주세요.
+              </p>
+            </div>
+          )}
+          {imageQualities.some(q => q && q.qualityScore !== null && q.qualityScore >= 40 && q.qualityScore < 60) && !imageQualities.some(q => q && q.qualityScore !== null && q.qualityScore < 40) && (
+            <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <p className="text-[10px] sm:text-xs text-yellow-700 font-medium">
+                💡 사진 품질이 보통입니다. 가능하면 더 선명한 사진으로 교체하시면 분석 정확도가 높아져요.
+              </p>
+            </div>
+          )}
           <p className="text-[10px] sm:text-xs text-slate-400 mt-1.5 sm:mt-2">피부, 눈, 귀 등 증상 부위 사진을 첨부하면 더 정확한 진단이 가능해요</p>
         </div>
         </div>
