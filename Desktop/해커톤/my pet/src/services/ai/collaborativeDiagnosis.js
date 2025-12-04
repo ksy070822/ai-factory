@@ -230,6 +230,12 @@ ${reviewResult ? JSON.stringify(reviewResult, null, 2) : '없음'}
 }`;
 
   try {
+    // 🚨 CORS 회피: OpenAI API 키가 없으면 건너뛰기
+    if (!apiKey || apiKey === 'undefined' || apiKey === 'null') {
+      console.warn('⚠️ OpenAI API 키가 없습니다. 제2 의견 건너뜀.');
+      return null;
+    }
+
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -259,7 +265,7 @@ ${reviewResult ? JSON.stringify(reviewResult, null, 2) : '없음'}
       return JSON.parse(jsonMatch[0]);
     }
   } catch (error) {
-    console.error('제2 의견 오류:', error);
+    console.warn('⚠️ 제2 의견 건너뜀 (CORS 또는 API 키 없음):', error.message);
   }
 
   return null;

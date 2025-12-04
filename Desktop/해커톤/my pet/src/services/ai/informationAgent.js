@@ -169,6 +169,12 @@ ${JSON.stringify(csSummary, null, 2)}
 ${combinedSymptoms}`;
 
   try {
+    // 🚨 CORS 회피: OpenAI API 키가 없으면 Fallback 사용
+    if (!apiKey || apiKey === 'undefined' || apiKey === 'null') {
+      console.warn('⚠️ OpenAI API 키가 없습니다. Fallback 로직 사용.');
+      throw new Error('API key not configured');
+    }
+
     // GPT-4o Vision 메시지 구성 (이미지 포함 가능)
     const messageContent = [
       { type: 'text', text: userPrompt }
@@ -221,7 +227,8 @@ ${combinedSymptoms}`;
       };
     }
   } catch (error) {
-    console.error('GPT-4o Vision 분석 오류:', error);
+    console.warn('⚠️ GPT-4o Vision 분석 건너뜀 (CORS 또는 API 키 없음):', error.message);
+    // Fallback으로 즉시 이동
   }
 
   // Fallback
