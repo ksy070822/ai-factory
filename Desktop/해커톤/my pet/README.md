@@ -1,129 +1,220 @@
-# 🐾 PetMedical.AI - 반려동물 AI 진료 시스템
+# 🤖 PetMedical.AI
 
-24시간 반려동물 진료 접근성 문제 해결을 위한 AI 기반 멀티 에이전트 진단 시스템
+반려동물 응급도 평가를 위한 멀티에이전트 AI 진료 시스템이다. 6개의 전문 AI 에이전트가 순차적으로 협업하여 증상 분석, 감별진단, 응급도 판정, 홈케어 가이드를 제공한다.
 
-## ✨ 주요 기능
+---
 
-- **멀티 에이전트 AI 진료**: 4명의 전문 AI가 협업하여 정확한 진단
-- **반려동물 프로필 관리**: 여러 마리 반려동물 등록 및 관리
-- **증상 입력**: 텍스트, 사진, 음성 등 다양한 방식
-- **실시간 대화형 진료**: AI 의사와 실시간 질문/답변
-- **진단서 생성**: 상세한 진단 결과 및 치료 가이드
-- **마이페이지**: 반려동물 관리 및 진료 기록 확인
+## ✨ 핵심 기능
 
-## 🧠 멀티 에이전트 구조
+### 📊 멀티에이전트 AI 진료 파이프라인
+6개의 전문 에이전트가 순차적으로 진료를 수행한다. CS Agent가 증상을 접수하고, Information Agent가 추가 문진을 진행하며, Medical Agent가 감별진단을 수행한다. Triage Engine이 응급도를 0~5점으로 점수화하고, Ops Agent가 진단서를 생성하며, Care Agent가 홈케어 플랜을 작성한다.
 
-각 에이전트는 최적화된 AI 모델을 사용합니다:
+### 🔄 협진 시스템 (Collaborative Diagnosis)
+다중 AI 모델이 교차 검증을 수행하여 진단 정확도를 높인다. Medical Agent와 Triage Engine의 결과를 비교하여 불일치를 감지하고, 불일치 발생 시 보수적으로 높은 위험도를 채택한다. 최종 신뢰도 점수를 산출하여 진단 결과의 신뢰성을 제공한다.
 
-| 에이전트 | 역할 | 사용 모델 | 이유 |
-|---------|------|----------|------|
-| **CS Agent** | 상담 간호사 | **Gemini 1.5 Flash** | 빠르고 저렴, 문진/요약 특화 |
-| **Medical Agent** | 전문 수의사 | **GPT-4o** (환경 변수로 변경 가능) | 의학 reasoning 최강, 정확한 진단 |
-| **Ops Agent** | 데이터 처리자 | **Claude 3.5 Sonnet** | JSON 구조화/기록 최강, 안정성 |
-| **Care Agent** | 케어 플래너 | **Gemini 1.5 Pro** (환경 변수로 변경 가능) | 홈케어 가이드 작성 특화 |
+### 🛡️ 응급도 자동 판정 시스템
+5단계 응급도 체계로 긴급성을 분류한다. 0~1점(GREEN)은 홈케어로 충분, 2점(YELLOW)은 악화 시 병원 방문, 3~4점(ORANGE)은 24시간 내 방문, 5점(RED)은 즉시 병원 방문이 필요한 응급 상황이다. 색상과 점수로 보호자가 직관적으로 상황을 파악할 수 있다.
 
-### 모델 선택 가이드
+---
 
-**Medical Agent (수의사)**: 
-- `gpt-4o` (기본값, 권장) - 최신 모델, 비용 대비 성능 우수
-- `gpt-4-turbo` - 빠른 응답
-- `gpt-4` - 안정적인 성능
+## 🤖 AI 기술 활용
 
-**Care Agent (케어 플래너)**:
-- `gemini-1.5-pro` (기본값) - 상세한 가이드 작성
-- `gemini-1.5-flash` - 빠른 응답, 비용 절감
+### 멀티에이전트 오케스트레이션
+6개의 전문 에이전트가 파이프라인 방식으로 순차 실행된다. 각 에이전트는 이전 단계의 structured_data를 입력받아 처리하고, 다음 에이전트에 전달한다. Root Orchestrator가 전체 워크플로우를 조율하며, TRD(Tool Request Discipline) 규칙에 따라 각 단계에서 정확히 하나의 도구만 호출하여 안정성을 보장한다. 상태 기반 조건문으로 각 단계의 완료 여부를 확인하고 순차적으로 진행한다.
 
-## 🚀 시작하기
+### 동적 모델 라우팅 (Dynamic Model Router)
+상황별로 최적의 AI 모델을 자동 선택하여 비용을 절감한다. 응급 상황(출혈, 경련, 호흡곤란)에는 Claude Sonnet 4를 사용하고, 이미지 분석이 필요한 경우 GPT-4o Vision을 사용한다. 일반 문의에는 GPT-4o-mini를 사용하여 비용 효율성을 높인다. 규칙 기반 라우팅으로 월간 API 비용이 $5,000에서 $1,990으로 약 60% 절감되었다.
 
-### 1. 환경 변수 설정
+### 프롬프트 엔지니어링 최적화
+각 에이전트는 역할 기반 프롬프트(Role-based Prompting)를 사용한다. Medical Agent는 "경력 10년 이상의 수의사"로 설정되어 근거 중심 진단을 수행한다. temperature=0.1~0.2로 설정하여 일관된 의료 분석을 보장한다. 종(species) 특화 지시문을 포함하여 강아지, 고양이, 토끼 등 7종 반려동물에 대해 맞춤형 진단을 제공한다. JSON 스키마를 명시하여 파싱 오류를 방지한다.
 
-`.env` 파일을 생성하고 API 키를 설정하세요:
+### 멀티모달 비전 분석
+GPT-4o Vision을 활용하여 반려동물 사진을 분석한다. 상처, 부종, 피부 문제, 안구 이상, 자세 이상, 시각적 고통 신호 6가지 카테고리로 구조화된 분석 결과를 반환한다. 이미지 URL 기반으로 처리하며, 분석 결과는 Medical Agent의 감별진단에 추가 컨텍스트로 제공된다.
 
-```bash
-# AI API Keys
-VITE_GEMINI_API_KEY=your_gemini_api_key_here
-VITE_OPENAI_API_KEY=your_openai_api_key_here
-VITE_ANTHROPIC_API_KEY=your_anthropic_api_key_here
+---
 
-# OpenAI Model (Medical Agent용)
-# gpt-4o (기본값, 권장), gpt-4-turbo, gpt-4 등
-VITE_OPENAI_MODEL=gpt-4o
+## 🏗️ 아키텍처
 
-# Gemini Care Model (Care Agent용, 선택사항)
-# gemini-1.5-pro (기본값), gemini-1.5-flash (빠르고 저렴)
-VITE_GEMINI_CARE_MODEL=gemini-1.5-pro
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                        사용자 (보호자)                           │
+└────────────────────────────┬────────────────────────────────────┘
+                             │
+┌────────────────────────────▼────────────────────────────────────┐
+│                   Frontend (React + Vite)                       │
+│                   GitHub Pages 배포                              │
+└────────────────────────────┬────────────────────────────────────┘
+                             │ REST API
+┌────────────────────────────▼────────────────────────────────────┐
+│                   Backend (FastAPI + LangChain)                 │
+│                   Railway/Render 배포                            │
+└────────────────────────────┬────────────────────────────────────┘
+                             │
+┌────────────────────────────▼────────────────────────────────────┐
+│               멀티에이전트 파이프라인                              │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐         │
+│  │ CS Agent │→ │  Info    │→ │ Medical  │→ │ Triage   │         │
+│  │ (Gemini) │  │  Agent   │  │  Agent   │  │  Engine  │         │
+│  └──────────┘  │ (Gemini) │  │ (Claude) │  │ (Claude) │         │
+│                └──────────┘  └──────────┘  └──────────┘         │
+│                                    ↓                            │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐                       │
+│  │   Care   │← │   Ops    │← │ Collab   │                       │
+│  │  Agent   │  │  Agent   │  │ Diagnosis│                       │
+│  │ (Gemini) │  │ (Claude) │  │ (Claude) │                       │
+│  └──────────┘  └──────────┘  └──────────┘                       │
+└────────────────────────────┬────────────────────────────────────┘
+                             │
+┌────────────────────────────▼────────────────────────────────────┐
+│                    Firebase (Firestore + Storage)               │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
-### 2. 패키지 설치
+### 기술 스택
+- **Frontend**: React 18.2.0, Vite 5.0.8
+- **Backend**: Python 3.11, FastAPI, LangChain
+- **Database**: Firebase Firestore, Cloud Storage
+- **AI Models**: Claude Sonnet 4, GPT-4o, GPT-4o-mini, Gemini 2.0 Flash, Gemini 1.5 Pro
+- **Deploy**: GitHub Pages (Frontend), Railway/Render (Backend)
 
+---
+
+## 📂 프로젝트 구조
+
+```
+ai-factory/                          # Frontend Repository
+├── Desktop/해커톤/my pet/
+│   ├── src/
+│   │   ├── services/ai/
+│   │   │   ├── csAgent.js           # CS Agent (Gemini Flash)
+│   │   │   ├── informationAgent.js  # Information Agent (Gemini)
+│   │   │   ├── medicalAgent.js      # Medical Agent (Claude)
+│   │   │   ├── triageEngine.js      # Triage Engine (Claude)
+│   │   │   ├── opsAgent.js          # Ops Agent (Claude)
+│   │   │   ├── careAgent.js         # Care Agent (Gemini)
+│   │   │   ├── collaborativeDiagnosis.js  # 협진 시스템
+│   │   │   └── agentOrchestrator.js # 오케스트레이터
+│   │   ├── components/              # React UI 컴포넌트
+│   │   └── lib/                     # Firebase 설정
+│   ├── App.jsx                      # 메인 앱 (8800줄)
+│   ├── package.json
+│   └── vite.config.js
+│
+multi-agent/                         # Backend Repository
+├── petcare_advisor/
+│   ├── src/petcare_advisor/
+│   │   ├── agents/
+│   │   │   ├── root_orchestrator.py # 전체 워크플로우 조율
+│   │   │   ├── symptom_intake.py    # 증상 수집
+│   │   │   ├── vision_agent.py      # 이미지 분석
+│   │   │   ├── medical_agent.py     # 의료 분석
+│   │   │   ├── triage_agent.py      # 응급도 판정
+│   │   │   └── careplan_agent.py    # 케어플랜 생성
+│   │   ├── tools/                   # report_builder, persistence
+│   │   ├── config.py                # 설정 관리
+│   │   └── main.py                  # FastAPI 진입점
+│   └── requirements.txt
+```
+
+---
+
+## 🚀 빠른 시작
+
+### 1. 사전 준비
+- Node.js 18+
+- Python 3.11+
+- Google AI Studio 계정 (Gemini API)
+- OpenAI 계정 (GPT-4o API)
+- Anthropic 계정 (Claude API)
+- Firebase 프로젝트
+
+### 2. Frontend 설정
 ```bash
+cd ai-factory/Desktop/해커톤/my\ pet
+cp .env.example .env
+# .env 파일에 API 키 설정
 npm install
-```
-
-### 3. 개발 서버 실행
-
-```bash
 npm run dev
 ```
 
-브라우저에서 `http://localhost:5173`으로 접속하세요.
-
-## 📋 API 키 발급 방법
-
-### Gemini API (Google AI Studio)
-1. https://aistudio.google.com/ 접속
-2. API 키 생성
-3. `.env` 파일에 `VITE_GEMINI_API_KEY` 설정
-
-### OpenAI API
-1. https://platform.openai.com/ 접속
-2. API Keys 메뉴에서 키 생성
-3. `.env` 파일에 `VITE_OPENAI_API_KEY` 설정
-
-### Anthropic API (Claude)
-1. https://console.anthropic.com/ 접속
-2. API Keys 메뉴에서 키 생성
-3. `.env` 파일에 `VITE_ANTHROPIC_API_KEY` 설정
-
-## 🎯 사용 방법
-
-1. **반려동물 등록**: 첫 방문 시 반려동물 정보 입력
-2. **증상 입력**: 대시보드에서 "증상이 있어요" 클릭 후 증상 입력
-3. **AI 진료**: 4명의 AI 에이전트가 순차적으로 진료 수행
-4. **대화형 상담**: AI 의사와 실시간 질문/답변
-5. **진단서 확인**: 진단 결과 및 치료 가이드 확인
-6. **마이페이지**: 반려동물 관리 및 진료 기록 확인
-
-## 📁 프로젝트 구조
-
-```
-my-pet/
-├── src/
-│   ├── components/
-│   │   └── MyPage.jsx          # 마이페이지 컴포넌트
-│   ├── services/
-│   │   └── ai/
-│   │       ├── csAgent.js      # CS Agent (Gemini Flash)
-│   │       ├── medicalAgent.js # Medical Agent (GPT-4.1/5.1)
-│   │       ├── opsAgent.js     # Ops Agent (Claude 3.5 Sonnet)
-│   │       ├── careAgent.js    # Care Agent (Gemini Pro)
-│   │       └── agentOrchestrator.js # 멀티 에이전트 오케스트레이터
-│   └── main.jsx
-├── App.jsx                      # 메인 앱 컴포넌트
-├── App.css                      # 스타일
-└── package.json
+### 3. Backend 설정
+```bash
+cd multi-agent/petcare_advisor
+pip install -r requirements.txt
+cp .env.example .env
+# .env 파일에 API 키 설정
+uvicorn src.petcare_advisor.main:app --reload
 ```
 
-## 🔧 기술 스택
+### 4. 환경 변수 설정
+```bash
+# AI API Keys
+VITE_GEMINI_API_KEY=your_gemini_api_key
+VITE_OPENAI_API_KEY=your_openai_api_key
+VITE_ANTHROPIC_API_KEY=your_anthropic_api_key
 
-- **React 18** - UI 프레임워크
-- **Vite** - 빌드 도구
-- **Gemini API** - CS Agent, Care Agent
-- **OpenAI API** - Medical Agent
-- **Anthropic API** - Ops Agent
-- **LocalStorage** - 데이터 저장
+# Firebase
+VITE_FIREBASE_API_KEY=your_firebase_api_key
+VITE_FIREBASE_PROJECT_ID=your_project_id
 
-## 📝 라이센스
+# Backend
+VITE_BACKEND_API_URL=http://localhost:8000
+```
 
-MIT
+---
 
+## 🔐 보안
+
+- API 키는 환경 변수로만 관리하며 코드에 하드코딩하지 않는다
+- 프로덕션 환경에서는 백엔드 API를 통해 AI 모델을 호출한다
+- Firebase Security Rules로 사용자별 데이터 접근을 제한한다
+- CORS 설정으로 허용된 도메인만 API 접근을 허용한다
+- 의료 정보는 Firebase Firestore에 암호화하여 저장한다
+
+---
+
+## 📝 API 엔드포인트
+
+| Method | Endpoint | 설명 |
+|--------|----------|------|
+| GET | `/health` | 서버 상태 확인 |
+| POST | `/api/triage` | AI 진료 요청 |
+| POST | `/api/question` | 후속 질문 처리 |
+
+### /api/triage 요청 예시
+```json
+{
+  "symptom_text": "강아지가 어제부터 구토를 해요",
+  "species": "dog",
+  "age": "3세",
+  "images": ["https://..."]
+}
+```
+
+---
+
+## 🤝 기여
+
+1. 이 저장소를 Fork한다
+2. 기능 브랜치를 생성한다 (`git checkout -b feature/AmazingFeature`)
+3. 변경사항을 커밋한다 (`git commit -m 'Add AmazingFeature'`)
+4. 브랜치에 Push한다 (`git push origin feature/AmazingFeature`)
+5. Pull Request를 생성한다
+
+---
+
+## 📄 라이선스
+
+MIT License
+
+---
+
+## 📞 지원
+
+- **Frontend Repository**: https://github.com/ksy070822/ai-factory
+- **Backend Repository**: https://github.com/ksy070822/multi-agent
+- **Issues**: GitHub Issues를 통해 버그 리포트 및 기능 요청
+
+---
+
+**Made with ❤️ by PetMedical.AI Team**
