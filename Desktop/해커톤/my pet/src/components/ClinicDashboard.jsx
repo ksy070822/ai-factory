@@ -61,7 +61,7 @@ export function ClinicDashboard({ currentUser, onBack }) {
   const [loading, setLoading] = useState(true);
   const [currentClinic, setCurrentClinic] = useState(null);
   const [clinics, setClinics] = useState([]);
-  const [activeTab, setActiveTab] = useState('today');
+  const [activeTab, setActiveTab] = useState('home');
   const [todayBookings, setTodayBookings] = useState([]);
   const [monthlyBookings, setMonthlyBookings] = useState([]);
   const [monthlyResults, setMonthlyResults] = useState([]);
@@ -512,8 +512,8 @@ export function ClinicDashboard({ currentUser, onBack }) {
           key={day}
           onClick={() => count > 0 && handleDateClick(day)}
           className={`aspect-square flex flex-col items-center justify-center rounded-xl transition-all cursor-pointer
-            ${isSelected ? 'bg-gradient-to-br from-red-300 to-rose-400 text-white shadow-lg scale-105' :
-              isToday ? 'bg-white border-2 border-red-300 shadow-md' :
+            ${isSelected ? 'bg-gradient-to-br from-sky-400 to-blue-500 text-white shadow-lg scale-105' :
+              isToday ? 'bg-white border-2 border-sky-400 shadow-md' :
               count > 0 ? 'bg-white/90 shadow-sm hover:shadow-md hover:scale-105' :
               'bg-white/30'}
           `}
@@ -521,7 +521,7 @@ export function ClinicDashboard({ currentUser, onBack }) {
         >
           <div className={`text-sm font-bold
             ${isSelected ? 'text-white' :
-              isToday ? 'text-red-400' :
+              isToday ? 'text-sky-500' :
               count > 0 ? 'text-gray-900' :
               isSunday ? 'text-red-400' :
               isSaturday ? 'text-blue-400' :
@@ -531,7 +531,7 @@ export function ClinicDashboard({ currentUser, onBack }) {
           </div>
           {count > 0 && (
             <div className={`absolute bottom-1 text-xs px-1.5 py-0.5 rounded-full font-bold shadow-sm
-              ${isSelected ? 'bg-white text-rose-500' : 'bg-gradient-to-r from-red-300 to-rose-400 text-white'}`}
+              ${isSelected ? 'bg-white text-sky-600' : 'bg-gradient-to-r from-sky-400 to-blue-500 text-white'}`}
             >
               {count}
             </div>
@@ -650,9 +650,9 @@ export function ClinicDashboard({ currentUser, onBack }) {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-rose-50">
+      <div className="flex items-center justify-center min-h-screen bg-slate-100">
         <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 border-4 border-rose-200 border-t-rose-600 rounded-full animate-spin"></div>
+          <div className="w-12 h-12 border-4 border-sky-200 border-t-sky-600 rounded-full animate-spin"></div>
           <p className="text-gray-600">병원 데이터 로딩 중...</p>
         </div>
       </div>
@@ -661,8 +661,12 @@ export function ClinicDashboard({ currentUser, onBack }) {
 
   const monthlyStats = getMonthlyStats();
 
+  // 오늘 진료 대상 환자 수 (확정된 예약 중 아직 진료하지 않은 환자)
+  const todayTreatmentCount = todayBookings.filter(b => b.status === 'confirmed' && !b.hasResult).length;
+  const pendingCount = todayBookings.filter(b => b.status === 'pending').length;
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-rose-50 to-white">
+    <div className="min-h-screen bg-slate-100">
       <style>{`
         @keyframes spin { to { transform: rotate(360deg); } }
         .animate-spin { animation: spin 1s linear infinite; }
@@ -670,56 +674,35 @@ export function ClinicDashboard({ currentUser, onBack }) {
         .animate-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
       `}</style>
 
-      {/* Header - 병원 테마 (파스텔 레드/코랄) */}
-      <div className="bg-gradient-to-r from-red-300 to-rose-300 text-white">
-        <div className="flex items-center justify-between p-4">
+      {/* Header - 로고 중앙 정렬 (보호자모드와 동일) */}
+      <header className="bg-gradient-to-r from-sky-500 to-sky-600 text-white px-4 pt-4 pb-4 shadow-lg">
+        <div className="flex items-center justify-between">
           <button onClick={onBack} className="p-2 hover:bg-white/20 rounded-full transition-colors">
             <span className="material-symbols-outlined">arrow_back</span>
           </button>
-          <div className="flex gap-2">
-            <button onClick={handleLogout} className="p-2 hover:bg-white/20 rounded-full transition-colors" title="로그아웃">
-              <span className="material-symbols-outlined">logout</span>
-            </button>
+          <div className="flex items-center justify-center flex-1">
+            <div className="w-9 h-9 bg-white rounded-lg flex items-center justify-center shadow-md flex-shrink-0">
+              <img
+                src={`${import.meta.env.BASE_URL}icon/login/logo.png`}
+                alt="PetMedical.AI"
+                className="w-6 h-6 object-contain"
+              />
+            </div>
+            <div className="text-center ml-2">
+              <h1 className="text-xl font-bold tracking-tight">PetMedical.AI</h1>
+              <p className="text-sky-100 text-xs font-medium">AI 기반 반려동물 건강 관리 서비스</p>
+            </div>
           </div>
+          <button onClick={handleLogout} className="p-2 hover:bg-white/20 rounded-full transition-colors" title="로그아웃">
+            <span className="material-symbols-outlined">logout</span>
+          </button>
         </div>
+      </header>
 
-        <div className="px-4 pb-4">
-          <h1 className="text-xl font-bold flex items-center gap-2">
-            <span className="material-symbols-outlined">local_hospital</span>
-            {currentClinic?.name || '행복한 동물병원'}
-          </h1>
-          <p className="text-red-100 text-sm mt-1">병원 관리자 모드</p>
-        </div>
-
-        {/* Summary Cards - 클릭 시 해당 화면으로 이동 */}
-        <div className="grid grid-cols-3 gap-3 px-4 pb-4">
-          <div
-            onClick={() => { setActiveTab('today'); setTodayFilter('confirmed'); }}
-            className="bg-white/30 backdrop-blur p-3 rounded-xl text-center cursor-pointer hover:bg-white/40 transition-colors active:scale-95"
-          >
-            <div className="text-2xl font-bold">{todayBookings.filter(b => b.status === 'confirmed' && !b.hasResult).length}</div>
-            <div className="text-xs text-red-50">오늘 진료</div>
-          </div>
-          <div
-            onClick={() => { setActiveTab('today'); setTodayFilter('pending'); }}
-            className="bg-white/30 backdrop-blur p-3 rounded-xl text-center cursor-pointer hover:bg-white/40 transition-colors active:scale-95"
-          >
-            <div className="text-2xl font-bold">{todayBookings.filter(b => b.status === 'pending').length}</div>
-            <div className="text-xs text-red-50">확정 대기</div>
-          </div>
-          <div
-            onClick={() => setActiveTab('stats')}
-            className="bg-white/30 backdrop-blur p-3 rounded-xl text-center cursor-pointer hover:bg-white/40 transition-colors active:scale-95"
-          >
-            <div className="text-2xl font-bold">{monthlyStats.total}</div>
-            <div className="text-xs text-red-50">이번달 진료</div>
-          </div>
-        </div>
-      </div>
-
-      {/* Tabs - 블루 계열 포인트 */}
+      {/* Tabs - 상단 고정 네비게이션 */}
       <div className="sticky top-0 z-10 bg-white border-b border-gray-200 flex overflow-x-auto shadow-sm">
         {[
+          { id: 'home', icon: 'home', label: '홈' },
           { id: 'today', icon: 'today', label: '오늘 예약' },
           { id: 'calendar', icon: 'calendar_month', label: '예약 달력' },
           { id: 'stats', icon: 'analytics', label: '진료 현황' },
@@ -741,6 +724,132 @@ export function ClinicDashboard({ currentUser, onBack }) {
 
       {/* Content */}
       <div className="p-4 pb-24">
+        {/* 홈 탭 - 병원 프로필 및 대시보드 카드 */}
+        {activeTab === 'home' && (
+          <>
+            {/* 병원 프로필 배너 - 보호자모드 메인화면과 유사 */}
+            <div className="bg-white rounded-2xl p-4 shadow-lg border border-slate-100 relative overflow-hidden mb-4">
+              <div className="relative flex items-stretch gap-4">
+                {/* 병원 이미지 */}
+                <div className="flex-shrink-0 w-28 h-40 bg-white/80 rounded-2xl shadow-md overflow-hidden border-2 border-white flex items-center justify-center">
+                  <img
+                    src={`${import.meta.env.BASE_URL}icon/login/main_hospital.png`}
+                    alt="병원 모드"
+                    className="w-full h-full object-contain"
+                  />
+                </div>
+
+                {/* 병원 정보 */}
+                <div className="flex-1 flex flex-col justify-between py-2">
+                  <div className="flex flex-col items-center justify-center text-center w-full">
+                    <p className="text-xl font-display font-bold text-gray-900 w-full">
+                      {currentClinic?.name || '행복한 동물병원'}
+                    </p>
+                    <p className="text-lg font-semibold text-sky-600 mt-2 w-full">
+                      관리자 모드입니다.
+                    </p>
+                    <p className="text-base text-gray-600 mt-2 w-full">
+                      오늘도 든든한 진료 시작!
+                    </p>
+                  </div>
+
+                  {/* 태그 정보 */}
+                  <div className="flex items-center gap-1.5 flex-wrap mt-3 justify-center">
+                    <span className="text-[11px] text-sky-700 font-semibold bg-sky-100 px-2.5 py-1 rounded-full border border-sky-200">
+                      {currentClinic?.staffRole === 'director' ? '원장' :
+                       currentClinic?.staffRole === 'vet' ? '수의사' :
+                       currentClinic?.staffRole === 'nurse' ? '간호사' : '스태프'}
+                    </span>
+                    <span className="text-[11px] text-sky-700 font-semibold bg-sky-100 px-2.5 py-1 rounded-full border border-sky-200">
+                      진료대기 {todayTreatmentCount}명
+                    </span>
+                    <span className="text-[11px] text-sky-700 font-semibold bg-sky-100 px-2.5 py-1 rounded-full border border-sky-200">
+                      확정대기 {pendingCount}명
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* 오늘 진료할 환자 배너 - 클릭 시 오늘 예약 탭으로 이동 */}
+              <button
+                onClick={() => { setActiveTab('today'); setTodayFilter('all'); }}
+                className="w-full mt-3 bg-gradient-to-r from-sky-500 to-sky-600 text-white font-bold text-sm py-3 rounded-xl shadow-md hover:shadow-lg transition-all"
+              >
+                오늘 진료할 환자 {todayBookings.length}명 확인하기 &gt;
+              </button>
+            </div>
+
+            {/* 대시보드 카드 영역 */}
+            <div className="grid grid-cols-2 gap-3 mb-4">
+              {/* 오늘 진료 카드 */}
+              <div
+                onClick={() => { setActiveTab('today'); setTodayFilter('confirmed'); }}
+                className="bg-white rounded-2xl p-4 shadow-lg border border-slate-100 cursor-pointer hover:shadow-xl transition-all active:scale-95"
+              >
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="material-symbols-outlined text-sky-500">medical_services</span>
+                  <span className="text-sm font-semibold text-gray-700">오늘 진료</span>
+                </div>
+                <div className="text-3xl font-bold text-gray-900">{todayTreatmentCount}</div>
+                <p className="text-xs text-gray-500 mt-1">확정된 진료 대기</p>
+              </div>
+
+              {/* 확정 대기 카드 */}
+              <div
+                onClick={() => { setActiveTab('today'); setTodayFilter('pending'); }}
+                className="bg-white rounded-2xl p-4 shadow-lg border border-slate-100 cursor-pointer hover:shadow-xl transition-all active:scale-95"
+              >
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="material-symbols-outlined text-amber-500">pending_actions</span>
+                  <span className="text-sm font-semibold text-gray-700">확정 대기</span>
+                </div>
+                <div className="text-3xl font-bold text-gray-900">{pendingCount}</div>
+                <p className="text-xs text-gray-500 mt-1">확정 필요한 예약</p>
+              </div>
+
+              {/* 이번달 진료 카드 */}
+              <div
+                onClick={() => setActiveTab('stats')}
+                className="bg-white rounded-2xl p-4 shadow-lg border border-slate-100 cursor-pointer hover:shadow-xl transition-all active:scale-95"
+              >
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="material-symbols-outlined text-green-500">analytics</span>
+                  <span className="text-sm font-semibold text-gray-700">이번달 진료</span>
+                </div>
+                <div className="text-3xl font-bold text-gray-900">{monthlyStats.total}</div>
+                <p className="text-xs text-gray-500 mt-1">완료된 진료</p>
+              </div>
+
+              {/* 예약 달력 카드 */}
+              <div
+                onClick={() => setActiveTab('calendar')}
+                className="bg-white rounded-2xl p-4 shadow-lg border border-slate-100 cursor-pointer hover:shadow-xl transition-all active:scale-95"
+              >
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="material-symbols-outlined text-purple-500">calendar_month</span>
+                  <span className="text-sm font-semibold text-gray-700">예약 달력</span>
+                </div>
+                <div className="text-3xl font-bold text-gray-900">{monthlyBookings.length}</div>
+                <p className="text-xs text-gray-500 mt-1">이번달 총 예약</p>
+              </div>
+            </div>
+
+            {/* 병원 설정 바로가기 */}
+            <button
+              onClick={() => setActiveTab('settings')}
+              className="w-full bg-white rounded-2xl p-4 shadow-lg border border-slate-100 flex items-center justify-between hover:shadow-xl transition-all active:scale-[0.99]"
+            >
+              <div className="flex items-center gap-3">
+                <span className="material-symbols-outlined text-gray-500">settings</span>
+                <div className="text-left">
+                  <p className="text-sm font-semibold text-gray-700">병원 설정</p>
+                  <p className="text-xs text-gray-400">병원 정보 및 임직원 관리</p>
+                </div>
+              </div>
+              <span className="material-symbols-outlined text-gray-400">chevron_right</span>
+            </button>
+          </>
+        )}
         {/* 오늘 예약 Tab */}
         {activeTab === 'today' && (() => {
           // 필터 적용
@@ -757,7 +866,7 @@ export function ClinicDashboard({ currentUser, onBack }) {
               <button
                 onClick={() => setTodayFilter('all')}
                 className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-colors ${
-                  todayFilter === 'all' ? 'bg-rose-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  todayFilter === 'all' ? 'bg-sky-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
               >
                 전체 ({todayBookings.length})
@@ -781,7 +890,7 @@ export function ClinicDashboard({ currentUser, onBack }) {
             </div>
 
             <h2 className="font-bold text-gray-900 mb-3 flex items-center gap-2">
-              <span className="w-2 h-2 bg-rose-500 rounded-full animate-pulse"></span>
+              <span className="w-2 h-2 bg-sky-500 rounded-full animate-pulse"></span>
               {todayFilter === 'all' ? '오늘의 진료 일정' : todayFilter === 'confirmed' ? '오늘 진료 대상' : '확정 대기 예약'} ({filteredBookings.length}건)
             </h2>
 
@@ -816,7 +925,7 @@ export function ClinicDashboard({ currentUser, onBack }) {
 
                     {/* 환자 정보 */}
                     <div className="flex items-center gap-3 mb-3">
-                      <div className="w-14 h-14 rounded-full bg-gradient-to-br from-rose-100 to-pink-100 overflow-hidden border-2 border-rose-200">
+                      <div className="w-14 h-14 rounded-full bg-gradient-to-br from-sky-100 to-blue-100 overflow-hidden border-2 border-sky-200">
                         <img
                           src={booking.pet?.profileImage || getPetImage(booking.pet || { species: booking.pet?.species || 'dog' }, false)}
                           alt={booking.pet?.name || '반려동물'}
@@ -852,7 +961,7 @@ export function ClinicDashboard({ currentUser, onBack }) {
                     <div className="grid grid-cols-3 gap-2 mb-3">
                       <button
                         onClick={() => handleShowPatientDetail(booking)}
-                        className="p-2 bg-rose-50 border border-rose-200 rounded-lg text-xs font-medium text-rose-700 hover:bg-rose-100 transition-colors flex flex-col items-center gap-1"
+                        className="p-2 bg-sky-50 border border-sky-200 rounded-lg text-xs font-medium text-sky-700 hover:bg-sky-100 transition-colors flex flex-col items-center gap-1"
                       >
                         <span className="material-symbols-outlined text-lg">pets</span>
                         환자정보
@@ -957,26 +1066,26 @@ export function ClinicDashboard({ currentUser, onBack }) {
         {/* 예약 달력 Tab */}
         {activeTab === 'calendar' && (
           <div>
-            <div className="bg-gradient-to-br from-rose-50 to-pink-50 rounded-3xl p-6 mb-4 shadow-md border border-rose-100">
+            <div className="bg-gradient-to-br from-sky-50 to-blue-50 rounded-3xl p-6 mb-4 shadow-md border border-sky-100">
               <div className="flex items-center justify-between mb-4">
-                <button onClick={handlePrevMonth} className="bg-white p-2 rounded-lg shadow-sm hover:bg-rose-50 transition-colors">
-                  <span className="material-symbols-outlined text-rose-600">chevron_left</span>
+                <button onClick={handlePrevMonth} className="bg-white p-2 rounded-lg shadow-sm hover:bg-sky-50 transition-colors">
+                  <span className="material-symbols-outlined text-sky-600">chevron_left</span>
                 </button>
                 <div className="text-center">
-                  <h2 className="text-xl font-bold text-rose-900">
+                  <h2 className="text-xl font-bold text-sky-900">
                     {currentMonth.getFullYear()}년 {currentMonth.getMonth() + 1}월
                   </h2>
-                  <p className="text-xs text-rose-600 mt-1">예약 현황</p>
+                  <p className="text-xs text-sky-600 mt-1">예약 현황</p>
                 </div>
-                <button onClick={handleNextMonth} className="bg-white p-2 rounded-lg shadow-sm hover:bg-rose-50 transition-colors">
-                  <span className="material-symbols-outlined text-rose-600">chevron_right</span>
+                <button onClick={handleNextMonth} className="bg-white p-2 rounded-lg shadow-sm hover:bg-sky-50 transition-colors">
+                  <span className="material-symbols-outlined text-sky-600">chevron_right</span>
                 </button>
               </div>
 
               {/* 요일 헤더 */}
               <div className="grid grid-cols-7 gap-1 mb-2">
                 {['일', '월', '화', '수', '목', '금', '토'].map((day, i) => (
-                  <div key={day} className={`text-center text-sm font-bold py-2 ${i === 0 ? 'text-red-500' : i === 6 ? 'text-blue-500' : 'text-rose-800'}`}>
+                  <div key={day} className={`text-center text-sm font-bold py-2 ${i === 0 ? 'text-red-500' : i === 6 ? 'text-blue-500' : 'text-gray-700'}`}>
                     {day}
                   </div>
                 ))}
@@ -990,10 +1099,10 @@ export function ClinicDashboard({ currentUser, onBack }) {
 
             {/* 선택된 날짜의 예약 목록 */}
             {selectedDate && (
-              <div className="bg-white border-2 border-rose-300 rounded-2xl p-5 mb-4 shadow-lg">
+              <div className="bg-white border-2 border-sky-300 rounded-2xl p-5 mb-4 shadow-lg">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                    <span className="bg-gradient-to-r from-red-300 to-rose-400 text-white px-3 py-1 rounded-lg">
+                    <span className="bg-gradient-to-r from-sky-400 to-blue-500 text-white px-3 py-1 rounded-lg">
                       {selectedDate}일
                     </span>
                     예약 목록
@@ -1053,7 +1162,7 @@ export function ClinicDashboard({ currentUser, onBack }) {
 
             {!selectedDate && (
               <div className="bg-white rounded-2xl p-4 shadow-sm text-center text-gray-500 text-sm">
-                <span className="material-symbols-outlined text-2xl block mb-1 text-rose-300">touch_app</span>
+                <span className="material-symbols-outlined text-2xl block mb-1 text-sky-300">touch_app</span>
                 날짜를 클릭하면 예약 목록을 확인할 수 있습니다
               </div>
             )}
@@ -1064,15 +1173,15 @@ export function ClinicDashboard({ currentUser, onBack }) {
         {activeTab === 'stats' && (
           <div>
             <h2 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
-              <span className="material-symbols-outlined text-red-400">analytics</span>
+              <span className="material-symbols-outlined text-sky-500">analytics</span>
               {currentMonth.getMonth() + 1}월 진료 현황
             </h2>
 
             {/* 요약 카드 */}
             <div className="grid grid-cols-2 gap-3 mb-6">
-              <div className="bg-gradient-to-br from-red-300 to-rose-400 text-white p-4 rounded-2xl shadow-lg">
+              <div className="bg-gradient-to-br from-sky-400 to-blue-500 text-white p-4 rounded-2xl shadow-lg">
                 <div className="text-3xl font-bold">{monthlyStats.total}</div>
-                <div className="text-red-50 text-sm">총 진료 완료</div>
+                <div className="text-sky-100 text-sm">총 진료 완료</div>
               </div>
               <div className="bg-gradient-to-br from-blue-500 to-indigo-500 text-white p-4 rounded-2xl shadow-lg">
                 <div className="text-3xl font-bold">{monthlyStats.estimatedRevenue.toLocaleString()}원</div>
@@ -1101,7 +1210,7 @@ export function ClinicDashboard({ currentUser, onBack }) {
             {/* 종류별 진료 수 */}
             <div className="bg-white rounded-2xl p-4 shadow-sm">
               <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                <span className="material-symbols-outlined text-red-400">pets</span>
+                <span className="material-symbols-outlined text-sky-500">pets</span>
                 종류별 진료 수
               </h3>
               {Object.keys(monthlyStats.speciesCount).length === 0 ? (
@@ -1119,11 +1228,11 @@ export function ClinicDashboard({ currentUser, onBack }) {
                         <div className="flex items-center gap-2">
                           <div className="w-24 h-2 bg-gray-200 rounded-full overflow-hidden">
                             <div
-                              className="h-full bg-gradient-to-r from-rose-400 to-pink-400 rounded-full"
+                              className="h-full bg-gradient-to-r from-sky-400 to-blue-500 rounded-full"
                               style={{ width: `${(count / monthlyStats.total) * 100}%` }}
                             />
                           </div>
-                          <span className="font-bold text-rose-600 w-8 text-right">{count}</span>
+                          <span className="font-bold text-sky-600 w-8 text-right">{count}</span>
                         </div>
                       </div>
                     ))}
@@ -1140,7 +1249,7 @@ export function ClinicDashboard({ currentUser, onBack }) {
             <div>
               <h2 className="font-bold text-gray-900 mb-3 flex items-center justify-between">
                 <span className="flex items-center gap-2">
-                  <span className="material-symbols-outlined text-red-400">local_hospital</span>
+                  <span className="material-symbols-outlined text-sky-500">local_hospital</span>
                   병원 정보
                 </span>
                 {!isEditingClinic && (
@@ -1250,7 +1359,7 @@ export function ClinicDashboard({ currentUser, onBack }) {
             {/* 임직원 관리 섹션 */}
             <div>
               <h2 className="font-bold text-gray-900 mb-3 flex items-center gap-2">
-                <span className="material-symbols-outlined text-red-400">group</span>
+                <span className="material-symbols-outlined text-sky-500">group</span>
                 임직원 관리
               </h2>
 
@@ -1271,7 +1380,7 @@ export function ClinicDashboard({ currentUser, onBack }) {
                             <div className="text-xs text-gray-500">{staff.user?.email}</div>
                           </div>
                           <span className={`px-2 py-0.5 rounded-full text-xs font-semibold
-                            ${staff.role === 'director' ? 'bg-rose-100 text-rose-700' :
+                            ${staff.role === 'director' ? 'bg-sky-100 text-sky-700' :
                               staff.role === 'vet' ? 'bg-blue-100 text-blue-700' :
                               staff.role === 'nurse' ? 'bg-green-100 text-green-700' :
                               'bg-gray-100 text-gray-700'}`}>
@@ -1339,7 +1448,7 @@ export function ClinicDashboard({ currentUser, onBack }) {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl w-full max-w-md max-h-[85vh] overflow-y-auto">
             {/* 헤더 */}
-            <div className="bg-gradient-to-r from-red-300 to-rose-400 text-white p-4 rounded-t-2xl">
+            <div className="bg-gradient-to-r from-sky-400 to-blue-500 text-white p-4 rounded-t-2xl">
               <div className="flex items-center justify-between">
                 <h3 className="font-bold text-lg">환자 정보</h3>
                 <button onClick={() => { setDetailModalType(null); setSelectedBooking(null); }} className="p-1 hover:bg-white/20 rounded-full">
@@ -1351,7 +1460,7 @@ export function ClinicDashboard({ currentUser, onBack }) {
             <div className="p-4 space-y-4">
               {/* 동물 정보 */}
               <div className="flex items-center gap-4">
-                <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-rose-100">
+                <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-sky-100">
                   <img
                     src={selectedBooking.pet?.profileImage || getPetImage(selectedBooking.pet || { species: 'dog' }, false)}
                     alt={selectedBooking.pet?.name}
@@ -1606,7 +1715,7 @@ export function ClinicDashboard({ currentUser, onBack }) {
                   {/* 병원 진료 기록 */}
                   <div>
                     <h4 className="font-semibold text-gray-900 mb-2 flex items-center gap-1">
-                      <span className="material-symbols-outlined text-rose-500 text-lg">local_hospital</span>
+                      <span className="material-symbols-outlined text-sky-500 text-lg">local_hospital</span>
                       병원 진료 기록
                     </h4>
                     {historyData.results.length === 0 ? (
@@ -1614,11 +1723,11 @@ export function ClinicDashboard({ currentUser, onBack }) {
                     ) : (
                       <div className="space-y-2">
                         {historyData.results.slice(0, 5).map(r => (
-                          <div key={r.id} className="bg-rose-50 border border-rose-200 p-3 rounded-lg">
-                            <div className="text-xs text-rose-600 mb-1">{r.visitDate} {r.visitTime}</div>
-                            <div className="font-semibold text-rose-900">{r.mainDiagnosis || r.diagnosis}</div>
+                          <div key={r.id} className="bg-sky-50 border border-sky-200 p-3 rounded-lg">
+                            <div className="text-xs text-sky-600 mb-1">{r.visitDate} {r.visitTime}</div>
+                            <div className="font-semibold text-sky-900">{r.mainDiagnosis || r.diagnosis}</div>
                             {r.soap?.assessment && (
-                              <div className="text-sm text-rose-700 mt-1 line-clamp-2">{r.soap.assessment}</div>
+                              <div className="text-sm text-sky-700 mt-1 line-clamp-2">{r.soap.assessment}</div>
                             )}
                           </div>
                         ))}
@@ -1636,20 +1745,20 @@ export function ClinicDashboard({ currentUser, onBack }) {
       {resultModalOpen && selectedResult && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl w-full max-w-md max-h-[85vh] overflow-y-auto">
-            <div className="bg-gradient-to-r from-red-300 to-rose-400 text-white p-4 rounded-t-2xl">
+            <div className="bg-gradient-to-r from-sky-400 to-blue-500 text-white p-4 rounded-t-2xl">
               <div className="flex items-center justify-between">
                 <h3 className="font-bold text-lg">병원 진단서</h3>
                 <button onClick={() => { setResultModalOpen(false); setSelectedResult(null); }} className="p-1 hover:bg-white/20 rounded-full">
                   <span className="material-symbols-outlined">close</span>
                 </button>
               </div>
-              <p className="text-rose-100 text-sm">{selectedResult.visitDate} {selectedResult.visitTime}</p>
+              <p className="text-sky-100 text-sm">{selectedResult.visitDate} {selectedResult.visitTime}</p>
             </div>
 
             <div className="p-4 space-y-4">
-              <div className="bg-rose-50 border border-rose-200 rounded-xl p-4">
-                <div className="text-sm text-rose-600 mb-1">주 진단명</div>
-                <div className="text-lg font-bold text-rose-900">
+              <div className="bg-sky-50 border border-sky-200 rounded-xl p-4">
+                <div className="text-sm text-sky-600 mb-1">주 진단명</div>
+                <div className="text-lg font-bold text-sky-900">
                   {selectedResult.mainDiagnosis || selectedResult.diagnosis || '기록 없음'}
                 </div>
               </div>
