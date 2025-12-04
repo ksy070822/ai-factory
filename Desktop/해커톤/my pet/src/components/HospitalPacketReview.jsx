@@ -311,27 +311,27 @@ export function HospitalPacketReview({ petData, diagnosis, hospital, hospitalPac
       </div>
 
       {/* Bottom Buttons */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-sm p-4 border-t border-slate-200">
-        <div className="flex flex-col space-y-3">
+      <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm px-4 py-3 border-t border-slate-200 z-50">
+        <div className="flex gap-3 mb-2">
           <button
             onClick={onEdit}
-            className="w-full bg-slate-200 text-slate-700 font-bold py-4 px-6 rounded-lg text-base hover:bg-slate-300 transition-colors"
+            className="flex-1 bg-slate-200 text-slate-700 font-bold py-3 px-4 rounded-lg text-sm hover:bg-slate-300 transition-colors"
           >
-            내용 수정하기
+            내용 수정
           </button>
           <button
             onClick={() => onSend && onSend(createFinalPacket())}
-            className="w-full bg-primary text-white font-bold py-4 px-6 rounded-lg text-base hover:bg-primary/90 transition-colors shadow-lg shadow-primary/30"
+            className="flex-1 bg-primary text-white font-bold py-3 px-4 rounded-lg text-sm hover:bg-primary/90 transition-colors shadow-lg shadow-primary/30"
           >
-            병원에 전송하기
-          </button>
-          <button
-            onClick={() => onSave && onSave(createFinalPacket())}
-            className="w-full text-slate-500 font-medium py-2 px-6 rounded-lg text-sm hover:text-slate-700 transition-colors"
-          >
-            진단서만 저장하기
+            병원 전송
           </button>
         </div>
+        <button
+          onClick={() => onSave && onSave(createFinalPacket())}
+          className="w-full text-slate-500 font-medium py-1.5 text-xs hover:text-slate-700 transition-colors"
+        >
+          진단서만 저장하기
+        </button>
       </div>
     </div>
   );
