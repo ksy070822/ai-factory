@@ -5927,7 +5927,16 @@ function App() {
     }
     // hospital 탭은 조건 없이 항상 표시 (내부에서 lastDiagnosis 체크)
   };
-  
+  // 디버깅: 현재 상태 출력
+  console.log('🔍 App 상태:', {
+    userMode,
+    currentTab,
+    currentView,
+    hasPetData: !!petData,
+    petDataName: petData?.petName || petData?.name || 'null',
+    hasCurrentUser: !!currentUser
+  });
+
   return (
     <div className="App app-root">
       {/* 플로팅 배경 효과 */}
