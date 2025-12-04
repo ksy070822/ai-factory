@@ -5357,12 +5357,31 @@ function App() {
     setCurrentUser(user);
     setUserMode(mode);
     setAuthScreen(null);
+    setCurrentView(null);
+    setCurrentTab('care'); // 메인 화면 표시를 위해 currentTab 설정
 
     // userMode를 localStorage에 저장
     localStorage.setItem('petMedical_userMode', mode);
 
-    // 로그인한 사용자의 반려동물 데이터 로드
-    const userPets = getPetsForUser(user.uid);
+    // 로그인한 사용자의 반려동물 데이터 로드 (Firestore 우선)
+    let userPets = [];
+    try {
+      // Firestore에서 동물 데이터 가져오기
+      const petsResult = await petService.getPetsByUser(user.uid);
+      if (petsResult.success && petsResult.data && petsResult.data.length > 0) {
+        userPets = petsResult.data;
+        // localStorage에도 저장 (오프라인 지원)
+        savePetsForUser(user.uid, userPets);
+        console.log(`✅ Firestore에서 ${userPets.length}마리 반려동물 로드 완료`);
+      } else {
+        // Firestore에 데이터가 없으면 localStorage 확인
+        userPets = getPetsForUser(user.uid);
+      }
+    } catch (error) {
+      console.warn('동물 데이터 로드 실패, localStorage 확인:', error);
+      userPets = getPetsForUser(user.uid);
+    }
+    
     setPets(userPets);
     if (userPets.length > 0) {
       setPetData(userPets[0]);
@@ -5489,6 +5508,8 @@ function App() {
         setCurrentUser(user);
         setUserMode(mode);
         setAuthScreen(null);
+        setCurrentView(null);
+        setCurrentTab('care'); // 메인 화면 표시를 위해 currentTab 설정
 
         // userMode를 localStorage에 저장
         localStorage.setItem('petMedical_userMode', mode);
@@ -5668,6 +5689,8 @@ function App() {
         setCurrentUser(guestUser);
         setUserMode(selectedMode);
         setAuthScreen(null);
+        setCurrentView(null);
+        setCurrentTab('care'); // 메인 화면 표시를 위해 currentTab 설정
       }
     } catch (error) {
       console.error('테스트 계정 로그인 오류:', error);
