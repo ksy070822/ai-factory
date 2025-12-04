@@ -401,6 +401,7 @@ export async function getClinicPatients(clinicId, options = {}) {
       return [
         {
           id: 'dummy-1',
+          petId: 'dummy-pet-1',
           petName: '뽀삐',
           species: '강아지',
           breed: '포메라니안',
@@ -415,6 +416,7 @@ export async function getClinicPatients(clinicId, options = {}) {
         },
         {
           id: 'dummy-2',
+          petId: 'dummy-pet-2',
           petName: '나비',
           species: '고양이',
           breed: '코리안숏헤어',
@@ -429,6 +431,7 @@ export async function getClinicPatients(clinicId, options = {}) {
         },
         {
           id: 'dummy-3',
+          petId: 'dummy-pet-3',
           petName: '초코',
           species: '강아지',
           breed: '말티즈',
@@ -443,6 +446,7 @@ export async function getClinicPatients(clinicId, options = {}) {
         },
         {
           id: 'dummy-4',
+          petId: 'dummy-pet-4',
           petName: '루비',
           species: '강아지',
           breed: '비글',
@@ -457,6 +461,7 @@ export async function getClinicPatients(clinicId, options = {}) {
         },
         {
           id: 'dummy-5',
+          petId: 'dummy-pet-5',
           petName: '밤이',
           species: '고양이',
           breed: '페르시안',
@@ -502,6 +507,7 @@ export async function getClinicPatients(clinicId, options = {}) {
     return [
       {
         id: 'dummy-1',
+        petId: 'dummy-pet-1',
         petName: '뽀삐',
         species: '강아지',
         breed: '포메라니안',
@@ -516,6 +522,7 @@ export async function getClinicPatients(clinicId, options = {}) {
       },
       {
         id: 'dummy-2',
+        petId: 'dummy-pet-2',
         petName: '나비',
         species: '고양이',
         breed: '코리안숏헤어',
@@ -530,6 +537,7 @@ export async function getClinicPatients(clinicId, options = {}) {
       },
       {
         id: 'dummy-3',
+        petId: 'dummy-pet-3',
         petName: '초코',
         species: '강아지',
         breed: '말티즈',
@@ -653,8 +661,16 @@ export async function getClinicResults(clinicId, options = {}) {
 
     // 클라이언트에서 정렬
     results.sort((a, b) => {
-      const dateA = a.visitDate || '';
-      const dateB = b.visitDate || '';
+      const getDateString = (result) => {
+        if (!result.visitDate) return '';
+        // Timestamp 객체인 경우 문자열로 변환
+        return typeof result.visitDate === 'string'
+          ? result.visitDate
+          : (result.visitDate.toDate?.() ? result.visitDate.toDate().toISOString() : '');
+      };
+
+      const dateA = getDateString(a);
+      const dateB = getDateString(b);
       return dateB.localeCompare(dateA);
     });
 
@@ -666,7 +682,8 @@ export async function getClinicResults(clinicId, options = {}) {
     return results;
   } catch (error) {
     console.error('❌ [getClinicResults] 진료 결과 조회 실패:', error);
-    throw error;
+    // 에러 발생 시 빈 배열 반환
+    return [];
   }
 }
 
@@ -945,11 +962,16 @@ export async function migrateExistingClinicUser(userId, userData) {
       return { success: true, alreadyMigrated: true, clinics: existingClinics };
     }
 
+    // 🧪 테스트 계정인 경우 "행복 동물병원" 이름 사용
+    const isTestClinicUser = userData.email === 'clinic@happyvet.com' ||
+                             userData.displayName?.includes('수의') ||
+                             userData.displayName?.includes('행복');
+
     // clinicInfo가 users 컬렉션에 있는지 확인
     const clinicInfo = userData.clinicInfo || {
-      name: userData.displayName ? `${userData.displayName}의 병원` : '내 병원',
-      address: null,
-      phone: null,
+      name: isTestClinicUser ? '행복 동물병원' : (userData.displayName ? `${userData.displayName}의 병원` : '내 병원'),
+      address: isTestClinicUser ? '서울특별시 강남구 테헤란로 123' : null,
+      phone: isTestClinicUser ? '02-1234-5678' : null,
       licenseNumber: null
     };
 

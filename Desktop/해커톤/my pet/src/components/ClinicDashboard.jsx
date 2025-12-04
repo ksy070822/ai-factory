@@ -274,7 +274,8 @@ export function ClinicDashboard({ currentUser, onBack, onModeSwitch }) {
         const userData = userDoc.data || {};
         const migrationResult = await migrateExistingClinicUser(currentUser.uid, {
           ...userData,
-          displayName: currentUser.displayName || userData.displayName
+          displayName: currentUser.displayName || userData.displayName,
+          email: currentUser.email || userData.email  // 🔧 테스트 계정 식별을 위해 이메일 전달
         });
         if (migrationResult.success) {
           userClinics = await getUserClinics(currentUser.uid);
@@ -336,25 +337,59 @@ export function ClinicDashboard({ currentUser, onBack, onModeSwitch }) {
     }
   };
 
+  // 날짜를 문자열로 변환하는 헬퍼 함수
+  const formatDateToString = (date) => {
+    if (!date) return '';
+    if (typeof date === 'string') return date;
+    if (date instanceof Date) return date.toISOString().split('T')[0];
+    if (date?.toDate && typeof date.toDate === 'function') {
+      // Firestore Timestamp
+      return date.toDate().toISOString().split('T')[0];
+    }
+    if (date?.seconds) {
+      // Firestore Timestamp (seconds 필드가 있는 경우)
+      return new Date(date.seconds * 1000).toISOString().split('T')[0];
+    }
+    return '';
+  };
+
   // 환자 목록 로드 (clinicPatients 컬렉션에서 직접 조회 + 예약 기록에서 고유 환자 추출)
   const loadPatientList = async () => {
     try {
       // 1) clinicPatients 컬렉션에서 직접 환자 목록 조회
       const clinicPatients = await getClinicPatients(currentClinic.id, { limit: 100 });
       
+      console.log('📋 [loadPatientList] clinicPatients 조회 결과:', clinicPatients.length, '명');
+      
       // clinicPatients를 patientList 형식으로 변환
-      const patientsFromCollection = clinicPatients.map(patient => ({
-        id: patient.petId || patient.id,
-        name: patient.petName || '이름 없음',
-        species: patient.species || 'dog',
-        breed: patient.breed || '',
-        profileImage: null,
-        guardianName: patient.ownerName || '',
-        guardianId: patient.ownerUserId,
-        lastVisit: patient.lastVisitDate || patient.updatedAt?.toDate?.()?.toISOString()?.split('T')[0] || '',
-        visitCount: patient.visitCount || 0,
-        bookings: []
-      }));
+      const patientsFromCollection = clinicPatients.map(patient => {
+        const lastVisitDate = formatDateToString(patient.lastVisitDate || patient.updatedAt);
+        // petId가 숫자일 수 있으므로 문자열로 변환
+        // 문서 ID 형식이 "clinicId_petId"인 경우 petId 추출
+        let petId = patient.petId;
+        if (!petId && patient.id) {
+          // 문서 ID에서 petId 추출 (마지막 _ 이후 부분)
+          const parts = String(patient.id).split('_');
+          petId = parts.length > 1 ? parts[parts.length - 1] : patient.id;
+        }
+        // 숫자면 문자열로 변환
+        petId = petId ? String(petId) : patient.id;
+        
+        return {
+          id: petId,
+          name: patient.petName || '이름 없음',
+          species: patient.species || 'dog',
+          breed: patient.breed || '',
+          profileImage: null,
+          guardianName: patient.ownerName || '',
+          guardianId: patient.ownerUserId,
+          lastVisit: lastVisitDate,
+          visitCount: patient.visitCount || 0,
+          bookings: []
+        };
+      });
+      
+      console.log('📋 [loadPatientList] 변환된 환자:', patientsFromCollection.length, '명');
 
       // 2) 예약 기록에서도 고유 환자 추출 (기존 로직 유지)
       const allBookings = await bookingService.getBookingsByClinic(currentClinic.id);
@@ -373,6 +408,7 @@ export function ClinicDashboard({ currentUser, onBack, onModeSwitch }) {
       allBookings.forEach(booking => {
         if (booking.pet?.id || booking.petId) {
           const petId = booking.pet?.id || booking.petId;
+          const bookingDate = formatDateToString(booking.date);
           if (!petsMap.has(petId)) {
             petsMap.set(petId, {
               id: petId,
@@ -382,7 +418,7 @@ export function ClinicDashboard({ currentUser, onBack, onModeSwitch }) {
               profileImage: booking.pet?.profileImage,
               guardianName: booking.guardianName || booking.guardian?.displayName || '',
               guardianId: booking.userId || booking.guardianId,
-              lastVisit: booking.date,
+              lastVisit: bookingDate,
               visitCount: 0,
               bookings: []
             });
@@ -390,8 +426,8 @@ export function ClinicDashboard({ currentUser, onBack, onModeSwitch }) {
           const pet = petsMap.get(petId);
           pet.visitCount++;
           pet.bookings.push(booking);
-          if (booking.date && (!pet.lastVisit || booking.date > pet.lastVisit)) {
-            pet.lastVisit = booking.date;
+          if (bookingDate && (!pet.lastVisit || bookingDate > pet.lastVisit)) {
+            pet.lastVisit = bookingDate;
           }
         }
       });
@@ -404,16 +440,21 @@ export function ClinicDashboard({ currentUser, onBack, onModeSwitch }) {
           if (!pet.results) pet.results = [];
           pet.results.push(result);
           // visitCount 업데이트
-          if (result.visitDate && (!pet.lastVisit || result.visitDate > pet.lastVisit)) {
-            pet.lastVisit = result.visitDate;
+          const resultVisitDate = formatDateToString(result.visitDate);
+          if (resultVisitDate && (!pet.lastVisit || resultVisitDate > pet.lastVisit)) {
+            pet.lastVisit = resultVisitDate;
           }
         }
       });
 
-      // 최근 방문순으로 정렬
-      const sortedPatients = Array.from(petsMap.values()).sort((a, b) =>
-        (b.lastVisit || '').localeCompare(a.lastVisit || '')
-      );
+      // 최근 방문순으로 정렬 (lastVisit를 문자열로 보장)
+      const sortedPatients = Array.from(petsMap.values()).sort((a, b) => {
+        const dateA = formatDateToString(a.lastVisit) || '';
+        const dateB = formatDateToString(b.lastVisit) || '';
+        return dateB.localeCompare(dateA);
+      });
+      
+      console.log('📋 [loadPatientList] 최종 환자 목록:', sortedPatients.length, '명');
 
       setPatientList(sortedPatients);
     } catch (error) {
@@ -529,9 +570,16 @@ export function ClinicDashboard({ currentUser, onBack, onModeSwitch }) {
       return;
     }
 
+    // 오늘 예약 목록 업데이트
     setTodayBookings(prev =>
       prev.map(b => b.id === targetId ? { ...b, status: 'confirmed' } : b)
     );
+
+    // 월별 예약 목록도 업데이트 (달력 반영)
+    setMonthlyBookings(prev =>
+      prev.map(b => b.id === targetId ? { ...b, status: 'confirmed' } : b)
+    );
+
     alert('예약이 확정되었습니다.');
   };
 
@@ -640,14 +688,34 @@ export function ClinicDashboard({ currentUser, onBack, onModeSwitch }) {
     const daysInMonth = new Date(year, month + 1, 0).getDate();
 
     const bookingsByDate = {};
+
     // 확정된 예약만 달력에 표시 (확인대기 제외)
-    monthlyBookings.filter(b => b.status !== 'pending').forEach(booking => {
-      const bookingDate = new Date(booking.date);
+    const allBookings = [...todayBookings, ...monthlyBookings].filter(b => b.status !== 'pending');
+
+    allBookings.forEach(booking => {
+      // booking.date가 문자열 형식(YYYY-MM-DD)일 수도 있고 Date 객체일 수도 있음
+      let bookingDate;
+      if (typeof booking.date === 'string') {
+        // 문자열 형식인 경우
+        const [y, m, d] = booking.date.split('-').map(Number);
+        bookingDate = new Date(y, m - 1, d);
+      } else if (booking.date instanceof Date) {
+        bookingDate = booking.date;
+      } else if (booking.date?.toDate) {
+        // Firestore Timestamp인 경우
+        bookingDate = booking.date.toDate();
+      } else {
+        return; // 날짜를 파싱할 수 없으면 스킵
+      }
+
       if (bookingDate.getMonth() === month && bookingDate.getFullYear() === year) {
         const day = bookingDate.getDate();
         bookingsByDate[day] = (bookingsByDate[day] || 0) + 1;
       }
     });
+    
+    console.log('📅 [renderCalendar] todayBookings:', todayBookings.length, 'monthlyBookings:', monthlyBookings.length);
+    console.log('📅 [renderCalendar] 예약 건수:', bookingsByDate);
 
     const today = new Date();
     const isCurrentMonth = today.getMonth() === month && today.getFullYear() === year;
@@ -705,13 +773,35 @@ export function ClinicDashboard({ currentUser, onBack, onModeSwitch }) {
     if (!selectedDate) return [];
     const year = currentMonth.getFullYear();
     const month = currentMonth.getMonth();
-    return monthlyBookings.filter(booking => {
-      const bookingDate = new Date(booking.date);
-      return booking.status !== 'pending' &&
-             bookingDate.getDate() === selectedDate &&
-             bookingDate.getMonth() === month &&
-             bookingDate.getFullYear() === year;
-    }).sort((a, b) => a.time.localeCompare(b.time));
+    const selectedDateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(selectedDate).padStart(2, '0')}`;
+
+    // 확정된 예약만 (확인대기 제외)
+    const allBookings = [...todayBookings, ...monthlyBookings].filter(b => b.status !== 'pending');
+
+    return allBookings.filter(booking => {
+      // booking.date가 문자열 형식(YYYY-MM-DD)일 수도 있고 Date 객체일 수도 있음
+      let bookingDate;
+      if (typeof booking.date === 'string') {
+        // 문자열 형식인 경우 직접 비교
+        if (booking.date === selectedDateStr) {
+          return true;
+        }
+        // 또는 Date 객체로 변환하여 비교
+        const [y, m, d] = booking.date.split('-').map(Number);
+        bookingDate = new Date(y, m - 1, d);
+      } else if (booking.date instanceof Date) {
+        bookingDate = booking.date;
+      } else if (booking.date?.toDate) {
+        // Firestore Timestamp인 경우
+        bookingDate = booking.date.toDate();
+      } else {
+        return false;
+      }
+
+      return bookingDate.getMonth() === month &&
+        bookingDate.getFullYear() === year &&
+        bookingDate.getDate() === selectedDate;
+    }).sort((a, b) => (a.time || '').localeCompare(b.time || ''));
   };
 
   // 이번달 통계 계산 (가상 데이터 포함)
@@ -831,6 +921,7 @@ export function ClinicDashboard({ currentUser, onBack, onModeSwitch }) {
   // 환자정보 탭 선택 시 환자 목록 로드
   useEffect(() => {
     if (currentClinic?.id && activeTab === 'patients') {
+      console.log('📋 [useEffect] 환자정보 탭 선택, currentClinic.id:', currentClinic.id);
       loadPatientList();
     }
   }, [currentClinic?.id, activeTab]);
@@ -861,24 +952,29 @@ export function ClinicDashboard({ currentUser, onBack, onModeSwitch }) {
         .animate-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
       `}</style>
 
-      {/* Header - 로고 중앙 정렬 (로그인 화면과 유사한 형태) */}
+      {/* Header - 로고 좌측, 텍스트 중앙 (파스텔 레드 테마) */}
       <header className="bg-gradient-to-r from-red-300 to-rose-300 px-4 pt-8 pb-8 shadow-lg">
-        <div className="flex items-center justify-between max-w-lg mx-auto">
-          <button onClick={onBack} className="p-2 hover:bg-white/20 rounded-full transition-colors text-gray-800">
-            <span className="material-symbols-outlined">arrow_back</span>
-          </button>
-          <div className="flex flex-col items-center justify-center flex-1">
-            <div className="flex items-center gap-3">
+        <div className="flex items-center max-w-lg mx-auto">
+          {/* 좌측: 뒤로가기 + 로고 */}
+          <div className="flex items-center gap-2">
+            <button onClick={onBack} className="p-2 hover:bg-white/20 rounded-full transition-colors text-gray-800">
+              <span className="material-symbols-outlined">arrow_back</span>
+            </button>
+            <div className="w-14 h-14 bg-white rounded-xl flex items-center justify-center shadow-md">
               <img
                 src={`${import.meta.env.BASE_URL}icon/login/logo_red.png`}
                 alt="PetMedical.AI"
-                className="w-12 h-12 object-contain"
+                className="w-10 h-10 object-contain"
               />
-              <h1 className="text-2xl font-bold tracking-tight text-gray-900">PetMedical.AI</h1>
             </div>
-            <p className="text-rose-700 text-xs font-medium mt-1">AI기반 반려동물 건강관리 플랫폼</p>
           </div>
-          <button onClick={handleLogout} className="p-2 hover:bg-white/20 rounded-full transition-colors text-gray-800" title="로그아웃">
+          {/* 중앙: 텍스트 영역 */}
+          <div className="flex-1 text-center">
+            <h1 className="text-2xl font-bold tracking-tight text-gray-900">PetMedical.AI</h1>
+            <p className="text-white text-sm font-medium">AI기반 반려동물 건강관리 플랫폼</p>
+          </div>
+          {/* 우측: 로그아웃 */}
+          <button onClick={handleLogout} className="p-2 hover:bg-white/20 rounded-full transition-colors text-white" title="로그아웃">
             <span className="material-symbols-outlined">logout</span>
           </button>
         </div>
@@ -2015,7 +2111,9 @@ export function ClinicDashboard({ currentUser, onBack, onModeSwitch }) {
               <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4">
                 <div className="text-sm text-emerald-600 mb-1">주요 진단</div>
                 <div className="text-lg font-bold text-emerald-900">
-                  {aiDiagnosisModal.diagnosis?.diagnosis || aiDiagnosisModal.diagnosis?.mainDiagnosis || '진단명 없음'}
+                  {typeof aiDiagnosisModal.diagnosis?.diagnosis === 'string'
+                    ? aiDiagnosisModal.diagnosis.diagnosis
+                    : (aiDiagnosisModal.diagnosis?.diagnosis?.name || aiDiagnosisModal.diagnosis?.mainDiagnosis || '진단명 없음')}
                 </div>
               </div>
 
@@ -2117,7 +2215,7 @@ export function ClinicDashboard({ currentUser, onBack, onModeSwitch }) {
                             <div className="text-xs text-emerald-600 mb-1">
                               {d.createdAt?.toDate ? new Date(d.createdAt.toDate()).toLocaleDateString('ko-KR') : d.createdAt}
                           </div>
-                            <div className="font-semibold text-emerald-900">{d.diagnosis}</div>
+                            <div className="font-semibold text-emerald-900">{typeof d.diagnosis === 'string' ? d.diagnosis : (d.diagnosis?.name || '진단 정보')}</div>
                             {d.symptom && <div className="text-sm text-emerald-700 mt-1">{d.symptom}</div>}
                           </div>
                         ))}

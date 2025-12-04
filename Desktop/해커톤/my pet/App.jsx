@@ -256,29 +256,23 @@ const SPECIES_OPTIONS = [
   { id: 'other', label: '기타', emoji: '🐾', icon: PROFILE_IMAGES.etc },
 ];
 
+// Base URL for GitHub Pages deployment
+const BASE_URL = import.meta.env.BASE_URL || '/ai-factory/';
+
 // 동물 종류별 메인 캐릭터 이미지 (프로필 배너용)
 const MAIN_CHARACTER_IMAGES = {
-  dog: '/icon/main-image/dog_main-removebg-preview.png',
-  cat: '/icon/main-image/Cat_main-removebg-preview.png',
-  rabbit: '/icon/main-image/rabbit_main-removebg-preview.png',
-  hamster: '/icon/main-image/hamster_main-removebg-preview.png',
-  bird: '/icon/main-image/bird_main-removebg-preview.png',
-  hedgehog: '/icon/main-image/hedgehog_main-removebg-preview.png',
-  reptile: '/icon/main-image/reptile_main-removebg-preview.png',
-  other: '/icon/main-image/etc_main-removebg-preview.png'
+  dog: `${BASE_URL}icon/main-image/dog_main-removebg-preview.png`,
+  cat: `${BASE_URL}icon/main-image/Cat_main-removebg-preview.png`,
+  rabbit: `${BASE_URL}icon/main-image/rabbit_main-removebg-preview.png`,
+  hamster: `${BASE_URL}icon/main-image/hamster_main-removebg-preview.png`,
+  bird: `${BASE_URL}icon/main-image/bird_main-removebg-preview.png`,
+  hedgehog: `${BASE_URL}icon/main-image/hedgehog_main-removebg-preview.png`,
+  reptile: `${BASE_URL}icon/main-image/reptile_main-removebg-preview.png`,
+  other: `${BASE_URL}icon/main-image/etc_main-removebg-preview.png`
 };
 
-// 동물 종류별 프로필 아이콘 이미지 (원형 배경 포함)
-const PROFILE_ICON_IMAGES = {
-  dog: '/icon/dog.png',
-  cat: '/icon/cat.png',
-  rabbit: '/icon/rabbit.png',
-  hamster: '/icon/hamster.png',
-  bird: '/icon/bird.png',
-  hedgehog: '/icon/hedgehog.png',
-  reptile: '/icon/reptile.png',
-  other: '/icon/etc.png'
-};
+// 동물 종류별 프로필 아이콘 이미지 - imagePaths.js의 PROFILE_IMAGES 사용
+const PROFILE_ICON_IMAGES = PROFILE_IMAGES;
 
 // 개/고양이 대표 품종 목록
 const DOG_BREEDS = [
@@ -654,9 +648,19 @@ function ProfileRegistration({ onComplete, userId }) {
                   )}
                 </div>
 
-                {/* 사진 업로드 버튼 */}
-                <div className="profile-options">
-                  <label className="upload-btn" style={{ opacity: loading ? 0.6 : 1 }}>
+                {/* 사진 업로드 및 캐릭터 변환 버튼 */}
+                <div className="profile-options" style={{ display: 'flex', gap: '8px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                  <label className="upload-btn" style={{
+                    opacity: loading ? 0.6 : 1,
+                    flex: previewImage ? '1' : 'none',
+                    minWidth: previewImage ? '120px' : 'auto',
+                    maxWidth: '180px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    height: '40px',
+                    margin: 0
+                  }}>
                     {loading ? '⏳ 업로드 중...' : '📷 사진 업로드'}
                     <input
                       type="file"
@@ -666,7 +670,7 @@ function ProfileRegistration({ onComplete, userId }) {
                       disabled={loading}
                     />
                   </label>
-                  
+
                   {/* 캐릭터 변환 버튼 - base64 이미지가 있으면 표시 (originalImageUrl 없어도 가능) */}
                   {previewImage && (
                     <button
@@ -675,16 +679,24 @@ function ProfileRegistration({ onComplete, userId }) {
                       disabled={converting}
                       className="upload-btn"
                       style={{
-                        marginTop: '8px',
-                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                        color: 'white',
+                        flex: '1',
+                        minWidth: '160px',
+                        maxWidth: '200px',
+                        height: '40px',
+                        background: '#7dd3fc',
+                        color: '#0c4a6e',
                         border: 'none',
                         opacity: converting ? 0.6 : 1,
+                        margin: 0,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontWeight: '600'
                       }}
                     >
-                      {converting 
-                        ? '🎨 캐릭터 생성 중...' 
-                        : `✨ ${formData.petName || '반려동물'} 캐릭터로 변환하기`
+                      {converting
+                        ? '🎨 생성 중...'
+                        : `✨ 캐릭터로 변환하기`
                       }
                     </button>
                   )}
@@ -1240,7 +1252,7 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet, onLogout }) {
               <header className="bg-gradient-to-r from-sky-500 to-blue-600 text-white px-4 py-4 shadow-lg">
                 <div className="flex items-center justify-center gap-2 relative">
                   <div className="w-9 h-9 bg-white rounded-lg flex items-center justify-center shadow-md flex-shrink-0 overflow-hidden">
-                    <img src={PROFILE_ICON_IMAGES[petData?.species] || PROFILE_ICON_IMAGES.other} alt="Pet" className="w-full h-full object-cover" />
+                    <img src={`${import.meta.env.BASE_URL}icon/login/logo_red.png`} alt="PetMedical.AI" className="w-7 h-7 object-contain" />
                   </div>
                   <div className="text-center">
                     <h1 className="text-xl font-bold tracking-tight">PetMedical.AI</h1>
@@ -1384,34 +1396,51 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet, onLogout }) {
                       </div>
 
                       <div className="bg-white rounded-2xl p-4 shadow-lg border border-gray-200">
-                        <button
-                          onClick={() => {
-                            setCurrentTab('mypage');
-                            // MyPage의 bookings 탭으로 이동하기 위해 localStorage에 저장
-                            localStorage.setItem('mypage_initialTab', 'bookings');
-                            // 컴포넌트가 마운트된 후 탭 변경을 위해 약간의 지연
-                            setTimeout(() => {
-                              const event = new CustomEvent('mypage-set-tab', { detail: 'bookings' });
-                              window.dispatchEvent(event);
-                            }, 100);
-                          }}
-                          className="w-full flex items-center gap-3 py-3 border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer"
-                        >
+                        {/* 병원 예약일 - 페이지 랜딩 기능 제거 */}
+                        <div className="w-full flex items-center gap-3 py-3 border-b border-gray-100">
                           <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center flex-shrink-0">
                             <span className="text-2xl">📅</span>
                           </div>
                           <div className="flex-1 text-left">
                             <h4 className="text-sm font-bold text-gray-800 mb-0.5">병원 예약일</h4>
-                            <p className="text-xs text-gray-500">
-                              {latestBooking ? (
-                                <>다음 진료: {new Date(latestBooking.bookingDate).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })} {latestBooking.bookingTime || ''}</>
-                              ) : (
-                                '예약된 진료가 없습니다'
-                              )}
-                            </p>
+                            {latestBooking ? (
+                              <div className="text-xs text-gray-500 space-y-0.5">
+                                <p className="font-medium text-gray-700">
+                                  {typeof latestBooking.clinicName === 'string' ? latestBooking.clinicName :
+                                    (typeof latestBooking.hospitalName === 'string' ? latestBooking.hospitalName : '병원')}
+                                </p>
+                                <p>
+                                  {(() => {
+                                    try {
+                                      const dateValue = latestBooking.bookingDate || latestBooking.date;
+                                      if (!dateValue) return '';
+                                      return new Date(dateValue).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
+                                    } catch { return ''; }
+                                  })()}{' '}
+                                  {typeof latestBooking.bookingTime === 'string' ? latestBooking.bookingTime :
+                                    (typeof latestBooking.time === 'string' ? latestBooking.time : '')}
+                                </p>
+                                {(() => {
+                                  let symptomText = '';
+                                  if (typeof latestBooking.symptomText === 'string' && latestBooking.symptomText) {
+                                    symptomText = latestBooking.symptomText;
+                                  } else if (typeof latestBooking.aiDiagnosis === 'string' && latestBooking.aiDiagnosis) {
+                                    symptomText = latestBooking.aiDiagnosis;
+                                  } else if (latestBooking.diagnosis) {
+                                    if (typeof latestBooking.diagnosis === 'string') {
+                                      symptomText = latestBooking.diagnosis;
+                                    } else if (typeof latestBooking.diagnosis?.name === 'string') {
+                                      symptomText = latestBooking.diagnosis.name;
+                                    }
+                                  }
+                                  return symptomText ? <p className="text-blue-600">{symptomText}</p> : null;
+                                })()}
+                              </div>
+                            ) : (
+                              <p className="text-xs text-gray-500">예약된 진료가 없습니다</p>
+                            )}
                           </div>
-                          <span className="text-gray-400 text-lg">&gt;</span>
-                        </button>
+                        </div>
 
                         <div className="flex items-center gap-3 py-3 bg-yellow-50 rounded-xl px-3">
                           <div className="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center flex-shrink-0">
@@ -1539,30 +1568,49 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet, onLogout }) {
                         </button>
                       </div>
                       <div className="space-y-3">
-                        <button
-                          onClick={() => {
-                            setCurrentTab('mypage');
-                            localStorage.setItem('mypage_initialTab', 'bookings');
-                            setTimeout(() => {
-                              const event = new CustomEvent('mypage-set-tab', { detail: 'bookings' });
-                              window.dispatchEvent(event);
-                            }, 100);
-                          }}
-                          className="w-full flex items-center gap-3 p-3 bg-blue-50 rounded-xl hover:bg-blue-100 transition-colors cursor-pointer text-left"
-                        >
+                        {/* 병원 예약일 - 페이지 랜딩 기능 제거 */}
+                        <div className="w-full flex items-center gap-3 p-3 bg-blue-50 rounded-xl text-left">
                           <span className="text-2xl">📅</span>
                           <div className="flex-1">
                             <p className="font-medium text-gray-900">병원 예약일</p>
-                            <p className="text-sm text-gray-500">
-                              {latestBooking ? (
-                                <>다음 진료: {new Date(latestBooking.bookingDate).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })} {latestBooking.bookingTime || ''}</>
-                              ) : (
-                                '예약된 진료가 없습니다'
-                              )}
-                            </p>
+                            {latestBooking ? (
+                              <div className="text-sm text-gray-500 space-y-0.5">
+                                <p className="font-medium text-gray-700">
+                                  {typeof latestBooking.clinicName === 'string' ? latestBooking.clinicName :
+                                    (typeof latestBooking.hospitalName === 'string' ? latestBooking.hospitalName : '병원')}
+                                </p>
+                                <p>
+                                  {(() => {
+                                    try {
+                                      const dateValue = latestBooking.bookingDate || latestBooking.date;
+                                      if (!dateValue) return '';
+                                      return new Date(dateValue).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
+                                    } catch { return ''; }
+                                  })()}{' '}
+                                  {typeof latestBooking.bookingTime === 'string' ? latestBooking.bookingTime :
+                                    (typeof latestBooking.time === 'string' ? latestBooking.time : '')}
+                                </p>
+                                {(() => {
+                                  let symptomText = '';
+                                  if (typeof latestBooking.symptomText === 'string' && latestBooking.symptomText) {
+                                    symptomText = latestBooking.symptomText;
+                                  } else if (typeof latestBooking.aiDiagnosis === 'string' && latestBooking.aiDiagnosis) {
+                                    symptomText = latestBooking.aiDiagnosis;
+                                  } else if (latestBooking.diagnosis) {
+                                    if (typeof latestBooking.diagnosis === 'string') {
+                                      symptomText = latestBooking.diagnosis;
+                                    } else if (typeof latestBooking.diagnosis?.name === 'string') {
+                                      symptomText = latestBooking.diagnosis.name;
+                                    }
+                                  }
+                                  return symptomText ? <p className="text-blue-600">{symptomText}</p> : null;
+                                })()}
+                              </div>
+                            ) : (
+                              <p className="text-sm text-gray-500">예약된 진료가 없습니다</p>
+                            )}
                           </div>
-                          <span className="text-gray-400 text-lg">&gt;</span>
-                        </button>
+                        </div>
                         <div className="flex items-center gap-3 p-3 bg-yellow-50 rounded-xl">
                           <div className="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center flex-shrink-0">
                             <span className="text-xl">💡</span>
@@ -1664,7 +1712,7 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet, onLogout }) {
       <header className="bg-gradient-to-r from-sky-500 to-blue-600 text-white px-4 py-4 shadow-lg">
         <div className="flex items-center justify-center gap-2">
           <div className="w-9 h-9 bg-white rounded-lg flex items-center justify-center shadow-md flex-shrink-0 overflow-hidden">
-            <img src={PROFILE_ICON_IMAGES[petData?.species] || PROFILE_ICON_IMAGES.other} alt="Pet" className="w-full h-full object-cover" />
+            <img src={`${import.meta.env.BASE_URL}icon/login/logo_red.png`} alt="PetMedical.AI" className="w-7 h-7 object-contain" />
           </div>
           <div className="text-center">
             <h1 className="text-xl font-bold tracking-tight">PetMedical.AI</h1>
@@ -1811,33 +1859,52 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet, onLogout }) {
               </div>
 
               <div className="bg-white rounded-2xl p-4 shadow-lg border border-gray-200">
-                {/* 병원 예약일 */}
-                <button
-                  onClick={() => {
-                    onNavigate('mypage');
-                    localStorage.setItem('mypage_initialTab', 'bookings');
-                    setTimeout(() => {
-                      const event = new CustomEvent('mypage-set-tab', { detail: 'bookings' });
-                      window.dispatchEvent(event);
-                    }, 100);
-                  }}
-                  className="w-full flex items-center gap-3 py-3 border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer"
-                >
+                {/* 병원 예약일 - 페이지 랜딩 기능 제거 */}
+                <div className="w-full flex items-center gap-3 py-3 border-b border-gray-100">
                   <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center flex-shrink-0">
                     <span className="text-2xl">📅</span>
                   </div>
                   <div className="flex-1 text-left">
                     <h4 className="text-sm font-bold text-gray-800 mb-0.5">병원 예약일</h4>
-                    <p className="text-xs text-gray-500">
-                      {latestBooking ? (
-                        <>다음 진료: {new Date(latestBooking.bookingDate).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })} {latestBooking.bookingTime || ''}</>
-                      ) : (
-                        '예약된 진료가 없습니다'
-                      )}
-                    </p>
+                    {latestBooking ? (
+                      <div className="text-xs text-gray-500 space-y-0.5">
+                        <p className="font-medium text-gray-700">
+                          {typeof latestBooking.clinicName === 'string' ? latestBooking.clinicName :
+                            (typeof latestBooking.hospitalName === 'string' ? latestBooking.hospitalName : '병원')}
+                        </p>
+                        <p>
+                          {(() => {
+                            try {
+                              const dateValue = latestBooking.bookingDate || latestBooking.date;
+                              if (!dateValue) return '';
+                              return new Date(dateValue).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
+                            } catch { return ''; }
+                          })()}{' '}
+                          {typeof latestBooking.bookingTime === 'string' ? latestBooking.bookingTime :
+                            (typeof latestBooking.time === 'string' ? latestBooking.time : '')}
+                        </p>
+                        {(() => {
+                          // 증상 텍스트 안전 추출
+                          let symptomText = '';
+                          if (typeof latestBooking.symptomText === 'string' && latestBooking.symptomText) {
+                            symptomText = latestBooking.symptomText;
+                          } else if (typeof latestBooking.aiDiagnosis === 'string' && latestBooking.aiDiagnosis) {
+                            symptomText = latestBooking.aiDiagnosis;
+                          } else if (latestBooking.diagnosis) {
+                            if (typeof latestBooking.diagnosis === 'string') {
+                              symptomText = latestBooking.diagnosis;
+                            } else if (typeof latestBooking.diagnosis?.name === 'string') {
+                              symptomText = latestBooking.diagnosis.name;
+                            }
+                          }
+                          return symptomText ? <p className="text-blue-600">{symptomText}</p> : null;
+                        })()}
+                      </div>
+                    ) : (
+                      <p className="text-xs text-gray-500">예약된 진료가 없습니다</p>
+                    )}
                   </div>
-                  <span className="text-gray-400 text-lg">&gt;</span>
-                </button>
+                </div>
 
                 {/* 오늘의 케어 팁 */}
                 <div className="flex items-center gap-3 py-3 bg-yellow-50 rounded-xl px-3">
@@ -2783,7 +2850,7 @@ function MultiAgentDiagnosis({ petData, symptomData, onComplete, onBack, onDiagn
             role: '전문 수의사',
             icon: '👨‍⚕️',
             type: 'medical',
-            content: `종합 진단 수행 중...\n\n🔬 증상 분석 결과:\n${analysis.description}\n\n📊 진단 결과:\n• ${analysis.diagnosis}\n\n⚠️ 위험도: ${analysis.emergency === 'low' ? '낮음' : analysis.emergency === 'medium' ? '보통' : '높음'}\n🚨 응급도: ${analysis.emergency === 'low' ? '🟢 경미' : analysis.emergency === 'medium' ? '🟡 보통' : '🔴 응급'}\n\n→ Data Agent, 진단서 작성 부탁합니다.`
+            content: `종합 진단 수행 중...\n\n🔬 증상 분석 결과:\n${analysis.description}\n\n📊 진단 결과:\n• ${typeof analysis.diagnosis === 'string' ? analysis.diagnosis : (analysis.diagnosis?.name || '진단 분석 중')}\n\n⚠️ 위험도: ${analysis.emergency === 'low' ? '낮음' : analysis.emergency === 'medium' ? '보통' : '높음'}\n🚨 응급도: ${analysis.emergency === 'low' ? '🟢 경미' : analysis.emergency === 'medium' ? '🟡 보통' : '🔴 응급'}\n\n→ Data Agent, 진단서 작성 부탁합니다.`
           },
           {
             agent: 'Data Agent',
@@ -3073,7 +3140,7 @@ function MultiAgentDiagnosis({ petData, symptomData, onComplete, onBack, onDiagn
       const questionLower = userQuestion.toLowerCase();
       
       if (questionLower.includes('음식') || questionLower.includes('먹이') || questionLower.includes('식욕') || questionLower.includes('밥')) {
-        answer = `식욕이 좋지 않을 때는 다음과 같은 방법을 시도해보세요:\n\n1. **부드러운 음식 제공**: 삶은 닭가슴살(기름 제거), 계란(삶은 것), 흰 쌀밥을 소량씩 제공\n2. **수분 공급**: 깨끗한 물을 자주 제공하고, 필요시 수액 보충 고려\n3. **소량씩 자주**: 한 번에 많이 주지 말고 소량씩 여러 번 나누어 제공\n4. **온도 조절**: 미지근한 온도로 제공하면 식욕이 좋아질 수 있음\n5. **환경 조성**: 조용하고 편안한 환경에서 식사하도록 도와주기\n\n⚠️ **주의사항**:\n- 구토나 설사가 동반되면 음식을 제한하고 수의사와 상의하세요.\n- 24시간 이상 음식을 거부하면 탈수 위험이 있으므로 병원 방문을 권장합니다.\n- 현재 진단 결과(${diagnosisResult.diagnosis || '일반 건강 이상'})를 고려하여 추가 조치가 필요할 수 있습니다.`;
+        answer = `식욕이 좋지 않을 때는 다음과 같은 방법을 시도해보세요:\n\n1. **부드러운 음식 제공**: 삶은 닭가슴살(기름 제거), 계란(삶은 것), 흰 쌀밥을 소량씩 제공\n2. **수분 공급**: 깨끗한 물을 자주 제공하고, 필요시 수액 보충 고려\n3. **소량씩 자주**: 한 번에 많이 주지 말고 소량씩 여러 번 나누어 제공\n4. **온도 조절**: 미지근한 온도로 제공하면 식욕이 좋아질 수 있음\n5. **환경 조성**: 조용하고 편안한 환경에서 식사하도록 도와주기\n\n⚠️ **주의사항**:\n- 구토나 설사가 동반되면 음식을 제한하고 수의사와 상의하세요.\n- 24시간 이상 음식을 거부하면 탈수 위험이 있으므로 병원 방문을 권장합니다.\n- 현재 진단 결과(${typeof diagnosisResult.diagnosis === 'string' ? diagnosisResult.diagnosis : (diagnosisResult.diagnosis?.name || '일반 건강 이상')})를 고려하여 추가 조치가 필요할 수 있습니다.`;
       } else if (questionLower.includes('병원') || questionLower.includes('방문') || questionLower.includes('응급')) {
         const urgency = diagnosisResult.triage_level || 'yellow';
         const urgencyText = urgency === 'red' ? '즉시' : urgency === 'orange' ? '오늘 안에' : urgency === 'yellow' ? '24~48시간 내' : '증상 악화 시';
@@ -3083,7 +3150,7 @@ function MultiAgentDiagnosis({ petData, symptomData, onComplete, onBack, onDiagn
         answer = `현재 진단 결과를 바탕으로 한 케어 가이드입니다:\n\n**즉시 조치사항**:\n${actions.length > 0 ? actions.map((a, i) => `${i + 1}. ${a}`).join('\n') : '- 증상을 지속적으로 관찰하세요.\n- 충분한 휴식과 수분 공급을 유지하세요.'}\n\n**일반적인 케어 원칙**:\n1. 조용하고 편안한 환경 유지\n2. 충분한 휴식 제공\n3. 수분 섭취 촉진\n4. 증상 변화 관찰 및 기록\n5. 필요시 병원 방문\n\n**주의사항**:\n- 증상이 악화되거나 새로운 증상이 나타나면 즉시 병원을 방문하세요.\n- 자가 처방은 피하고, 수의사의 지시를 따르세요.`;
       } else {
         // 일반적인 질문에 대한 답변
-        answer = `질문해주셔서 감사합니다.\n\n현재 ${petData.petName}의 진단 결과는 "${diagnosisResult.diagnosis || '일반 건강 이상'}"입니다.\n\n**답변**:\n${userQuestion}에 대해 답변드리기 위해, 현재 진단 결과와 연관하여 다음과 같이 안내드립니다:\n\n- 현재 위험도: ${diagnosisResult.riskLevel || '보통'}\n- 권장 조치: ${diagnosisResult.actions?.join(', ') || '증상 관찰 지속'}\n\n더 구체적인 답변을 원하시면 다음 정보를 알려주시면 도움이 됩니다:\n1. 질문과 관련된 구체적인 상황\n2. 현재 관찰 중인 증상이나 변화\n3. 특별히 궁금한 부분\n\n또한 병원 방문 시 수의사에게 직접 문의하시면 더 정확한 답변을 받으실 수 있습니다.`;
+        answer = `질문해주셔서 감사합니다.\n\n현재 ${petData.petName}의 진단 결과는 "${typeof diagnosisResult.diagnosis === 'string' ? diagnosisResult.diagnosis : (diagnosisResult.diagnosis?.name || '일반 건강 이상')}"입니다.\n\n**답변**:\n${userQuestion}에 대해 답변드리기 위해, 현재 진단 결과와 연관하여 다음과 같이 안내드립니다:\n\n- 현재 위험도: ${typeof diagnosisResult.riskLevel === 'string' ? diagnosisResult.riskLevel : '보통'}\n- 권장 조치: ${diagnosisResult.actions?.join(', ') || '증상 관찰 지속'}\n\n더 구체적인 답변을 원하시면 다음 정보를 알려주시면 도움이 됩니다:\n1. 질문과 관련된 구체적인 상황\n2. 현재 관찰 중인 증상이나 변화\n3. 특별히 궁금한 부분\n\n또한 병원 방문 시 수의사에게 직접 문의하시면 더 정확한 답변을 받으실 수 있습니다.`;
       }
       
       setMessages(prev => [...prev, {
@@ -3957,7 +4024,7 @@ function MultiAgentDiagnosis({ petData, symptomData, onComplete, onBack, onDiagn
                 margin: '0 0 8px 0',
                 lineHeight: '1.3'
               }}>
-                {diagnosisResult.diagnosis || '진단 결과'}
+                {typeof diagnosisResult.diagnosis === 'string' ? diagnosisResult.diagnosis : (diagnosisResult.diagnosis?.name || '진단 결과')}
               </h2>
               <p style={{
                 fontSize: '13px',
@@ -3969,7 +4036,7 @@ function MultiAgentDiagnosis({ petData, symptomData, onComplete, onBack, onDiagn
             </div>
 
             {/* 상세 설명 카드 */}
-            {diagnosisResult.description && (
+            {diagnosisResult.description && typeof diagnosisResult.description === 'string' && (
               <div style={{
                 background: 'white',
                 borderRadius: '16px',
@@ -4072,7 +4139,7 @@ function MultiAgentDiagnosis({ petData, symptomData, onComplete, onBack, onDiagn
                         margin: 0,
                         flex: 1
                       }}>
-                        {action}
+                        {typeof action === 'string' ? action : (action?.title || action?.description || action?.name || '')}
                       </p>
                     </div>
                   ))}
@@ -4353,7 +4420,7 @@ function DiagnosisResultView({ petData, diagnosisResult, symptomData, onGoToTrea
             margin: '0 0 8px 0',
             lineHeight: '1.3'
           }}>
-            {diagnosisResult?.diagnosis || '진단 결과'}
+            {typeof diagnosisResult?.diagnosis === 'string' ? diagnosisResult.diagnosis : (diagnosisResult?.diagnosis?.name || '진단 결과')}
           </h2>
           <p style={{
             fontSize: '13px',
@@ -4365,7 +4432,7 @@ function DiagnosisResultView({ petData, diagnosisResult, symptomData, onGoToTrea
         </div>
 
         {/* 상세 설명 카드 */}
-        {diagnosisResult?.description && (
+        {diagnosisResult?.description && typeof diagnosisResult.description === 'string' && (
           <div style={{
             background: 'white',
             borderRadius: '16px',
@@ -4467,7 +4534,7 @@ function DiagnosisResultView({ petData, diagnosisResult, symptomData, onGoToTrea
                     margin: 0,
                     flex: 1
                   }}>
-                    {action}
+                    {typeof action === 'string' ? action : (action?.title || action?.description || action?.name || '')}
                   </p>
                 </div>
               ))}
@@ -4831,7 +4898,7 @@ function HomeTreatmentGuide({ petData, diagnosisResult, onBack, onGoToHospital }
                 opacity: 0.9,
                 margin: 0
               }}>
-                {diagnosisResult.diagnosis}
+                {typeof diagnosisResult.diagnosis === 'string' ? diagnosisResult.diagnosis : (diagnosisResult.diagnosis?.name || '')}
               </p>
             )}
           </div>
@@ -5460,7 +5527,7 @@ function App() {
       if ('Notification' in window && Notification.permission === 'granted') {
         new Notification(payload.notification?.title || payload.data?.title || '알림', {
           body: payload.notification?.body || payload.data?.body || '',
-          icon: '/icon/dog.png',
+          icon: PROFILE_IMAGES.dog,
           tag: payload.data?.type || 'notification',
           data: payload.data || {}
         });
@@ -5847,7 +5914,6 @@ function App() {
     }
     // hospital 탭은 조건 없이 항상 표시 (내부에서 lastDiagnosis 체크)
   };
-  
   return (
     <div className="App app-root">
       {/* 플로팅 배경 효과 */}
@@ -6164,7 +6230,9 @@ function App() {
               </h3>
               <div className="flex items-center justify-between gap-3">
                 <p className="text-lg font-semibold text-slate-900 flex-1">
-                  {lastDiagnosis.diagnosis || lastDiagnosis.suspectedConditions?.[0]?.name || '일반 건강 이상'}
+                  {typeof lastDiagnosis.diagnosis === 'string'
+                    ? lastDiagnosis.diagnosis
+                    : (lastDiagnosis.diagnosis?.name || lastDiagnosis.suspectedConditions?.[0]?.name || '일반 건강 이상')}
                 </p>
                 <span className={`shrink-0 px-3 py-1 rounded-full text-sm font-bold ${
                   lastDiagnosis.riskLevel === 'High' || lastDiagnosis.emergency === 'high' ? 'bg-red-100 text-red-600' :
@@ -6200,7 +6268,7 @@ function App() {
                   {lastDiagnosis.actions.map((action, idx) => (
                     <li key={idx} className="flex items-start gap-2 text-sm text-slate-700">
                       <span className="material-symbols-outlined text-green-500 text-base mt-0.5">check_circle</span>
-                      <span>{action}</span>
+                      <span>{typeof action === 'string' ? action : (action?.title || action?.description || action?.name || '')}</span>
                     </li>
                   ))}
                 </ul>
