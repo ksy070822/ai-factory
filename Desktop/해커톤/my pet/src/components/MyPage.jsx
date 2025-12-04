@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { getPetImage, getProfileImage } from '../utils/imagePaths';
 import { clinicResultService, bookingService } from '../services/firestore';
+import { db } from '../lib/firebase';
+import { collection, query, where, onSnapshot, orderBy } from 'firebase/firestore';
 
 // 동물 종류 한글 매핑
 const SPECIES_LABELS = {
@@ -169,33 +171,41 @@ export function MyPage({ onBack, onSelectPet, onViewDiagnosis, onAddPet, onClini
       setPets(getPetsForUser(userId));
       setDiagnoses(getDiagnosesForUser(userId));
 
-      // Firestore에서 예약 조회 (상태 변경 반영) - 실시간 구독
-      const loadBookings = async () => {
-        try {
-          const result = await bookingService.getBookingsByUser(userId);
-          if (result.success && result.data.length > 0) {
-            setBookings(result.data);
-            // localStorage도 동기화
-            saveBookingsForUser(userId, result.data);
-          } else {
-            // Firestore에 없으면 localStorage 사용
-            setBookings(getBookingsForUser(userId));
-          }
-        } catch (error) {
-          console.warn('Firestore 예약 로드 오류, localStorage 사용:', error);
-          setBookings(getBookingsForUser(userId));
+      // 🔥 Firestore 실시간 구독 (onSnapshot) - 즉시 반영
+      console.log('[MyPage] 예약 실시간 구독 시작, userId:', userId);
+
+      const q = query(
+        collection(db, 'bookings'),
+        where('userId', '==', userId),
+        orderBy('createdAt', 'desc')
+      );
+
+      const unsubscribe = onSnapshot(
+        q,
+        (snapshot) => {
+          console.log('[MyPage] 예약 업데이트 수신:', snapshot.docs.length, '개');
+          const bookingsData = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+          }));
+
+          setBookings(bookingsData);
+          // localStorage도 동기화
+          saveBookingsForUser(userId, bookingsData);
+        },
+        (error) => {
+          console.error('[MyPage] 예약 구독 오류:', error);
+          // 오류 시 localStorage 폴백
+          const localBookings = getBookingsForUser(userId);
+          console.log('[MyPage] localStorage 폴백:', localBookings.length, '개');
+          setBookings(localBookings);
         }
-      };
-      loadBookings();
+      );
 
-      // 🔥 실시간 예약 상태 업데이트 구독 (5초마다 폴링)
-      const pollInterval = setInterval(() => {
-        console.log('[MyPage] 예약 상태 폴링 중...');
-        loadBookings();
-      }, 5000); // 5초마다 업데이트
-
+      // cleanup: 구독 해제
       return () => {
-        clearInterval(pollInterval);
+        console.log('[MyPage] 예약 구독 해제');
+        unsubscribe();
       };
     } else {
       setPets(getPetsFromStorage());
@@ -205,49 +215,44 @@ export function MyPage({ onBack, onSelectPet, onViewDiagnosis, onAddPet, onClini
 
   }, [userId]);
 
-  // 병원 진료 기록 로드 (pets가 로드된 후) - 실시간 폴링 추가
+  // 병원 진료 기록 로드 (pets가 로드된 후) - 실시간 구독
   useEffect(() => {
-    const loadClinicResults = async () => {
-      if (pets.length === 0) return;
+    if (!userId) return;
 
-      try {
-        // 모든 반려동물의 진료 기록 로드 (병원에서 공유된 것만)
-        const allResults = [];
-        for (const pet of pets) {
-          if (pet.id) {
-            const resultRes = await clinicResultService.getResultsByPet(pet.id);
-            if (resultRes.success && resultRes.data.length > 0) {
-              // 병원에서 보호자에게 공유한 진단서만 필터링
-              const sharedResults = resultRes.data.filter(r => r.sharedToGuardian === true);
-              allResults.push(...sharedResults);
-            }
-          }
-        }
+    console.log('[MyPage] 진료 기록 실시간 구독 시작, userId:', userId);
 
-        if (allResults.length > 0) {
-          setClinicResults(allResults);
-          return;
-        }
-      } catch (error) {
-        console.warn('Firestore 진료 결과 로드 오류:', error);
+    // 🔥 Firestore 실시간 구독 (onSnapshot) - userId 기준으로 모든 진료 기록 조회
+    const q = query(
+      collection(db, 'clinicResults'),
+      where('userId', '==', userId),
+      where('sharedToGuardian', '==', true), // 보호자에게 공유된 것만
+      orderBy('createdAt', 'desc')
+    );
+
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        console.log('[MyPage] 진료 기록 업데이트 수신:', snapshot.docs.length, '개');
+        const resultsData = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+
+        setClinicResults(resultsData);
+      },
+      (error) => {
+        console.error('[MyPage] 진료 기록 구독 오류:', error);
+        // 오류 시 localStorage 폴백
+        setClinicResults(getClinicResultsFromStorage());
       }
+    );
 
-      // Firestore 실패 시 localStorage 폴백
-      setClinicResults(getClinicResultsFromStorage());
-    };
-
-    loadClinicResults();
-
-    // 🔥 실시간 진료 기록 업데이트 구독 (5초마다 폴링)
-    const pollInterval = setInterval(() => {
-      console.log('[MyPage] 진료 기록 폴링 중...');
-      loadClinicResults();
-    }, 5000); // 5초마다 업데이트
-
+    // cleanup: 구독 해제
     return () => {
-      clearInterval(pollInterval);
+      console.log('[MyPage] 진료 기록 구독 해제');
+      unsubscribe();
     };
-  }, [pets]);
+  }, [userId]);
 
   const formatDate = (timestamp) => {
     return new Date(timestamp).toLocaleDateString('ko-KR', {
