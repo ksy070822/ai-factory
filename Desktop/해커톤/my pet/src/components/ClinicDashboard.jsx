@@ -444,10 +444,11 @@ export function ClinicDashboard({ currentUser, onBack }) {
 
   const getStatusLabel = (status) => {
     const labels = {
-      confirmed: '예약 확정',
-      pending: '확정 대기',
-      completed: '진료 완료',
-      cancelled: '취소됨'
+      pending: '확인 대기',
+      confirmed: '진료 예정',   // ✅ 기존 '확정' → '진료 예정' 으로 변경
+      completed: '진료 완료',   // ✅ 기존 '완료' → '진료 완료' 로 변경
+      cancelled: '취소됨',
+      waiting: '대기'
     };
     return labels[status] || status;
   };
@@ -1092,72 +1093,65 @@ export function ClinicDashboard({ currentUser, onBack }) {
 
                     {/* 액션 버튼 - 상태별 분기 */}
                     <div className="grid grid-cols-2 gap-2">
-                      {booking.status === 'pending' && (
-                        <>
-                          <button
-                            onClick={() => handleConfirmBooking(booking)}
-                            className="py-2.5 rounded-lg text-sm font-semibold bg-blue-600 text-white hover:bg-blue-700 transition-colors flex items-center justify-center gap-1.5"
-                          >
-                            <span className="material-symbols-outlined text-lg">check_circle</span>
-                            예약 확정
-                          </button>
-                          <button disabled className="py-2.5 bg-gray-200 text-gray-500 rounded-lg text-sm font-semibold cursor-not-allowed flex items-center justify-center gap-1.5">
+                      {/* 좌측 버튼: 예약 확정 / 진료 예정 / 진료 완료 */}
+                      <button
+                        onClick={() => {
+                          if (booking.status === 'pending') {
+                            handleConfirmBooking(booking);
+                          }
+                        }}
+                        disabled={booking.status !== 'pending'}
+                        className={`py-2.5 rounded-lg text-sm font-semibold transition-colors flex items-center justify-center gap-1.5
+                          ${booking.status === 'pending'
+                            ? 'bg-sky-600 text-white hover:bg-sky-700'
+                            : 'bg-gray-100 text-gray-700 cursor-default'}`}
+                      >
+                        <span className="material-symbols-outlined text-lg">check_circle</span>
+                        {booking.status === 'pending'
+                          ? '예약 확정'
+                          : booking.status === 'confirmed'
+                          ? '진료 예정'
+                          : booking.status === 'completed'
+                          ? '진료 완료'
+                          : '예약 상태'}
+                      </button>
+
+                      {/* 우측 버튼: 진료 시작 / 진료 결과 보기 */}
+                      <button
+                        onClick={() => {
+                          if (booking.status === 'confirmed') {
+                            handleStartTreatment(booking.id);
+                          } else if (booking.status === 'completed') {
+                            handleShowResultDetail(booking);
+                          }
+                        }}
+                        disabled={booking.status === 'pending'}
+                        className={`py-2.5 rounded-lg text-sm font-semibold transition-colors flex items-center justify-center gap-1.5
+                          ${booking.status === 'pending'
+                            ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                            : booking.status === 'confirmed'
+                            ? 'bg-sky-600 text-white hover:bg-sky-700'
+                            : 'bg-sky-600 text-white hover:bg-sky-700'}`}
+                      >
+                        {booking.status === 'pending' && (
+                          <>
                             <span className="material-symbols-outlined text-lg">play_arrow</span>
                             진료 시작
-                          </button>
-                        </>
-                      )}
-
-                      {booking.status === 'confirmed' && !booking.hasResult && (
-                        <>
-                          <button disabled className="py-2.5 bg-green-100 text-green-700 rounded-lg text-sm font-semibold flex items-center justify-center gap-1.5">
-                            <span className="material-symbols-outlined text-lg">check</span>
-                            예약 확정됨
-                          </button>
-                          <button
-                            onClick={() => handleStartTreatment(booking.id)}
-                            className="py-2.5 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors flex items-center justify-center gap-1.5"
-                          >
-                            <span className="material-symbols-outlined text-lg">edit_note</span>
+                          </>
+                        )}
+                        {booking.status === 'confirmed' && (
+                          <>
+                            <span className="material-symbols-outlined text-lg">play_arrow</span>
                             진료 시작
-                          </button>
-                        </>
-                      )}
-
-                      {booking.status === 'confirmed' && booking.hasResult && !booking.sharedToGuardian && (
-                        <>
-                          <button
-                            onClick={() => handleShowResultDetail(booking)}
-                            className="py-2.5 bg-gray-100 text-gray-700 rounded-lg text-sm font-semibold hover:bg-gray-200 transition-colors flex items-center justify-center gap-1.5"
-                          >
-                            <span className="material-symbols-outlined text-lg">visibility</span>
-                            진단서 보기
-                          </button>
-                          <button
-                            onClick={() => handleStartTreatment(booking.id)}
-                            className="py-2.5 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors flex items-center justify-center gap-1.5"
-                          >
-                            <span className="material-symbols-outlined text-lg">send</span>
-                            보호자에게 전송
-                          </button>
-                        </>
-                      )}
-
-                      {(booking.status === 'completed' || booking.sharedToGuardian) && (
-                        <>
-                          <button
-                            onClick={() => handleShowResultDetail(booking)}
-                            className="py-2.5 bg-gray-100 text-gray-700 rounded-lg text-sm font-semibold hover:bg-gray-200 transition-colors flex items-center justify-center gap-1.5"
-                          >
+                          </>
+                        )}
+                        {booking.status === 'completed' && (
+                          <>
                             <span className="material-symbols-outlined text-lg">description</span>
-                            진단서 보기
-                          </button>
-                          <div className="py-2.5 bg-blue-100 text-blue-800 rounded-lg text-sm font-semibold flex items-center justify-center gap-1.5">
-                            <span className="material-symbols-outlined text-lg">check_circle</span>
-                            전송 완료
-                          </div>
-                        </>
-                      )}
+                            진료 결과 보기
+                          </>
+                        )}
+                      </button>
                     </div>
                   </div>
                 ))}

@@ -476,9 +476,9 @@ export function RecordsView({ petData, onBack, onViewDiagnosis, onOCR, onHome, o
     const clinicVisits = clinicResults.map(result => ({
       id: result.id,
       date: result.visitDate || result.createdAt,
-      hospitalName: result.hospitalName,
+      hospitalName: result.hospitalName || result.clinicName || '병원', // ✅ clinicName fallback 추가
       hospitalAddress: result.hospitalAddress || '',
-      diagnosis: result.finalDiagnosis || result.diagnosis,
+      diagnosis: result.finalDiagnosis || result.diagnosis || result.mainDiagnosis, // ✅ mainDiagnosis fallback 추가
       type: 'visit',
       triage_score: result.triageScore,
       treatment: result.treatment,
@@ -486,7 +486,8 @@ export function RecordsView({ petData, onBack, onViewDiagnosis, onOCR, onHome, o
       totalCost: result.totalCost,
       nextVisitDate: result.nextVisitDate,
       doctorNote: result.doctorNote,
-      source: 'clinic' // 병원에서 입력한 기록
+      source: 'clinic', // 병원에서 입력한 기록
+      sharedToGuardian: result.sharedToGuardian || false // ✅ 공유 상태 필드 추가
     }));
 
     // 진단 기록 (AI 진단)
@@ -691,8 +692,15 @@ export function RecordsView({ petData, onBack, onViewDiagnosis, onOCR, onHome, o
               visitRecords.map(record => (
                 <div
                   key={record.id}
-                  onClick={() => onViewDiagnosis && onViewDiagnosis(record)}
-                  className="bg-slate-50 rounded-xl p-4 cursor-pointer hover:bg-slate-100 transition-all"
+                  className={`bg-slate-50 rounded-xl p-4 transition-all ${
+                    record.source === 'clinic' && !record.sharedToGuardian ? '' : 'cursor-pointer hover:bg-slate-100'
+                  }`}
+                  onClick={() => {
+                    // AI 진단이거나 공유 완료된 clinic 기록만 클릭 가능
+                    if (record.source === 'ai' || (record.source === 'clinic' && record.sharedToGuardian)) {
+                      onViewDiagnosis && onViewDiagnosis(record);
+                    }
+                  }}
                 >
                   <div className="flex justify-between items-start mb-2">
                     <div className="flex-1">
@@ -708,7 +716,9 @@ export function RecordsView({ petData, onBack, onViewDiagnosis, onOCR, onHome, o
                         {record.hospitalName || 'AI 진단'}
                       </h3>
                     </div>
-                    <span className="material-symbols-outlined text-slate-400">chevron_right</span>
+                    {(record.source === 'ai' || (record.source === 'clinic' && record.sharedToGuardian)) && (
+                      <span className="material-symbols-outlined text-slate-400">chevron_right</span>
+                    )}
                   </div>
 
                   {record.diagnosis && (
@@ -719,31 +729,50 @@ export function RecordsView({ petData, onBack, onViewDiagnosis, onOCR, onHome, o
 
                   {/* 병원 진료 결과 추가 정보 */}
                   {record.source === 'clinic' && (
-                    <div className="flex flex-wrap gap-2 mt-2">
-                      {record.treatment && (
-                        <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-50 text-green-700 rounded text-xs">
-                          <span className="material-symbols-outlined text-xs">healing</span>
-                          {record.treatment}
-                        </span>
-                      )}
-                      {record.medications?.length > 0 && (
-                        <span className="inline-flex items-center gap-1 px-2 py-1 bg-orange-50 text-orange-700 rounded text-xs">
-                          <span className="material-symbols-outlined text-xs">medication</span>
-                          처방약 {record.medications.length}개
-                        </span>
-                      )}
-                      {record.totalCost > 0 && (
-                        <span className="inline-flex items-center gap-1 px-2 py-1 bg-slate-100 text-slate-600 rounded text-xs">
-                          💰 {record.totalCost.toLocaleString()}원
-                        </span>
-                      )}
-                      {record.nextVisitDate && (
-                        <span className="inline-flex items-center gap-1 px-2 py-1 bg-primary/10 text-primary rounded text-xs">
-                          <span className="material-symbols-outlined text-xs">event</span>
-                          다음방문: {formatDateShort(record.nextVisitDate)}
-                        </span>
-                      )}
-                    </div>
+                    <>
+                      <div className="flex flex-wrap gap-2 mt-2 mb-3">
+                        {record.treatment && (
+                          <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-50 text-green-700 rounded text-xs">
+                            <span className="material-symbols-outlined text-xs">healing</span>
+                            {record.treatment}
+                          </span>
+                        )}
+                        {record.medications?.length > 0 && (
+                          <span className="inline-flex items-center gap-1 px-2 py-1 bg-orange-50 text-orange-700 rounded text-xs">
+                            <span className="material-symbols-outlined text-xs">medication</span>
+                            처방약 {record.medications.length}개
+                          </span>
+                        )}
+                        {record.totalCost > 0 && (
+                          <span className="inline-flex items-center gap-1 px-2 py-1 bg-slate-100 text-slate-600 rounded text-xs">
+                            💰 {record.totalCost.toLocaleString()}원
+                          </span>
+                        )}
+                        {record.nextVisitDate && (
+                          <span className="inline-flex items-center gap-1 px-2 py-1 bg-primary/10 text-primary rounded text-xs">
+                            <span className="material-symbols-outlined text-xs">event</span>
+                            다음방문: {formatDateShort(record.nextVisitDate)}
+                          </span>
+                        )}
+                      </div>
+                      {/* ✅ 공유받은 진단서 버튼 (상태만으로 표현) */}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (record.sharedToGuardian) {
+                            onViewDiagnosis && onViewDiagnosis(record);
+                          }
+                        }}
+                        disabled={!record.sharedToGuardian}
+                        className={`w-full py-2.5 rounded-lg text-sm font-semibold transition-colors flex items-center justify-center gap-1.5
+                          ${record.sharedToGuardian
+                            ? 'bg-sky-600 text-white hover:bg-sky-700'
+                            : 'bg-gray-200 text-gray-500 cursor-not-allowed'}`}
+                      >
+                        <span className="material-symbols-outlined text-lg">description</span>
+                        {record.sharedToGuardian ? '공유받은 진단서 보기' : '진단서 준비 중'}
+                      </button>
+                    </>
                   )}
                 </div>
               ))
