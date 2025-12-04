@@ -401,6 +401,7 @@ export async function getClinicPatients(clinicId, options = {}) {
       return [
         {
           id: 'dummy-1',
+          petId: 'dummy-pet-1',
           petName: '뽀삐',
           species: '강아지',
           breed: '포메라니안',
@@ -415,6 +416,7 @@ export async function getClinicPatients(clinicId, options = {}) {
         },
         {
           id: 'dummy-2',
+          petId: 'dummy-pet-2',
           petName: '나비',
           species: '고양이',
           breed: '코리안숏헤어',
@@ -429,6 +431,7 @@ export async function getClinicPatients(clinicId, options = {}) {
         },
         {
           id: 'dummy-3',
+          petId: 'dummy-pet-3',
           petName: '초코',
           species: '강아지',
           breed: '말티즈',
@@ -443,6 +446,7 @@ export async function getClinicPatients(clinicId, options = {}) {
         },
         {
           id: 'dummy-4',
+          petId: 'dummy-pet-4',
           petName: '루비',
           species: '강아지',
           breed: '비글',
@@ -457,6 +461,7 @@ export async function getClinicPatients(clinicId, options = {}) {
         },
         {
           id: 'dummy-5',
+          petId: 'dummy-pet-5',
           petName: '밤이',
           species: '고양이',
           breed: '페르시안',
@@ -502,6 +507,7 @@ export async function getClinicPatients(clinicId, options = {}) {
     return [
       {
         id: 'dummy-1',
+        petId: 'dummy-pet-1',
         petName: '뽀삐',
         species: '강아지',
         breed: '포메라니안',
@@ -516,6 +522,7 @@ export async function getClinicPatients(clinicId, options = {}) {
       },
       {
         id: 'dummy-2',
+        petId: 'dummy-pet-2',
         petName: '나비',
         species: '고양이',
         breed: '코리안숏헤어',
@@ -530,6 +537,7 @@ export async function getClinicPatients(clinicId, options = {}) {
       },
       {
         id: 'dummy-3',
+        petId: 'dummy-pet-3',
         petName: '초코',
         species: '강아지',
         breed: '말티즈',
