@@ -169,7 +169,7 @@ export function MyPage({ onBack, onSelectPet, onViewDiagnosis, onAddPet, onClini
       setPets(getPetsForUser(userId));
       setDiagnoses(getDiagnosesForUser(userId));
 
-      // Firestore에서 예약 조회 (상태 변경 반영)
+      // Firestore에서 예약 조회 (상태 변경 반영) - 실시간 구독
       const loadBookings = async () => {
         try {
           const result = await bookingService.getBookingsByUser(userId);
@@ -187,6 +187,16 @@ export function MyPage({ onBack, onSelectPet, onViewDiagnosis, onAddPet, onClini
         }
       };
       loadBookings();
+
+      // 🔥 실시간 예약 상태 업데이트 구독 (5초마다 폴링)
+      const pollInterval = setInterval(() => {
+        console.log('[MyPage] 예약 상태 폴링 중...');
+        loadBookings();
+      }, 5000); // 5초마다 업데이트
+
+      return () => {
+        clearInterval(pollInterval);
+      };
     } else {
       setPets(getPetsFromStorage());
       setDiagnoses(getDiagnosesFromStorage());
@@ -195,7 +205,7 @@ export function MyPage({ onBack, onSelectPet, onViewDiagnosis, onAddPet, onClini
 
   }, [userId]);
 
-  // 병원 진료 기록 로드 (pets가 로드된 후)
+  // 병원 진료 기록 로드 (pets가 로드된 후) - 실시간 폴링 추가
   useEffect(() => {
     const loadClinicResults = async () => {
       if (pets.length === 0) return;
@@ -227,6 +237,16 @@ export function MyPage({ onBack, onSelectPet, onViewDiagnosis, onAddPet, onClini
     };
 
     loadClinicResults();
+
+    // 🔥 실시간 진료 기록 업데이트 구독 (5초마다 폴링)
+    const pollInterval = setInterval(() => {
+      console.log('[MyPage] 진료 기록 폴링 중...');
+      loadClinicResults();
+    }, 5000); // 5초마다 업데이트
+
+    return () => {
+      clearInterval(pollInterval);
+    };
   }, [pets]);
 
   const formatDate = (timestamp) => {
