@@ -742,14 +742,20 @@ export function RecordsView({ petData, onBack, onViewDiagnosis, onOCR, onHome, o
                               <h4 className="font-bold text-slate-800">권장 조치사항</h4>
                             </div>
                             <div className="space-y-2">
-                              {actions.map((action, idx) => (
-                                <div key={idx} className="flex items-start gap-3 bg-sky-50 rounded-lg p-3">
-                                  <div className="w-6 h-6 rounded-full bg-sky-500 text-white flex items-center justify-center text-xs font-bold flex-shrink-0">
-                                    {idx + 1}
+                              {actions.map((action, idx) => {
+                                // action이 객체인 경우 처리
+                                const actionText = typeof action === 'string' 
+                                  ? action 
+                                  : (action?.title || action?.description || action?.text || JSON.stringify(action));
+                                return (
+                                  <div key={idx} className="flex items-start gap-3 bg-sky-50 rounded-lg p-3">
+                                    <div className="w-6 h-6 rounded-full bg-sky-500 text-white flex items-center justify-center text-xs font-bold flex-shrink-0">
+                                      {idx + 1}
+                                    </div>
+                                    <p className="text-sm text-slate-700 flex-1">{actionText}</p>
                                   </div>
-                                  <p className="text-sm text-slate-700 flex-1">{action}</p>
-                                </div>
-                              ))}
+                                );
+                              })}
                             </div>
                           </div>
                         )}

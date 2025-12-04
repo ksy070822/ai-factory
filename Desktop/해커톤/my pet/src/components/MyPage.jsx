@@ -768,14 +768,22 @@ export function MyPage({ onBack, onSelectPet, onViewDiagnosis, onAddPet, onClini
                   // 해당 반려동물 찾기
                   const pet = pets.find(p => p.id === record.petId);
                   
-                  // AI 진단인 경우 하늘색 테마 진단서 UI
+                  // AI 진단인 경우 하늘색 테마 진단서 카드 (클릭 시 상세보기)
                   if (record.source === 'ai') {
                     const diagnosis = record.diagnosis || record.suspectedConditions?.[0]?.name || '일반 건강 이상';
                     const description = record.description || record.detailDescription || '';
                     const actions = record.actions || record.recommendedActions || [];
                     
                     return (
-                      <div key={record.id} className="bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-200">
+                      <div 
+                        key={record.id} 
+                        className="bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-200 cursor-pointer hover:shadow-md transition-all active:scale-[0.98]"
+                        onClick={() => {
+                          if (onViewDiagnosis) {
+                            onViewDiagnosis({ ...record, pet });
+                          }
+                        }}
+                      >
                         {/* 상단: 하늘색 그라데이션 배경 */}
                         <div className="bg-gradient-to-br from-sky-300 via-sky-400 to-sky-500 p-5 text-white">
                           <div className="flex items-center gap-2 mb-2">
@@ -820,14 +828,20 @@ export function MyPage({ onBack, onSelectPet, onViewDiagnosis, onAddPet, onClini
                                 <h4 className="font-bold text-slate-800">권장 조치사항</h4>
                               </div>
                               <div className="space-y-2">
-                                {actions.map((action, idx) => (
-                                  <div key={idx} className="flex items-start gap-3 bg-sky-50 rounded-lg p-3">
-                                    <div className="w-6 h-6 rounded-full bg-sky-500 text-white flex items-center justify-center text-xs font-bold flex-shrink-0">
-                                      {idx + 1}
+                                {actions.map((action, idx) => {
+                                  // action이 객체인 경우 처리
+                                  const actionText = typeof action === 'string' 
+                                    ? action 
+                                    : (action?.title || action?.description || action?.text || JSON.stringify(action));
+                                  return (
+                                    <div key={idx} className="flex items-start gap-3 bg-sky-50 rounded-lg p-3">
+                                      <div className="w-6 h-6 rounded-full bg-sky-500 text-white flex items-center justify-center text-xs font-bold flex-shrink-0">
+                                        {idx + 1}
+                                      </div>
+                                      <p className="text-sm text-slate-700 flex-1">{actionText}</p>
                                     </div>
-                                    <p className="text-sm text-slate-700 flex-1">{action}</p>
-                                  </div>
-                                ))}
+                                  );
+                                })}
                               </div>
                             </div>
                           )}
@@ -851,7 +865,7 @@ export function MyPage({ onBack, onSelectPet, onViewDiagnosis, onAddPet, onClini
                     );
                   }
 
-                  // 병원 진료인 경우 연레드 테마 진단서 UI
+                  // 병원 진료인 경우 연레드 테마 진단서 카드 (클릭 시 상세보기)
                   if (record.source === 'clinic') {
                     const diagnosis = record.mainDiagnosis || record.diagnosis || '진단명 없음';
                     const description = record.summary || record.description || record.doctorNote || '';
@@ -859,7 +873,15 @@ export function MyPage({ onBack, onSelectPet, onViewDiagnosis, onAddPet, onClini
                     const soap = record.soap || {};
                     
                     return (
-                      <div key={record.id} className="bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-200">
+                      <div 
+                        key={record.id} 
+                        className="bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-200 cursor-pointer hover:shadow-md transition-all active:scale-[0.98]"
+                        onClick={() => {
+                          if (onViewDiagnosis) {
+                            onViewDiagnosis({ ...record, pet });
+                          }
+                        }}
+                      >
                         {/* 상단: 연레드 그라데이션 배경 */}
                         <div className="bg-gradient-to-br from-red-200 via-red-300 to-red-400 p-5 text-white">
                           <div className="flex items-center gap-2 mb-2">
