@@ -35,7 +35,7 @@ import { auth } from './src/lib/firebase'
 import { ClinicDashboard } from './src/components/ClinicDashboard'
 import { AICareConsultation } from './src/components/AICareConsultation'
 import { getFAQContext } from './src/data/faqData'
-import { diagnosisService, bookingService, petService } from './src/services/firestore'
+import { diagnosisService, bookingService, petService, commentTemplateService, clinicResultService } from './src/services/firestore'
 import { requestPushPermission, setupForegroundMessageHandler } from './src/services/pushNotificationService'
 import { getUserClinics } from './src/services/clinicService'
 import { getSpeciesDisplayName } from './src/services/ai/commonContext'
@@ -886,6 +886,41 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
     play: 0
   });
   const [latestBooking, setLatestBooking] = useState(null);
+  const [randomMessage, setRandomMessage] = useState(null);
+
+  // 랜덤 유의사항 메시지 로드
+  useEffect(() => {
+    const loadRandomMessage = async () => {
+      if (!petData?.id) return;
+
+      try {
+        // 병원 방문 기록 확인 (clinicResults)
+        const clinicResultsResult = await clinicResultService.getByPetId(petData.id);
+        const hasHospitalVisit = clinicResultsResult.success && clinicResultsResult.data && clinicResultsResult.data.length > 0;
+
+        // AI 진단 기록 확인
+        const diagnosesResult = await diagnosisService.getByPetId(petData.id);
+        const hasDiagnosis = diagnosesResult.success && diagnosesResult.data && diagnosesResult.data.length > 0;
+
+        // 조건에 따라 랜덤 메시지 가져오기
+        const result = await commentTemplateService.getRandomTemplate(hasHospitalVisit, hasDiagnosis);
+
+        if (result.success && result.data) {
+          // {name} 플레이스홀더를 실제 이름으로 교체
+          const petName = petData?.petName || petData?.name || '반려동물';
+          const messageText = result.data.text.replace(/{name}/g, petName);
+          setRandomMessage({
+            ...result.data,
+            displayText: messageText
+          });
+        }
+      } catch (error) {
+        console.error('랜덤 메시지 로드 오류:', error);
+      }
+    };
+
+    loadRandomMessage();
+  }, [petData?.id]);
 
   // 오늘 케어 기록 저장
   const saveTodayCare = () => {
@@ -986,21 +1021,22 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
       if (!petData?.userId) return;
 
       try {
-        const bookings = await bookingService.getByUser(petData.userId);
-        if (bookings && bookings.length > 0) {
+        const result = await bookingService.getBookingsByUser(petData.userId);
+        const bookingData = result?.data || result || [];
+        if (bookingData && bookingData.length > 0) {
           // 미래 예약만 필터링하고 가장 가까운 것 선택
           const now = new Date();
-          const futureBookings = bookings.filter(b => {
-            const bookingDate = b.bookingDate ? new Date(b.bookingDate) : null;
+          const futureBookings = bookingData.filter(b => {
+            const bookingDate = b.date ? new Date(b.date) : (b.bookingDate ? new Date(b.bookingDate) : null);
             return bookingDate && bookingDate >= now;
-          }).sort((a, b) => new Date(a.bookingDate) - new Date(b.bookingDate));
+          }).sort((a, b) => new Date(a.date || a.bookingDate) - new Date(b.date || b.bookingDate));
 
           if (futureBookings.length > 0) {
             setLatestBooking(futureBookings[0]);
-          } else if (bookings.length > 0) {
+          } else if (bookingData.length > 0) {
             // 미래 예약이 없으면 가장 최근 예약 표시
-            const sortedBookings = [...bookings].sort((a, b) =>
-              new Date(b.bookingDate) - new Date(a.bookingDate)
+            const sortedBookings = [...bookingData].sort((a, b) =>
+              new Date(b.date || b.bookingDate) - new Date(a.date || a.bookingDate)
             );
             setLatestBooking(sortedBookings[0]);
           }
@@ -1184,18 +1220,18 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
             {/* 모바일 컨텐츠 */}
             <div className="h-full overflow-y-auto overflow-x-hidden bg-slate-50 pb-20">
               {/* Header - 회사 로고 가운데 배치 */}
-              <header className="bg-gradient-to-r from-sky-500 to-sky-600 text-white px-4 pt-4 pb-4 shadow-lg">
+              <header className="bg-gradient-to-r from-sky-500 to-sky-600 text-white px-4 pt-8 pb-8 shadow-lg">
                 <div className="flex items-center justify-center">
-                  <div className="w-9 h-9 bg-white rounded-lg flex items-center justify-center shadow-md flex-shrink-0">
+                  <div className="w-14 h-14 bg-white rounded-xl flex items-center justify-center shadow-md flex-shrink-0">
                     <img
                       src={`${import.meta.env.BASE_URL}icon/login/logo_red.png`}
                       alt="PetMedical.AI"
-                      className="w-6 h-6 object-contain"
+                      className="w-10 h-10 object-contain"
                     />
                   </div>
-                  <div className="text-center ml-2">
-                    <h1 className="text-xl font-bold tracking-tight">PetMedical.AI</h1>
-                    <p className="text-sky-100 text-xs font-medium">AI 기반 반려동물 건강 관리 서비스</p>
+                  <div className="text-center ml-3">
+                    <h1 className="text-2xl font-bold tracking-tight">PetMedical.AI</h1>
+                    <p className="text-sky-100 text-sm font-medium">AI기반 반려동물 건강관리 플랫폼</p>
                   </div>
                 </div>
               </header>
@@ -1219,8 +1255,8 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
                     <div className="bg-white rounded-2xl p-4 shadow-lg border border-slate-100 relative overflow-hidden mb-4">
                       {/* 배경 장식 제거 - 깔끔한 흰색 배경 */}
 
-                      <div className="relative flex items-stretch gap-3">
-                        <div className="flex-shrink-0 w-24 h-36 bg-white/80 rounded-2xl shadow-md overflow-hidden border-2 border-white flex items-center justify-center">
+                      <div className="relative flex items-stretch gap-4">
+                        <div className="flex-shrink-0 w-28 h-40 bg-white/80 rounded-2xl shadow-md overflow-hidden border-2 border-white flex items-center justify-center">
                           <img
                             src={getMainCharacterImagePath()}
                             alt={petData?.petName || petData?.name || '반려동물'}
@@ -1252,16 +1288,16 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
                           />
                         </div>
 
-                        <div className="flex-1 flex flex-col justify-between py-1">
+                        <div className="flex-1 flex flex-col justify-between py-2">
                           <div className="flex flex-col items-center justify-center text-center w-full">
-                            <p className="text-lg font-display font-bold text-gray-900 w-full">AI 전문 의료진 24시간 대기</p>
-                            <p className="text-lg font-display font-bold text-gray-900 mt-1 w-full">{petData?.petName || petData?.name || '반려동물'} 지켜줄게요 ❤️</p>
-                            <p className="text-base font-semibold text-sky-600 mt-2 w-full">
+                            <p className="text-xl font-display font-bold text-gray-900 w-full">AI 전문 의료진 24시간 대기</p>
+                            <p className="text-xl font-display font-bold text-gray-900 mt-1.5 w-full">{petData?.petName || petData?.name || '반려동물'} 지켜줄게요 ❤️</p>
+                            <p className="text-lg font-semibold text-sky-600 mt-2.5 w-full">
                               오늘도 든든한 케어 시작!
                             </p>
                             <button
                               onClick={() => onNavigate('profile-list')}
-                              className="text-xs text-sky-600 font-semibold mt-2"
+                              className="text-sm text-sky-600 font-semibold mt-2"
                             >
                               반려동물 변경하기 &gt;
                             </button>
@@ -1355,15 +1391,16 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
                           <span className="text-gray-400 text-lg">&gt;</span>
                         </button>
 
-                        <div className="flex items-center gap-3 py-3 border-b border-gray-100">
-                          <div className="w-12 h-12 bg-orange-50 rounded-xl flex items-center justify-center flex-shrink-0">
-                            <span className="text-2xl">⚠️</span>
+                        <div className="flex items-center gap-3 py-3 bg-yellow-50 rounded-xl px-3">
+                          <div className="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center flex-shrink-0">
+                            <span className="text-xl">💡</span>
                           </div>
                           <div className="flex-1">
-                            <h4 className="text-sm font-bold text-gray-800 mb-0.5">유의사항</h4>
-                            <p className="text-xs text-gray-500">피부 알레르기 주의 필요</p>
+                            <h4 className="text-sm font-bold text-yellow-800 mb-0.5">오늘의 케어 팁</h4>
+                            <p className="text-xs text-yellow-700">
+                              {randomMessage?.displayText || '오늘도 함께 건강한 하루 보내세요!'}
+                            </p>
                           </div>
-                          <span className="text-gray-400 text-lg">&gt;</span>
                         </div>
                       </div>
                     </div>
@@ -1502,11 +1539,15 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
                           </div>
                           <span className="text-gray-400 text-lg">&gt;</span>
                         </button>
-                        <div className="flex items-center gap-3 p-3 bg-orange-50 rounded-xl">
-                          <span className="text-2xl">⚠️</span>
+                        <div className="flex items-center gap-3 p-3 bg-yellow-50 rounded-xl">
+                          <div className="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center flex-shrink-0">
+                            <span className="text-xl">💡</span>
+                          </div>
                           <div>
-                            <p className="font-medium text-gray-900">유의사항</p>
-                            <p className="text-sm text-gray-500">피부 알레르기 주의 필요</p>
+                            <p className="font-medium text-yellow-800">오늘의 케어 팁</p>
+                            <p className="text-sm text-yellow-700">
+                              {randomMessage?.displayText || '오늘도 함께 건강한 하루 보내세요!'}
+                            </p>
                           </div>
                         </div>
                       </div>
@@ -1588,18 +1629,18 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
         <div className="relative overflow-hidden">
           <div className="min-h-screen overflow-y-auto overflow-x-hidden bg-slate-50 pb-20">
       {/* Header - 회사 로고 가운데 배치 */}
-      <header className="bg-gradient-to-r from-sky-500 to-sky-600 text-white px-4 pt-4 pb-4 shadow-lg">
+      <header className="bg-gradient-to-r from-sky-500 to-sky-600 text-white px-4 pt-8 pb-8 shadow-lg">
         <div className="flex items-center justify-center">
-          <div className="w-9 h-9 bg-white rounded-lg flex items-center justify-center shadow-md flex-shrink-0">
+          <div className="w-14 h-14 bg-white rounded-xl flex items-center justify-center shadow-md flex-shrink-0">
             <img
               src={`${import.meta.env.BASE_URL}icon/login/logo.png`}
               alt="PetMedical.AI"
-              className="w-6 h-6 object-contain"
+              className="w-10 h-10 object-contain"
             />
           </div>
-          <div className="text-center ml-2">
-            <h1 className="text-xl font-bold tracking-tight">PetMedical.AI</h1>
-            <p className="text-sky-100 text-xs font-medium">AI 기반 반려동물 건강 관리 서비스</p>
+          <div className="text-center ml-3">
+            <h1 className="text-2xl font-bold tracking-tight">PetMedical.AI</h1>
+            <p className="text-sky-100 text-sm font-medium">AI기반 반려동물 건강관리 플랫폼</p>
           </div>
         </div>
       </header>
@@ -1620,12 +1661,12 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
         ) : (
           <>
             {/* Pet Profile Banner - 캐릭터 이미지 포함 */}
-            <div className="bg-white rounded-2xl p-4 shadow-lg border border-slate-100 relative overflow-hidden mb-4">
+            <div className="bg-white rounded-2xl p-5 shadow-lg border border-slate-100 relative overflow-hidden mb-4">
               {/* 배경 장식 제거 - 깔끔한 흰색 배경 */}
 
-              <div className="relative flex items-stretch gap-3">
+              <div className="relative flex items-stretch gap-4">
                 {/* 캐릭터 이미지 - 세로로 길게, 가로 좁게 */}
-                <div className="flex-shrink-0 w-24 h-36 bg-amber-50 rounded-2xl shadow-md overflow-hidden border-2 border-white flex items-center justify-center">
+                <div className="flex-shrink-0 w-28 h-40 bg-amber-50 rounded-2xl shadow-md overflow-hidden border-2 border-white flex items-center justify-center">
                   <img
                     src={getMainCharacterImagePath()}
                     alt={petData?.petName || '반려동물'}
@@ -1657,16 +1698,16 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
                   />
                 </div>
 
-                <div className="flex-1 flex flex-col justify-between py-1 min-w-0">
+                <div className="flex-1 flex flex-col justify-between py-2 min-w-0">
                   <div className="flex flex-col items-center justify-center text-center w-full">
-                    <p className="text-sm sm:text-base font-display font-bold text-gray-900 w-full leading-tight">AI 전문 의료진 24시간 대기</p>
-                    <p className="text-sm sm:text-base font-display font-bold text-gray-900 mt-1 w-full leading-tight truncate">{petData?.petName || petData?.name || '반려동물'} 지켜줄게요 ❤️</p>
-                    <p className="text-xs sm:text-sm font-semibold text-sky-600 mt-2 w-full">
+                    <p className="text-base sm:text-lg font-display font-bold text-gray-900 w-full leading-tight">AI 전문 의료진 24시간 대기</p>
+                    <p className="text-base sm:text-lg font-display font-bold text-gray-900 mt-1.5 w-full leading-tight truncate">{petData?.petName || petData?.name || '반려동물'} 지켜줄게요 ❤️</p>
+                    <p className="text-sm sm:text-base font-semibold text-sky-600 mt-2.5 w-full">
                       오늘도 든든한 케어 시작!
                     </p>
                     <button
                       onClick={() => onNavigate('profile-list')}
-                      className="text-xs text-sky-600 font-semibold mt-2"
+                      className="text-xs sm:text-sm text-sky-600 font-semibold mt-2"
                     >
                       반려동물 변경하기 &gt;
                     </button>
@@ -1763,16 +1804,17 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
                   <span className="text-gray-400 text-lg">&gt;</span>
                 </button>
 
-                {/* 유의사항 */}
-                <div className="flex items-center gap-3 py-3">
-                  <div className="w-12 h-12 bg-orange-50 rounded-xl flex items-center justify-center flex-shrink-0">
-                    <span className="text-2xl">⚠️</span>
+                {/* 오늘의 케어 팁 */}
+                <div className="flex items-center gap-3 py-3 bg-yellow-50 rounded-xl px-3">
+                  <div className="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <span className="text-xl">💡</span>
                   </div>
                   <div className="flex-1">
-                    <h4 className="text-sm font-bold text-gray-800 mb-0.5">유의사항</h4>
-                    <p className="text-xs text-gray-500">피부 알레르기 주의 필요</p>
+                    <h4 className="text-sm font-bold text-yellow-800 mb-0.5">오늘의 케어 팁</h4>
+                    <p className="text-xs text-yellow-700">
+                      {randomMessage?.displayText || '오늘도 함께 건강한 하루 보내세요!'}
+                    </p>
                   </div>
-                  <span className="text-gray-400 text-lg">&gt;</span>
                 </div>
               </div>
             </div>
@@ -4570,12 +4612,8 @@ function HomeTreatmentGuide({ petData, diagnosisResult, onBack, onGoToHospital }
   ];
 
   const [checklist, setChecklist] = useState(() => {
-    try {
-      const saved = localStorage.getItem(CHECKLIST_KEY);
-      return saved ? JSON.parse(saved) : defaultChecklist;
-    } catch {
-      return defaultChecklist;
-    }
+    // 항상 체크되지 않은 상태로 시작
+    return defaultChecklist;
   });
   const [saveMessage, setSaveMessage] = useState('');
 
@@ -4834,19 +4872,19 @@ function HomeTreatmentGuide({ petData, diagnosisResult, onBack, onGoToHospital }
 
             {/* 주의사항 */}
             <div style={{
-              background: 'linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%)',
+              background: 'linear-gradient(135deg, #fef9c3 0%, #fef08a 100%)',
               borderRadius: '16px',
               padding: '16px',
               marginBottom: '16px',
-              border: '2px solid #fbbf24',
-              boxShadow: '0 2px 8px rgba(251, 191, 36, 0.2)'
+              border: '2px solid #facc15',
+              boxShadow: '0 2px 8px rgba(250, 204, 21, 0.2)'
             }}>
               <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
                 <div style={{
                   width: '32px',
                   height: '32px',
                   borderRadius: '50%',
-                  background: '#f97316',
+                  background: '#eab308',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -4858,28 +4896,27 @@ function HomeTreatmentGuide({ petData, diagnosisResult, onBack, onGoToHospital }
                   <h4 style={{
                     fontSize: '14px',
                     fontWeight: 'bold',
-                    color: '#9a3412',
+                    color: '#a16207',
                     margin: '0 0 8px 0'
                   }}>
                     주의사항
                   </h4>
-                  <ul style={{
+                  <div style={{
                     margin: 0,
-                    paddingLeft: '16px',
                     display: 'flex',
                     flexDirection: 'column',
                     gap: '6px'
                   }}>
-                    <li style={{ fontSize: '13px', color: '#c2410c', lineHeight: '1.5' }}>
+                    <p style={{ fontSize: '13px', color: '#854d0e', lineHeight: '1.5', margin: 0 }}>
                       증상이 악화되거나 새로운 증상이 나타나면 즉시 병원을 방문하세요.
-                    </li>
-                    <li style={{ fontSize: '13px', color: '#c2410c', lineHeight: '1.5' }}>
+                    </p>
+                    <p style={{ fontSize: '13px', color: '#854d0e', lineHeight: '1.5', margin: 0 }}>
                       처방전 없이 사람 약물을 사용하지 마세요.
-                    </li>
-                    <li style={{ fontSize: '13px', color: '#c2410c', lineHeight: '1.5' }}>
+                    </p>
+                    <p style={{ fontSize: '13px', color: '#854d0e', lineHeight: '1.5', margin: 0 }}>
                       응급 상황(호흡 곤란, 의식 저하, 심한 출혈 등)은 즉시 응급실로 가세요.
-                    </li>
-                  </ul>
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
