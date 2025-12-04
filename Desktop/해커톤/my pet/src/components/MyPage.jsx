@@ -796,241 +796,92 @@ export function MyPage({ onBack, onSelectPet, onViewDiagnosis, onAddPet, onClini
                 <p className="text-slate-400 text-sm">AI 진료를 받으면 기록이 저장됩니다</p>
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {allRecords.map(record => {
                   // 해당 반려동물 찾기
                   const pet = pets.find(p => p.id === record.petId);
-                  
-                  // AI 진단인 경우 하늘색 테마 진단서 카드 (클릭 시 상세보기)
+                  const petName = pet?.petName || record.petName || '반려동물';
+
+                  // 날짜 포맷팅
+                  const recordDate = record.date || record.created_at;
+                  const formattedDate = recordDate ? new Date(recordDate).toLocaleDateString('ko-KR', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric'
+                  }) : '';
+
+                  // AI 진단인 경우 하늘색 카드
                   if (record.source === 'ai') {
-                    const diagnosis = record.diagnosis || record.suspectedConditions?.[0]?.name || '일반 건강 이상';
-                    const description = record.description || record.detailDescription || '';
-                    const actions = record.actions || record.recommendedActions || [];
-                    
+                    const diagnosis = record.diagnosis || record.suspectedConditions?.[0]?.name || '건강 상담';
+
                     return (
                       <div
                         key={record.id}
-                        className="bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-200 cursor-pointer hover:shadow-md transition-all active:scale-[0.98]"
+                        className="bg-white rounded-xl overflow-hidden shadow-sm border border-slate-200 cursor-pointer hover:shadow-md transition-all active:scale-[0.99]"
                         onClick={() => {
                           if (onViewDiagnosis) {
-                            // 돌아올 때 진료기록 탭으로 돌아오도록 설정
                             localStorage.setItem('mypage_initialTab', 'records');
                             onViewDiagnosis({ ...record, pet });
                           }
                         }}
                       >
-                        {/* 상단: 하늘색 그라데이션 배경 */}
-                        <div className="bg-gradient-to-br from-sky-300 via-sky-400 to-sky-500 p-5 text-white">
-                          <div className="flex items-center gap-2 mb-2">
-                            <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
-                              <span className="material-symbols-outlined text-white">info</span>
-                            </div>
-                            <div className="flex-1">
-                              <p className="text-sm opacity-90">상세 진단</p>
-                              <h3 className="text-xl font-bold mt-1">{diagnosis}</h3>
-                              <p className="text-xs opacity-80 mt-1">AI 기반 멀티 에이전트 분석 결과</p>
-                            </div>
+                        <div className="flex items-center gap-3 p-4">
+                          {/* 아이콘 */}
+                          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-sky-400 to-sky-500 flex items-center justify-center flex-shrink-0">
+                            <span className="material-symbols-outlined text-white text-xl">smart_toy</span>
                           </div>
-                        </div>
 
-                        <div className="p-4 space-y-4">
-                          {/* 상세 설명 */}
-                          {description && (
-                            <div className="bg-white rounded-xl p-4 border border-slate-200">
-                              <div className="flex items-center gap-2 mb-3">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" strokeWidth="2">
-                                  <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
-                                  <path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/>
-                                </svg>
-                                <h4 className="font-bold text-slate-800">상세 설명</h4>
-                              </div>
-                              <div className="bg-slate-50 rounded-lg p-4 border-l-4 border-sky-400">
-                                <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-line">{description}</p>
-                              </div>
+                          {/* 내용 */}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="px-2 py-0.5 bg-sky-100 text-sky-700 text-xs font-medium rounded-full">AI 진단</span>
+                              <span className="text-xs text-slate-400">{formattedDate}</span>
                             </div>
-                          )}
-
-                          {/* 권장 조치사항 */}
-                          {actions.length > 0 && (
-                            <div className="bg-white rounded-xl p-4 border border-slate-200">
-                              <div className="flex items-center gap-2 mb-3">
-                                <div className="w-8 h-8 rounded-full bg-sky-100 flex items-center justify-center">
-                                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0ea5e9" strokeWidth="2">
-                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                                    <polyline points="22 4 12 14.01 9 11.01"/>
-                                  </svg>
-                                </div>
-                                <h4 className="font-bold text-slate-800">권장 조치사항</h4>
-                              </div>
-                              <div className="space-y-2">
-                                {actions.map((action, idx) => {
-                                  // action이 객체인 경우 처리
-                                  const actionText = typeof action === 'string' 
-                                    ? action 
-                                    : (action?.title || action?.description || action?.text || JSON.stringify(action));
-                                  return (
-                                    <div key={idx} className="flex items-start gap-3 bg-sky-50 rounded-lg p-3">
-                                      <div className="w-6 h-6 rounded-full bg-sky-500 text-white flex items-center justify-center text-xs font-bold flex-shrink-0">
-                                        {idx + 1}
-                                      </div>
-                                      <p className="text-sm text-slate-700 flex-1">{actionText}</p>
-                                    </div>
-                                  );
-                                })}
-                              </div>
-                            </div>
-                          )}
-
-                          {/* 하단 안내 */}
-                          <div className="bg-amber-50 rounded-xl p-4 border border-amber-200">
-                            <div className="flex items-start gap-3">
-                              <div className="w-8 h-8 rounded-full bg-amber-400 flex items-center justify-center flex-shrink-0">
-                                <span className="material-symbols-outlined text-white text-sm">info</span>
-                              </div>
-                              <div className="flex-1">
-                                <h5 className="font-bold text-slate-800 mb-1">중요 안내사항</h5>
-                                <p className="text-sm text-slate-700 leading-relaxed">
-                                  본 진단서는 AI가 분석한 참고자료입니다. 증상이 지속되거나 악화될 경우 반드시 전문 수의사의 진료를 받으시기 바랍니다.
-                                </p>
-                              </div>
-                            </div>
+                            <h4 className="text-slate-900 font-bold truncate">{diagnosis}</h4>
+                            <p className="text-slate-500 text-sm truncate">{petName}</p>
                           </div>
+
+                          {/* 화살표 */}
+                          <span className="material-symbols-outlined text-slate-400">chevron_right</span>
                         </div>
                       </div>
                     );
                   }
 
-                  // 병원 진료인 경우 연레드 테마 진단서 카드 (클릭 시 상세보기)
+                  // 병원 진료인 경우 연레드 카드
                   if (record.source === 'clinic') {
-                    const diagnosis = record.mainDiagnosis || record.diagnosis || '진단명 없음';
-                    const description = record.summary || record.description || record.doctorNote || '';
-                    const treatment = record.soap?.plan || record.treatment || '';
-                    const soap = record.soap || {};
-                    
+                    const diagnosis = record.mainDiagnosis || record.diagnosis || '진료 완료';
+                    const hospitalName = record.hospitalName || '동물병원';
+
                     return (
                       <div
                         key={record.id}
-                        className="bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-200 cursor-pointer hover:shadow-md transition-all active:scale-[0.98]"
+                        className="bg-white rounded-xl overflow-hidden shadow-sm border border-slate-200 cursor-pointer hover:shadow-md transition-all active:scale-[0.99]"
                         onClick={() => {
                           if (onViewDiagnosis) {
-                            // 돌아올 때 진료기록 탭으로 돌아오도록 설정
                             localStorage.setItem('mypage_initialTab', 'records');
                             onViewDiagnosis({ ...record, pet });
                           }
                         }}
                       >
-                        {/* 상단: 연레드 그라데이션 배경 */}
-                        <div className="bg-gradient-to-br from-red-200 via-red-300 to-red-400 p-5 text-white">
-                          <div className="flex items-center gap-2 mb-2">
-                            <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
-                              <span className="material-symbols-outlined text-white">local_hospital</span>
-                            </div>
-                            <div className="flex-1">
-                              <p className="text-sm opacity-90">상세 진료</p>
-                              <h3 className="text-xl font-bold mt-1">{diagnosis}</h3>
-                              <p className="text-xs opacity-80 mt-1">병원 진료 결과</p>
-                              {record.hospitalName && (
-                                <p className="text-xs opacity-70 mt-1">{record.hospitalName}</p>
-                              )}
-                            </div>
+                        <div className="flex items-center gap-3 p-4">
+                          {/* 아이콘 */}
+                          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-red-300 to-red-400 flex items-center justify-center flex-shrink-0">
+                            <span className="material-symbols-outlined text-white text-xl">local_hospital</span>
                           </div>
-                        </div>
 
-                        <div className="p-4 space-y-4">
-                          {/* SOAP 정보 */}
-                          {soap.subjective && (
-                            <div className="bg-white rounded-xl p-4 border border-slate-200">
-                              <div className="flex items-center gap-2 mb-3">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#dc2626" strokeWidth="2">
-                                  <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
-                                  <path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/>
-                                </svg>
-                                <h4 className="font-bold text-slate-800">Subjective (보호자 설명)</h4>
-                              </div>
-                              <div className="bg-slate-50 rounded-lg p-4 border-l-4 border-red-400">
-                                <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-line">{soap.subjective}</p>
-                              </div>
+                          {/* 내용 */}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="px-2 py-0.5 bg-red-100 text-red-700 text-xs font-medium rounded-full">병원 진료</span>
+                              <span className="text-xs text-slate-400">{formattedDate}</span>
                             </div>
-                          )}
-
-                          {soap.objective && (
-                            <div className="bg-white rounded-xl p-4 border border-slate-200">
-                              <div className="flex items-center gap-2 mb-3">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#dc2626" strokeWidth="2">
-                                  <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
-                                  <path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/>
-                                </svg>
-                                <h4 className="font-bold text-slate-800">Objective (진찰 소견)</h4>
-                              </div>
-                              <div className="bg-slate-50 rounded-lg p-4 border-l-4 border-red-400">
-                                <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-line">{soap.objective}</p>
-                              </div>
-                            </div>
-                          )}
-
-                          {soap.assessment && (
-                            <div className="bg-white rounded-xl p-4 border border-slate-200">
-                              <div className="flex items-center gap-2 mb-3">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#dc2626" strokeWidth="2">
-                                  <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
-                                  <path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/>
-                                </svg>
-                                <h4 className="font-bold text-slate-800">Assessment (평가)</h4>
-                              </div>
-                              <div className="bg-slate-50 rounded-lg p-4 border-l-4 border-red-400">
-                                <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-line">{soap.assessment}</p>
-                              </div>
-                            </div>
-                          )}
-
-                          {/* 상세 설명 */}
-                          {description && (
-                            <div className="bg-white rounded-xl p-4 border border-slate-200">
-                              <div className="flex items-center gap-2 mb-3">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#dc2626" strokeWidth="2">
-                                  <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
-                                  <path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/>
-                                </svg>
-                                <h4 className="font-bold text-slate-800">진료 내용</h4>
-                              </div>
-                              <div className="bg-slate-50 rounded-lg p-4 border-l-4 border-red-400">
-                                <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-line">{description}</p>
-                              </div>
-                            </div>
-                          )}
-
-                          {/* 치료 계획 */}
-                          {treatment && (
-                            <div className="bg-white rounded-xl p-4 border border-slate-200">
-                              <div className="flex items-center gap-2 mb-3">
-                                <div className="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center">
-                                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#dc2626" strokeWidth="2">
-                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                                    <polyline points="22 4 12 14.01 9 11.01"/>
-                                  </svg>
-                                </div>
-                                <h4 className="font-bold text-slate-800">치료 계획</h4>
-                              </div>
-                              <div className="bg-red-50 rounded-lg p-4 border-l-4 border-red-400">
-                                <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-line">{treatment}</p>
-                              </div>
-                            </div>
-                          )}
-
-                          {/* 하단 안내 */}
-                          <div className="bg-amber-50 rounded-xl p-4 border border-amber-200">
-                            <div className="flex items-start gap-3">
-                              <div className="w-8 h-8 rounded-full bg-amber-400 flex items-center justify-center flex-shrink-0">
-                                <span className="material-symbols-outlined text-white text-sm">info</span>
-                              </div>
-                              <div className="flex-1">
-                                <h5 className="font-bold text-slate-800 mb-1">중요 안내사항</h5>
-                                <p className="text-sm text-slate-700 leading-relaxed">
-                                  본 진료서는 병원에서 작성한 공식 진료 기록입니다.
-                                </p>
-                              </div>
-                            </div>
+                            <h4 className="text-slate-900 font-bold truncate">{diagnosis}</h4>
+                            <p className="text-slate-500 text-sm truncate">{petName} • {hospitalName}</p>
                           </div>
+
+                          {/* 화살표 */}
+                          <span className="material-symbols-outlined text-slate-400">chevron_right</span>
                         </div>
                       </div>
                     );

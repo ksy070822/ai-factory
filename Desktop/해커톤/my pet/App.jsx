@@ -143,17 +143,26 @@ const saveDiagnosisToStorage = async (diagnosis, userId = null) => {
     if (!diagnosisWithFlags.healthFlags) {
       diagnosisWithFlags.healthFlags = mapDiagnosisToHealthFlags(diagnosis);
     }
-    
+
     const diagnosisData = {
-      ...diagnosisWithFlags, 
-      id: diagnosisWithFlags.id || Date.now().toString(), 
-      date: new Date().toISOString() 
+      ...diagnosisWithFlags,
+      id: diagnosisWithFlags.id || Date.now().toString(),
+      date: new Date().toISOString(),
+      userId: userId || diagnosisWithFlags.userId || null
     };
 
-    // localStorage에도 저장 (오프라인 지원)
+    // localStorage에 저장 (공통 키)
     const diagnoses = JSON.parse(localStorage.getItem(DIAGNOSIS_KEY) || '[]');
     diagnoses.unshift(diagnosisData);
     localStorage.setItem(DIAGNOSIS_KEY, JSON.stringify(diagnoses));
+
+    // userId가 있으면 사용자별 키에도 저장 (MyPage에서 읽기 위함)
+    if (userId) {
+      const userDiagnosesKey = getUserDiagnosesKey(userId);
+      const userDiagnoses = JSON.parse(localStorage.getItem(userDiagnosesKey) || '[]');
+      userDiagnoses.unshift(diagnosisData);
+      localStorage.setItem(userDiagnosesKey, JSON.stringify(userDiagnoses));
+    }
 
     // Firestore에 저장 (userId가 있으면)
     try {
