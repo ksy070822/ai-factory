@@ -1075,6 +1075,26 @@ export const medicationLogService = {
     }
   },
 
+  // 사용자의 약물 처방 기록 조회
+  async getMedicationsByUser(userId) {
+    try {
+      const q = query(
+        collection(db, 'medicationLogs'),
+        where('userId', '==', userId),
+        orderBy('createdAt', 'desc')
+      );
+      const querySnapshot = await getDocs(q);
+      const medications = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      return { success: true, data: medications };
+    } catch (error) {
+      console.error('약물 기록 조회 오류:', error);
+      return { success: false, error, data: [] };
+    }
+  },
+
   // 약물 피드백 업데이트
   async updateMedicationFeedback(medicationId, feedback) {
     try {
@@ -1091,6 +1111,52 @@ export const medicationLogService = {
   }
 };
 
+// ============ 건강검진 기록 서비스 ============
+export const checkupService = {
+  // 사용자의 건강검진 기록 조회
+  async getCheckupsByUser(userId) {
+    try {
+      const q = query(
+        collection(db, 'healthCheckups'),
+        where('userId', '==', userId),
+        orderBy('createdAt', 'desc')
+      );
+      const querySnapshot = await getDocs(q);
+      const checkups = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      return { success: true, data: checkups };
+    } catch (error) {
+      console.error('건강검진 기록 조회 오류:', error);
+      return { success: false, error, data: [] };
+    }
+  }
+};
+
+// ============ 예방접종 기록 서비스 ============
+export const vaccinationService = {
+  // 사용자의 예방접종 기록 조회
+  async getVaccinationsByUser(userId) {
+    try {
+      const q = query(
+        collection(db, 'vaccinations'),
+        where('userId', '==', userId),
+        orderBy('createdAt', 'desc')
+      );
+      const querySnapshot = await getDocs(q);
+      const vaccinations = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      return { success: true, data: vaccinations };
+    } catch (error) {
+      console.error('예방접종 기록 조회 오류:', error);
+      return { success: false, error, data: [] };
+    }
+  }
+};
+
 export default {
   userService,
   petService,
@@ -1103,5 +1169,7 @@ export default {
   medicalRecordService,  // 🔥 환자 기록 서비스
   commentTemplateService,  // 🔥 코멘트 템플릿 서비스
   medicationLogService,  // 🔥 약물 처방 기록 서비스
+  checkupService,  // 🔥 건강검진 기록 서비스
+  vaccinationService,  // 🔥 예방접종 기록 서비스
   migrationHelper
 };

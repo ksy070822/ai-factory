@@ -32,7 +32,14 @@ import { OCRUpload } from './src/components/OCRUpload'
 import { ClinicAdmin } from './src/components/ClinicAdmin'
 import { seedGuardianData, seedClinicData } from './src/utils/seedTestDataUtils'
 import { seedMedicationData } from './src/utils/seedMedicationData'
-import { fixPpukuData, shareAllResults } from './src/utils/fixDemoData'
+import {
+  fixPpukuData,
+  shareAllResults,
+  addCheckupRecords,
+  addVaccinationRecords,
+  addMedicationRecords,
+  addAllMedicalRecords
+} from './src/utils/fixDemoData'
 import { auth } from './src/lib/firebase'
 import { ClinicDashboard } from './src/components/ClinicDashboard'
 import { AICareConsultation } from './src/components/AICareConsultation'
@@ -5506,6 +5513,91 @@ function App() {
       }
     };
 
+    // 🏥 건강검진 기록 추가
+    window.addCheckupRecords = async (userId = null) => {
+      try {
+        const uid = userId || currentUser?.uid;
+        if (!uid) {
+          alert('❌ 로그인이 필요합니다.');
+          return;
+        }
+        const result = await addCheckupRecords(uid);
+        if (result.success) {
+          alert(`✅ ${result.message}`);
+        } else {
+          alert(`❌ 실패: ${result.error}`);
+        }
+        return result;
+      } catch (error) {
+        console.error('❌ 오류:', error);
+        throw error;
+      }
+    };
+
+    // 💉 예방접종 기록 추가
+    window.addVaccinationRecords = async (userId = null) => {
+      try {
+        const uid = userId || currentUser?.uid;
+        if (!uid) {
+          alert('❌ 로그인이 필요합니다.');
+          return;
+        }
+        const result = await addVaccinationRecords(uid);
+        if (result.success) {
+          alert(`✅ ${result.message}`);
+        } else {
+          alert(`❌ 실패: ${result.error}`);
+        }
+        return result;
+      } catch (error) {
+        console.error('❌ 오류:', error);
+        throw error;
+      }
+    };
+
+    // 💊 의약품 처방 기록 추가
+    window.addMedicationRecords = async (userId = null) => {
+      try {
+        const uid = userId || currentUser?.uid;
+        if (!uid) {
+          alert('❌ 로그인이 필요합니다.');
+          return;
+        }
+        const result = await addMedicationRecords(uid);
+        if (result.success) {
+          alert(`✅ ${result.message}`);
+        } else {
+          alert(`❌ 실패: ${result.error}`);
+        }
+        return result;
+      } catch (error) {
+        console.error('❌ 오류:', error);
+        throw error;
+      }
+    };
+
+    // 🎯 모든 의료 기록 한 번에 추가
+    window.addAllMedicalRecords = async (userId = null) => {
+      try {
+        const uid = userId || currentUser?.uid;
+        if (!uid) {
+          alert('❌ 로그인이 필요합니다.');
+          return;
+        }
+        console.log('🎯 모든 의료 기록 추가 시작...');
+        const result = await addAllMedicalRecords(uid);
+        if (result.success) {
+          alert(`✅ ${result.message}\n\n건강검진: ${result.results.checkups.count}건\n예방접종: ${result.results.vaccinations.count}건\n의약품 처방: ${result.results.medications.count}건`);
+        } else {
+          alert(`❌ 실패`);
+        }
+        return result;
+      } catch (error) {
+        console.error('❌ 오류:', error);
+        throw error;
+      }
+    };
+
     console.log('💡 테스트 데이터 시드 함수가 등록되었습니다.');
     console.log('   사용법: const user = window.auth.currentUser; await window.seedGuardianData(user.uid, user.email);');
     console.log('   약물 처방 정보 추가: await window.seedMedicationData(user.uid);');
@@ -5514,6 +5606,12 @@ function App() {
     console.log('🔧 발표 준비 함수:');
     console.log('   뿌꾸 진료 결과 생성: await window.fixPpukuData();');
     console.log('   모든 진료 결과 공유: await window.shareAllResults();');
+    console.log('');
+    console.log('🏥 의료 기록 추가 함수:');
+    console.log('   건강검진 기록 추가: await window.addCheckupRecords();');
+    console.log('   예방접종 기록 추가: await window.addVaccinationRecords();');
+    console.log('   의약품 처방 기록 추가: await window.addMedicationRecords();');
+    console.log('   모든 기록 한번에 추가: await window.addAllMedicalRecords();');
   }, []);
 
   // 로그인 성공 핸들러

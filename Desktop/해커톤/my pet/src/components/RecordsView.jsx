@@ -1,5 +1,11 @@
 import { useState, useEffect } from 'react';
-import { diagnosisService, clinicResultService, medicationLogService } from '../services/firestore';
+import {
+  diagnosisService,
+  clinicResultService,
+  medicationLogService,
+  checkupService,
+  vaccinationService
+} from '../services/firestore';
 
 const DIAGNOSIS_KEY = 'petMedical_diagnoses';
 const CLINIC_RESULTS_KEY = 'petMedical_clinicResults';
@@ -364,6 +370,8 @@ export function RecordsView({ petData, pets = [], onBack, onViewDiagnosis, onOCR
   const [clinicResults, setClinicResults] = useState([]);
   const [medicationLogs, setMedicationLogs] = useState([]); // Firestore 약물 처방 기록
   const [medicationFeedback, setMedicationFeedback] = useState({});
+  const [checkups, setCheckups] = useState([]); // 🔥 건강검진 기록
+  const [vaccinations, setVaccinations] = useState([]); // 🔥 예방접종 기록
   const [useDummyData, setUseDummyData] = useState(false); // 더미데이터 사용 플래그 - 실제 데이터만 표시
   const [showCheckupDetail, setShowCheckupDetail] = useState(false); // 건강검진 상세 보기
 
@@ -440,6 +448,44 @@ export function RecordsView({ petData, pets = [], onBack, onViewDiagnosis, onOCR
     };
 
     loadMedicationLogs();
+  }, [petData]);
+
+  // 🏥 건강검진 기록 로드 (Firestore)
+  useEffect(() => {
+    const loadCheckups = async () => {
+      if (!petData?.userId) return;
+
+      try {
+        const checkupRes = await checkupService.getCheckupsByUser(petData.userId);
+        if (checkupRes.success && checkupRes.data.length > 0) {
+          console.log('🏥 건강검진 기록 로드 성공:', checkupRes.data.length, '개');
+          setCheckups(checkupRes.data);
+        }
+      } catch (error) {
+        console.warn('Firestore 건강검진 기록 로드 오류:', error);
+      }
+    };
+
+    loadCheckups();
+  }, [petData]);
+
+  // 💉 예방접종 기록 로드 (Firestore)
+  useEffect(() => {
+    const loadVaccinations = async () => {
+      if (!petData?.userId) return;
+
+      try {
+        const vacRes = await vaccinationService.getVaccinationsByUser(petData.userId);
+        if (vacRes.success && vacRes.data.length > 0) {
+          console.log('💉 예방접종 기록 로드 성공:', vacRes.data.length, '개');
+          setVaccinations(vacRes.data);
+        }
+      } catch (error) {
+        console.warn('Firestore 예방접종 기록 로드 오류:', error);
+      }
+    };
+
+    loadVaccinations();
   }, [petData]);
 
   // 의약품 피드백 로드
@@ -599,10 +645,20 @@ export function RecordsView({ petData, pets = [], onBack, onViewDiagnosis, onOCR
   })();
 
   // 건강검진 기록
-  const checkupRecords = useDummyData ? DUMMY_CHECKUPS : [];
+  const checkupRecords = (() => {
+    const realData = checkups.sort((a, b) =>
+      new Date(b.date) - new Date(a.date)
+    );
+    return useDummyData ? [...realData, ...DUMMY_CHECKUPS] : realData;
+  })();
 
   // 예방접종 기록
-  const vaccinationRecords = useDummyData ? DUMMY_VACCINATIONS : [];
+  const vaccinationRecords = (() => {
+    const realData = vaccinations.sort((a, b) =>
+      new Date(b.date) - new Date(a.date)
+    );
+    return useDummyData ? [...realData, ...DUMMY_VACCINATIONS] : realData;
+  })();
 
   // 케어 기록
   const careRecords = useDummyData ? DUMMY_CARE_LOGS : [];

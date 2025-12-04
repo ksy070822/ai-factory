@@ -175,3 +175,241 @@ export async function shareAllResults() {
     };
   }
 }
+
+// 🏥 건강검진 기록 추가
+export async function addCheckupRecords(userId, petId = 'HjxrCWoW5WlFymH1A0tH') {
+  console.log('🏥 건강검진 기록 추가 시작...');
+
+  try {
+    const checkups = [
+      {
+        userId,
+        petId,
+        petName: '뿌꾸',
+        date: '2024-09-05',
+        hospitalName: '행복 동물병원',
+        type: '종합건강검진',
+        results: [
+          { item: '혈액검사', status: 'normal', note: '모든 수치 정상 범위' },
+          { item: '소변검사', status: 'normal', note: '요비중 정상' },
+          { item: '심장초음파', status: 'normal', note: '심장 기능 양호' },
+          { item: '복부초음파', status: 'normal', note: '장기 상태 양호' }
+        ],
+        overallStatus: '건강',
+        createdAt: serverTimestamp()
+      },
+      {
+        userId,
+        petId,
+        petName: '뿌꾸',
+        date: '2024-03-15',
+        hospitalName: '24시 강남동물의료센터',
+        type: '기본건강검진',
+        results: [
+          { item: '혈액검사', status: 'normal', note: '정상' },
+          { item: '체중측정', status: 'caution', note: '약간 과체중 (4.8kg → 5.2kg)' },
+          { item: '치아검사', status: 'normal', note: '치석 약간 있음' }
+        ],
+        overallStatus: '주의',
+        createdAt: serverTimestamp()
+      }
+    ];
+
+    let count = 0;
+    for (const checkup of checkups) {
+      await addDoc(collection(db, 'healthCheckups'), checkup);
+      count++;
+      console.log(`   ✅ 건강검진 기록 추가: ${checkup.date} - ${checkup.type}`);
+    }
+
+    console.log(`\n✅ 총 ${count}건의 건강검진 기록 추가 완료`);
+
+    return {
+      success: true,
+      count,
+      message: `${count}건의 건강검진 기록을 추가했습니다.`
+    };
+  } catch (error) {
+    console.error('❌ 건강검진 기록 추가 오류:', error);
+    return {
+      success: false,
+      error: error.message
+    };
+  }
+}
+
+// 💉 예방접종 기록 추가
+export async function addVaccinationRecords(userId, petId = 'HjxrCWoW5WlFymH1A0tH') {
+  console.log('💉 예방접종 기록 추가 시작...');
+
+  try {
+    const vaccinations = [
+      {
+        userId,
+        petId,
+        petName: '뿌꾸',
+        date: '2024-08-20',
+        name: '종합백신 (DHPPL)',
+        hospitalName: '행복 동물병원',
+        nextDue: '2025-08-20',
+        status: 'completed',
+        createdAt: serverTimestamp()
+      },
+      {
+        userId,
+        petId,
+        petName: '뿌꾸',
+        date: '2024-11-01',
+        name: '심장사상충 예방',
+        hospitalName: '행복 동물병원',
+        nextDue: '2024-12-01',
+        status: 'due_soon',
+        createdAt: serverTimestamp()
+      },
+      {
+        userId,
+        petId,
+        petName: '뿌꾸',
+        date: '2024-06-15',
+        name: '광견병 예방접종',
+        hospitalName: '24시 강남동물의료센터',
+        nextDue: '2025-06-15',
+        status: 'completed',
+        createdAt: serverTimestamp()
+      }
+    ];
+
+    let count = 0;
+    for (const vaccination of vaccinations) {
+      await addDoc(collection(db, 'vaccinations'), vaccination);
+      count++;
+      console.log(`   ✅ 예방접종 기록 추가: ${vaccination.date} - ${vaccination.name}`);
+    }
+
+    console.log(`\n✅ 총 ${count}건의 예방접종 기록 추가 완료`);
+
+    return {
+      success: true,
+      count,
+      message: `${count}건의 예방접종 기록을 추가했습니다.`
+    };
+  } catch (error) {
+    console.error('❌ 예방접종 기록 추가 오류:', error);
+    return {
+      success: false,
+      error: error.message
+    };
+  }
+}
+
+// 💊 의약품 처방 기록 추가
+export async function addMedicationRecords(userId, petId = 'HjxrCWoW5WlFymH1A0tH') {
+  console.log('💊 의약품 처방 기록 추가 시작...');
+
+  try {
+    const medications = [
+      {
+        userId,
+        petId,
+        petName: '뿌꾸',
+        date: '2024-11-28',
+        medications: ['피부연고 (히드로코르티손)', '항히스타민제'],
+        pharmacyName: '행복 동물병원',
+        daysSupply: '7일분',
+        status: 'effective',
+        evaluation: {
+          userFeedback: 'effective',
+          feedbackAt: serverTimestamp()
+        },
+        createdAt: serverTimestamp()
+      },
+      {
+        userId,
+        petId,
+        petName: '뿌꾸',
+        date: '2024-11-20',
+        medications: ['아목시실린 (항생제)', '소염진통제'],
+        pharmacyName: '24시 강남동물의료센터',
+        daysSupply: '5일분',
+        status: 'effective',
+        evaluation: {
+          userFeedback: 'effective',
+          feedbackAt: serverTimestamp()
+        },
+        createdAt: serverTimestamp()
+      },
+      {
+        userId,
+        petId,
+        petName: '뿌꾸',
+        date: '2024-11-15',
+        medications: ['프로바이오틱스', '장영양제'],
+        pharmacyName: '행복 동물병원',
+        daysSupply: '14일분',
+        status: 'none',
+        createdAt: serverTimestamp()
+      },
+      {
+        userId,
+        petId,
+        petName: '뿌꾸',
+        date: '2024-10-28',
+        medications: ['넥스가드 스펙트라'],
+        pharmacyName: '행복 동물병원',
+        daysSupply: '1회분',
+        status: 'none',
+        createdAt: serverTimestamp()
+      }
+    ];
+
+    let count = 0;
+    for (const medication of medications) {
+      await addDoc(collection(db, 'medicationLogs'), medication);
+      count++;
+      console.log(`   ✅ 의약품 처방 기록 추가: ${medication.date} - ${medication.medications.join(', ')}`);
+    }
+
+    console.log(`\n✅ 총 ${count}건의 의약품 처방 기록 추가 완료`);
+
+    return {
+      success: true,
+      count,
+      message: `${count}건의 의약품 처방 기록을 추가했습니다.`
+    };
+  } catch (error) {
+    console.error('❌ 의약품 처방 기록 추가 오류:', error);
+    return {
+      success: false,
+      error: error.message
+    };
+  }
+}
+
+// 🎯 한 번에 모든 기록 추가
+export async function addAllMedicalRecords(userId, petId = 'HjxrCWoW5WlFymH1A0tH') {
+  console.log('🎯 모든 의료 기록 추가 시작...\n');
+
+  const results = {
+    checkups: await addCheckupRecords(userId, petId),
+    vaccinations: await addVaccinationRecords(userId, petId),
+    medications: await addMedicationRecords(userId, petId)
+  };
+
+  const totalCount =
+    (results.checkups.count || 0) +
+    (results.vaccinations.count || 0) +
+    (results.medications.count || 0);
+
+  console.log('\n🎉 모든 의료 기록 추가 완료!');
+  console.log(`   건강검진: ${results.checkups.count || 0}건`);
+  console.log(`   예방접종: ${results.vaccinations.count || 0}건`);
+  console.log(`   의약품 처방: ${results.medications.count || 0}건`);
+  console.log(`   총: ${totalCount}건`);
+
+  return {
+    success: true,
+    results,
+    totalCount,
+    message: `총 ${totalCount}건의 의료 기록을 추가했습니다.`
+  };
+}
