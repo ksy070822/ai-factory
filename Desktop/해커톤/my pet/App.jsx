@@ -2565,6 +2565,8 @@ function MultiAgentDiagnosis({ petData, symptomData, onComplete, onBack, onDiagn
   const [conversationHistory, setConversationHistory] = useState([]);
   const [showDiagnosisReport, setShowDiagnosisReport] = useState(false); // 진단서 표시 여부
   const messagesEndRef = useRef(null); // 자동 스크롤을 위한 ref
+  const chatContainerRef = useRef(null); // 채팅 컨테이너 ref
+  const userScrolledRef = useRef(false); // 사용자가 스크롤했는지 추적
 
   // 보호자 응답 관련 상태
   const [guardianQuestions, setGuardianQuestions] = useState([]); // 현재 질문들
@@ -2579,12 +2581,33 @@ function MultiAgentDiagnosis({ petData, symptomData, onComplete, onBack, onDiagn
   const [selectedFAQs, setSelectedFAQs] = useState([]); // 선택된 FAQ IDs
   const faqResolveRef = useRef(null); // FAQ Promise resolve 함수 저장
 
-  // 자동 스크롤: 메시지가 추가될 때마다 맨 아래로 스크롤
+  // 자동 스크롤: 메시지가 추가될 때마다 맨 아래로 스크롤 (사용자가 스크롤하지 않은 경우에만)
   useEffect(() => {
-    if (messagesEndRef.current) {
+    if (messagesEndRef.current && !userScrolledRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [messages]);
+
+  // 스크롤 이벤트 핸들러: 사용자가 위로 스크롤하면 자동 스크롤 비활성화
+  useEffect(() => {
+    const container = chatContainerRef.current;
+    if (!container) return;
+
+    const handleScroll = () => {
+      const { scrollTop, scrollHeight, clientHeight } = container;
+      const isAtBottom = scrollHeight - scrollTop - clientHeight < 50;
+
+      // 맨 아래에 있으면 자동 스크롤 다시 활성화
+      if (isAtBottom) {
+        userScrolledRef.current = false;
+      } else {
+        userScrolledRef.current = true;
+      }
+    };
+
+    container.addEventListener('scroll', handleScroll);
+    return () => container.removeEventListener('scroll', handleScroll);
+  }, []);
   
   useEffect(() => {
     let isMounted = true; // 컴포넌트 마운트 상태 추적
@@ -3214,7 +3237,7 @@ function MultiAgentDiagnosis({ petData, symptomData, onComplete, onBack, onDiagn
       </div>
       
       {/* 채팅창 UI */}
-      <div className="chat-messages-container" style={{
+      <div ref={chatContainerRef} className="chat-messages-container" style={{
         padding: '16px',
         display: 'flex',
         flexDirection: 'column',
