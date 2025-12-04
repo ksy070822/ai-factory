@@ -688,10 +688,10 @@ export function ClinicDashboard({ currentUser, onBack, onModeSwitch }) {
     const daysInMonth = new Date(year, month + 1, 0).getDate();
 
     const bookingsByDate = {};
-    
-    // todayBookings와 monthlyBookings를 합쳐서 사용
-    const allBookings = [...todayBookings, ...monthlyBookings];
-    
+
+    // 확정된 예약만 달력에 표시 (확인대기 제외)
+    const allBookings = [...todayBookings, ...monthlyBookings].filter(b => b.status !== 'pending');
+
     allBookings.forEach(booking => {
       // booking.date가 문자열 형식(YYYY-MM-DD)일 수도 있고 Date 객체일 수도 있음
       let bookingDate;
@@ -707,7 +707,7 @@ export function ClinicDashboard({ currentUser, onBack, onModeSwitch }) {
       } else {
         return; // 날짜를 파싱할 수 없으면 스킵
       }
-      
+
       if (bookingDate.getMonth() === month && bookingDate.getFullYear() === year) {
         const day = bookingDate.getDate();
         bookingsByDate[day] = (bookingsByDate[day] || 0) + 1;
@@ -768,16 +768,16 @@ export function ClinicDashboard({ currentUser, onBack, onModeSwitch }) {
     return days;
   };
 
-  // 선택된 날짜의 예약 목록
+  // 선택된 날짜의 예약 목록 (확정된 예약만 - 확인대기 제외)
   const getSelectedDateBookings = () => {
     if (!selectedDate) return [];
     const year = currentMonth.getFullYear();
     const month = currentMonth.getMonth();
     const selectedDateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(selectedDate).padStart(2, '0')}`;
-    
-    // todayBookings와 monthlyBookings를 합쳐서 사용
-    const allBookings = [...todayBookings, ...monthlyBookings];
-    
+
+    // 확정된 예약만 (확인대기 제외)
+    const allBookings = [...todayBookings, ...monthlyBookings].filter(b => b.status !== 'pending');
+
     return allBookings.filter(booking => {
       // booking.date가 문자열 형식(YYYY-MM-DD)일 수도 있고 Date 객체일 수도 있음
       let bookingDate;
@@ -797,7 +797,7 @@ export function ClinicDashboard({ currentUser, onBack, onModeSwitch }) {
       } else {
         return false;
       }
-      
+
       return bookingDate.getMonth() === month &&
         bookingDate.getFullYear() === year &&
         bookingDate.getDate() === selectedDate;

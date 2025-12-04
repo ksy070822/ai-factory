@@ -936,49 +936,15 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet, onLogout }) {
   const [latestBooking, setLatestBooking] = useState(null);
   const [randomMessage, setRandomMessage] = useState(null);
 
-  // 랜덤 유의사항 메시지 로드
+  // 랜덤 유의사항 메시지 (기본 메시지 사용 - API 오류로 비활성화)
   useEffect(() => {
-    const loadRandomMessage = async () => {
-      if (!petData?.id) return;
+    // 기본 메시지 표시 (API 호출 비활성화)
+    if (petData?.id) {
       const petName = petData?.petName || petData?.name || '반려동물';
-
-      try {
-        // 조건에 따라 랜덤 메시지 가져오기 (getByPetId 오류 방지를 위해 직접 템플릿 조회)
-        const result = await commentTemplateService.getRandomTemplate(false, true);
-
-        if (result.success && result.data && typeof result.data.text === 'string') {
-          // {name} 플레이스홀더를 실제 이름으로 교체
-          const messageText = result.data.text.replace(/{name}/g, petName);
-          setRandomMessage({
-            ...result.data,
-            displayText: messageText
-          });
-        } else if (result.success && result.data) {
-          // text가 문자열이 아닌 경우 안전 처리
-          const textContent = typeof result.data.text === 'object'
-            ? (result.data.text?.content || result.data.text?.message || JSON.stringify(result.data.text))
-            : String(result.data.text || '');
-          const messageText = textContent.replace(/{name}/g, petName);
-          setRandomMessage({
-            ...result.data,
-            displayText: messageText || `${petName}의 건강한 하루를 위해 충분한 물과 규칙적인 식사를 챙겨주세요! 🐾`
-          });
-        } else {
-          // 기본 케어 메시지 설정
-          setRandomMessage({
-            displayText: `${petName}의 건강한 하루를 위해 충분한 물과 규칙적인 식사를 챙겨주세요! 🐾`
-          });
-        }
-      } catch (error) {
-        console.error('랜덤 메시지 로드 오류:', error);
-        // 오류 시 기본 케어 메시지 설정
-        setRandomMessage({
-          displayText: `${petName}의 건강한 하루를 위해 충분한 물과 규칙적인 식사를 챙겨주세요! 🐾`
-        });
-      }
-    };
-
-    loadRandomMessage();
+      setRandomMessage({
+        displayText: `${petName}의 건강을 위해 오늘도 함께해요!`
+      });
+    }
   }, [petData?.id]);
 
   // 오늘 케어 기록 저장
@@ -2666,6 +2632,8 @@ function MultiAgentDiagnosis({ petData, symptomData, onComplete, onBack, onDiagn
   const [conversationHistory, setConversationHistory] = useState([]);
   const [showDiagnosisReport, setShowDiagnosisReport] = useState(false); // 진단서 표시 여부
   const messagesEndRef = useRef(null); // 자동 스크롤을 위한 ref
+  const chatContainerRef = useRef(null); // 채팅 컨테이너 ref
+  const userScrolledRef = useRef(false); // 사용자가 스크롤했는지 추적
 
   // 보호자 응답 관련 상태
   const [guardianQuestions, setGuardianQuestions] = useState([]); // 현재 질문들
@@ -2680,12 +2648,33 @@ function MultiAgentDiagnosis({ petData, symptomData, onComplete, onBack, onDiagn
   const [selectedFAQs, setSelectedFAQs] = useState([]); // 선택된 FAQ IDs
   const faqResolveRef = useRef(null); // FAQ Promise resolve 함수 저장
 
-  // 자동 스크롤: 메시지가 추가될 때마다 맨 아래로 스크롤
+  // 자동 스크롤: 메시지가 추가될 때마다 맨 아래로 스크롤 (사용자가 스크롤하지 않은 경우에만)
   useEffect(() => {
-    if (messagesEndRef.current) {
+    if (messagesEndRef.current && !userScrolledRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [messages]);
+
+  // 스크롤 이벤트 핸들러: 사용자가 위로 스크롤하면 자동 스크롤 비활성화
+  useEffect(() => {
+    const container = chatContainerRef.current;
+    if (!container) return;
+
+    const handleScroll = () => {
+      const { scrollTop, scrollHeight, clientHeight } = container;
+      const isAtBottom = scrollHeight - scrollTop - clientHeight < 50;
+
+      // 맨 아래에 있으면 자동 스크롤 다시 활성화
+      if (isAtBottom) {
+        userScrolledRef.current = false;
+      } else {
+        userScrolledRef.current = true;
+      }
+    };
+
+    container.addEventListener('scroll', handleScroll);
+    return () => container.removeEventListener('scroll', handleScroll);
+  }, []);
   
   useEffect(() => {
     let isMounted = true; // 컴포넌트 마운트 상태 추적
@@ -2747,8 +2736,6 @@ function MultiAgentDiagnosis({ petData, symptomData, onComplete, onBack, onDiagn
         });
 
         // 프론트엔드 모드로 직접 실행 (백엔드 API 사용 안 함)
-        console.log('[MultiAgentDiagnosis] 프론트엔드 모드로 진단 시작');
-        
         if (!isMounted) return;
 
         // 프론트엔드 모드로 실행 (agentOrchestrator 사용)
@@ -3317,7 +3304,7 @@ function MultiAgentDiagnosis({ petData, symptomData, onComplete, onBack, onDiagn
       </div>
       
       {/* 채팅창 UI */}
-      <div className="chat-messages-container" style={{
+      <div ref={chatContainerRef} className="chat-messages-container" style={{
         padding: '16px',
         display: 'flex',
         flexDirection: 'column',
