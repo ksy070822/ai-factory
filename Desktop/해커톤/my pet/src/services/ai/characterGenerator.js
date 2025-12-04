@@ -4,8 +4,6 @@
  */
 
 export async function generatePetCharacter(petData, style) {
-  console.log('[CharacterGenerator] 캐릭터 생성 요청:', { petData, style });
-
   // Placeholder - 실제 구현 필요
   return {
     success: false,
