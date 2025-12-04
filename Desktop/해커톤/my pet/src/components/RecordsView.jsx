@@ -364,7 +364,7 @@ export function RecordsView({ petData, pets = [], onBack, onViewDiagnosis, onOCR
   const [clinicResults, setClinicResults] = useState([]);
   const [medicationLogs, setMedicationLogs] = useState([]); // Firestore 약물 처방 기록
   const [medicationFeedback, setMedicationFeedback] = useState({});
-  const [useDummyData, setUseDummyData] = useState(true); // 더미데이터 사용 플래그 - 샘플 데이터 표시
+  const [useDummyData, setUseDummyData] = useState(false); // 더미데이터 사용 플래그 - 실제 데이터만 표시
   const [showCheckupDetail, setShowCheckupDetail] = useState(false); // 건강검진 상세 보기
 
   // 진단 기록 로드 (Firestore)
