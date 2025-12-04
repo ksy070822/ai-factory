@@ -356,8 +356,8 @@ export function ClinicDashboard({ currentUser, onBack, onModeSwitch }) {
   // 환자 목록 로드 (clinicPatients 컬렉션에서 직접 조회 + 예약 기록에서 고유 환자 추출)
   const loadPatientList = async () => {
     try {
-      // 1) clinicPatients 컬렉션에서 직접 환자 목록 조회
-      const clinicPatients = await getClinicPatients(currentClinic.id, { limit: 100 });
+      // 1) clinicPatients 컬렉션에서 직접 환자 목록 조회 (로딩 속도 개선을 위해 30개로 제한)
+      const clinicPatients = await getClinicPatients(currentClinic.id, { limit: 30 });
       
       console.log('📋 [loadPatientList] clinicPatients 조회 결과:', clinicPatients.length, '명');
       
@@ -391,9 +391,9 @@ export function ClinicDashboard({ currentUser, onBack, onModeSwitch }) {
       
       console.log('📋 [loadPatientList] 변환된 환자:', patientsFromCollection.length, '명');
 
-      // 2) 예약 기록에서도 고유 환자 추출 (기존 로직 유지)
+      // 2) 예약 기록에서도 고유 환자 추출 (기존 로직 유지, 로딩 속도 개선을 위해 제한)
       const allBookings = await bookingService.getBookingsByClinic(currentClinic.id);
-      const allResults = await getClinicResults(currentClinic.id, { limit: 200 });
+      const allResults = await getClinicResults(currentClinic.id, { limit: 50 });
 
       const petsMap = new Map();
 
