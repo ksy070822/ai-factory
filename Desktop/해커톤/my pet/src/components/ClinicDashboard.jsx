@@ -640,7 +640,8 @@ export function ClinicDashboard({ currentUser, onBack, onModeSwitch }) {
     const daysInMonth = new Date(year, month + 1, 0).getDate();
 
     const bookingsByDate = {};
-    monthlyBookings.forEach(booking => {
+    // 확정된 예약만 달력에 표시 (확인대기 제외)
+    monthlyBookings.filter(b => b.status !== 'pending').forEach(booking => {
       const bookingDate = new Date(booking.date);
       if (bookingDate.getMonth() === month && bookingDate.getFullYear() === year) {
         const day = bookingDate.getDate();
@@ -699,14 +700,15 @@ export function ClinicDashboard({ currentUser, onBack, onModeSwitch }) {
     return days;
   };
 
-  // 선택된 날짜의 예약 목록
+  // 선택된 날짜의 예약 목록 (확정된 예약만 - 확인대기 제외)
   const getSelectedDateBookings = () => {
     if (!selectedDate) return [];
     const year = currentMonth.getFullYear();
     const month = currentMonth.getMonth();
     return monthlyBookings.filter(booking => {
       const bookingDate = new Date(booking.date);
-      return bookingDate.getDate() === selectedDate &&
+      return booking.status !== 'pending' &&
+             bookingDate.getDate() === selectedDate &&
              bookingDate.getMonth() === month &&
              bookingDate.getFullYear() === year;
     }).sort((a, b) => a.time.localeCompare(b.time));
