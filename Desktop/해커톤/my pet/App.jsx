@@ -3,6 +3,7 @@ import './App.css'
 // 백엔드 API 사용 안 함 - 프론트엔드 모드만 사용
 // import { runMultiAgentDiagnosisViaBackend } from './src/services/api/backendAPI'
 import { requestQuestionAnswer } from './src/services/api/backendAPI'
+import { runMultiAgentDiagnosis } from './src/services/ai/agentOrchestrator'
 import { MyPage } from './src/components/MyPage'
 import { Avatar } from './src/components/Avatar'
 import { AvatarLayered } from './src/components/AvatarLayered'
@@ -2617,7 +2618,7 @@ function MultiAgentDiagnosis({ petData, symptomData, onComplete, onBack, onDiagn
         if (!isMounted) return;
 
         // 프론트엔드 모드로 실행 (agentOrchestrator 사용)
-        const { runMultiAgentDiagnosis } = await import('./src/services/ai/agentOrchestrator');
+        // 정적 import로 변경하여 빌드 오류 방지
         
         try {
           const frontendResult = await runMultiAgentDiagnosis(
