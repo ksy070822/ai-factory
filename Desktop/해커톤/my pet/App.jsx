@@ -628,9 +628,19 @@ function ProfileRegistration({ onComplete, userId }) {
                   )}
                 </div>
 
-                {/* 사진 업로드 버튼 */}
-                <div className="profile-options">
-                  <label className="upload-btn" style={{ opacity: loading ? 0.6 : 1 }}>
+                {/* 사진 업로드 및 캐릭터 변환 버튼 */}
+                <div className="profile-options" style={{ display: 'flex', gap: '8px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                  <label className="upload-btn" style={{
+                    opacity: loading ? 0.6 : 1,
+                    flex: previewImage ? '1' : 'none',
+                    minWidth: previewImage ? '120px' : 'auto',
+                    maxWidth: '180px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    height: '40px',
+                    margin: 0
+                  }}>
                     {loading ? '⏳ 업로드 중...' : '📷 사진 업로드'}
                     <input
                       type="file"
@@ -640,7 +650,7 @@ function ProfileRegistration({ onComplete, userId }) {
                       disabled={loading}
                     />
                   </label>
-                  
+
                   {/* 캐릭터 변환 버튼 - base64 이미지가 있으면 표시 (originalImageUrl 없어도 가능) */}
                   {previewImage && (
                     <button
@@ -649,16 +659,24 @@ function ProfileRegistration({ onComplete, userId }) {
                       disabled={converting}
                       className="upload-btn"
                       style={{
-                        marginTop: '8px',
-                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                        color: 'white',
+                        flex: '1',
+                        minWidth: '160px',
+                        maxWidth: '200px',
+                        height: '40px',
+                        background: '#7dd3fc',
+                        color: '#0c4a6e',
                         border: 'none',
                         opacity: converting ? 0.6 : 1,
+                        margin: 0,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontWeight: '600'
                       }}
                     >
-                      {converting 
-                        ? '🎨 캐릭터 생성 중...' 
-                        : `✨ ${formData.petName || '반려동물'} 캐릭터로 변환하기`
+                      {converting
+                        ? '🎨 생성 중...'
+                        : `✨ 캐릭터로 변환하기`
                       }
                     </button>
                   )}
