@@ -222,6 +222,21 @@ export function MyPage({ onBack, onSelectPet, onViewDiagnosis, onAddPet, onClini
   };
 
   const getRiskColor = (riskLevel) => {
+    // 객체인 경우 처리
+    if (riskLevel && typeof riskLevel === 'object') {
+      const level = riskLevel.riskLevel || riskLevel.level || riskLevel;
+      if (typeof level === 'string') {
+        riskLevel = level;
+      } else {
+        return '#ff9800'; // 기본값
+      }
+    }
+    
+    // 문자열이 아닌 경우 기본값 반환
+    if (typeof riskLevel !== 'string') {
+      return '#ff9800';
+    }
+    
     switch(riskLevel) {
       case 'Emergency':
       case 'high': return '#f44336';
@@ -230,11 +245,26 @@ export function MyPage({ onBack, onSelectPet, onViewDiagnosis, onAddPet, onClini
       case 'medium': return '#ff9800';
       case 'Low':
       case 'low': return '#4caf50';
-      default: return '#666';
+      default: return '#ff9800'; // 기본값
     }
   };
 
   const getRiskLabel = (riskLevel) => {
+    // 객체인 경우 처리
+    if (riskLevel && typeof riskLevel === 'object') {
+      const level = riskLevel.riskLevel || riskLevel.level || riskLevel;
+      if (typeof level === 'string') {
+        riskLevel = level;
+      } else {
+        return '🟡 보통'; // 기본값
+      }
+    }
+    
+    // 문자열이 아닌 경우 기본값 반환
+    if (typeof riskLevel !== 'string') {
+      return '🟡 보통';
+    }
+    
     switch(riskLevel) {
       case 'Emergency':
       case 'high': return '🔴 응급';
@@ -243,7 +273,7 @@ export function MyPage({ onBack, onSelectPet, onViewDiagnosis, onAddPet, onClini
       case 'medium': return '🟡 보통';
       case 'Low':
       case 'low': return '🟢 경미';
-      default: return riskLevel;
+      default: return '🟡 보통'; // 기본값 반환
     }
   };
 
@@ -788,9 +818,9 @@ export function MyPage({ onBack, onSelectPet, onViewDiagnosis, onAddPet, onClini
                       </div>
                       <div
                         className="px-3 py-1 rounded-full text-xs font-bold text-white"
-                        style={{ backgroundColor: getRiskColor(record.riskLevel || record.emergency) }}
+                        style={{ backgroundColor: getRiskColor(record.riskLevel || record.emergency || 'medium') }}
                       >
-                        {getRiskLabel(record.riskLevel || record.emergency)}
+                        {getRiskLabel(record.riskLevel || record.emergency || 'medium')}
                       </div>
                     </div>
                     <div className="mb-2">
