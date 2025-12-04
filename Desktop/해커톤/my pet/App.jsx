@@ -904,7 +904,7 @@ function ProfileList({ pets, onSelectPet, onAddNew, onNavigate }) {
                 onClick={() => onSelectPet(pet)}
               >
                 <div className="w-16 h-16 rounded-full overflow-hidden">
-                  <img src={PROFILE_ICON_IMAGES[pet.species] || PROFILE_ICON_IMAGES.other} alt={pet.petName} className="w-full h-full object-cover" />
+                  <img src={getPetImage(pet, false)} alt={pet.petName} className="w-full h-full object-cover" />
                 </div>
                 <div className="flex-1">
                   <h3 className="font-bold text-gray-900 text-lg">{pet.petName}</h3>
@@ -945,40 +945,124 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet, onLogout }) {
   const [latestBooking, setLatestBooking] = useState(null);
   const [randomMessage, setRandomMessage] = useState(null);
 
-  // 랜덤 유의사항 메시지 로드
+  // 랜덤 유의사항 메시지 로드 (타임아웃 추가로 메인 화면 접근 보장)
   useEffect(() => {
+    let isMounted = true; // 컴포넌트 언마운트 체크
+    
     const loadRandomMessage = async () => {
       if (!petData?.id) return;
       const petName = petData?.petName || petData?.name || '반려동물';
 
-      try {
-        // 조건에 따라 랜덤 메시지 가져오기 (getByPetId 오류 방지를 위해 직접 템플릿 조회)
-        const result = await commentTemplateService.getRandomTemplate(false, true);
-
-        if (result.success && result.data) {
-          // {name} 플레이스홀더를 실제 이름으로 교체
-          const messageText = result.data.text.replace(/{name}/g, petName);
-          setRandomMessage({
-            ...result.data,
-            displayText: messageText
-          });
-        } else {
-          // 기본 케어 메시지 설정
+      // 타임아웃 설정 (5초 후 기본 메시지로 폴백)
+      const timeoutId = setTimeout(() => {
+        if (isMounted) {
           setRandomMessage({
             displayText: `${petName}의 건강한 하루를 위해 충분한 물과 규칙적인 식사를 챙겨주세요! 🐾`
           });
         }
+      }, 5000);
+
+      try {
+        // 실제 병원 방문 기록과 진단 기록 확인 (각각 타임아웃)
+        let hasHospitalVisit = false;
+        let hasDiagnosis = false;
+
+        // 병원 방문 기록 확인 (예약 + 실제 방문) - 2초 타임아웃
+        try {
+          if (petData?.userId) {
+            const bookingPromise = bookingService.getBookingsByUser(petData.userId);
+            const timeoutPromise = new Promise((_, reject) => 
+              setTimeout(() => reject(new Error('타임아웃')), 2000)
+            );
+            
+            const bookingResult = await Promise.race([bookingPromise, timeoutPromise]);
+            const bookings = bookingResult?.data || bookingResult || [];
+            // 예약이 있고 상태가 confirmed이거나 완료된 예약이 있는지 확인
+            hasHospitalVisit = bookings.some(b => 
+              b.status === 'confirmed' || b.status === 'completed' || 
+              (b.date && new Date(b.date) <= new Date())
+            );
+          }
+        } catch (err) {
+          console.warn('예약 기록 확인 실패 (타임아웃 또는 오류):', err);
+        }
+
+        // AI 진단 기록 확인 - 2초 타임아웃
+        try {
+          const diagnosisPromise = diagnosisService.getDiagnosesByPet(petData.id);
+          const timeoutPromise = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('타임아웃')), 2000)
+          );
+          
+          const diagnosisResult = await Promise.race([diagnosisPromise, timeoutPromise]);
+          const diagnoses = diagnosisResult?.data || diagnosisResult || [];
+          hasDiagnosis = diagnoses.length > 0;
+        } catch (err) {
+          console.warn('진단 기록 확인 실패 (타임아웃 또는 오류):', err);
+          // localStorage에서도 확인 (동기 작업이므로 빠름)
+          try {
+            const stored = localStorage.getItem('petMedical_diagnoses');
+            if (stored) {
+              const allDiagnoses = JSON.parse(stored);
+              hasDiagnosis = allDiagnoses.some(d => d.petId === petData.id);
+            }
+          } catch (e) {
+            console.warn('localStorage 진단 기록 확인 실패:', e);
+          }
+        }
+
+        // 조건에 따라 랜덤 메시지 가져오기 - 3초 타임아웃
+        try {
+          const templatePromise = commentTemplateService.getRandomTemplate(hasHospitalVisit, hasDiagnosis);
+          const timeoutPromise = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('타임아웃')), 3000)
+          );
+          
+          const result = await Promise.race([templatePromise, timeoutPromise]);
+          clearTimeout(timeoutId); // 성공 시 타임아웃 취소
+
+          if (isMounted && result.success && result.data) {
+            // {name} 플레이스홀더를 실제 이름으로 교체
+            const messageText = result.data.text.replace(/{name}/g, petName);
+            setRandomMessage({
+              ...result.data,
+              displayText: messageText
+            });
+          } else if (isMounted) {
+            // 기본 케어 메시지 설정
+            setRandomMessage({
+              displayText: `${petName}의 건강한 하루를 위해 충분한 물과 규칙적인 식사를 챙겨주세요! 🐾`
+            });
+          }
+        } catch (err) {
+          clearTimeout(timeoutId);
+          if (isMounted) {
+            console.warn('랜덤 메시지 로드 실패 (타임아웃 또는 오류):', err);
+            // 기본 케어 메시지 설정
+            setRandomMessage({
+              displayText: `${petName}의 건강한 하루를 위해 충분한 물과 규칙적인 식사를 챙겨주세요! 🐾`
+            });
+          }
+        }
       } catch (error) {
-        console.error('랜덤 메시지 로드 오류:', error);
-        // 오류 시 기본 케어 메시지 설정
-        setRandomMessage({
-          displayText: `${petName}의 건강한 하루를 위해 충분한 물과 규칙적인 식사를 챙겨주세요! 🐾`
-        });
+        clearTimeout(timeoutId);
+        if (isMounted) {
+          console.error('랜덤 메시지 로드 오류:', error);
+          // 오류 시 기본 케어 메시지 설정
+          setRandomMessage({
+            displayText: `${petName}의 건강한 하루를 위해 충분한 물과 규칙적인 식사를 챙겨주세요! 🐾`
+          });
+        }
       }
     };
 
     loadRandomMessage();
-  }, [petData?.id]);
+    
+    // 클린업: 컴포넌트 언마운트 시 플래그 설정
+    return () => {
+      isMounted = false;
+    };
+  }, [petData?.id, petData?.userId]);
 
   // 오늘 케어 기록 저장
   const saveTodayCare = () => {
