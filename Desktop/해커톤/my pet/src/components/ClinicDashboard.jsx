@@ -850,6 +850,7 @@ export function ClinicDashboard({ currentUser, onBack }) {
   // 환자정보 탭 선택 시 환자 목록 로드
   useEffect(() => {
     if (currentClinic?.id && activeTab === 'patients') {
+      console.log('📋 [useEffect] 환자정보 탭 선택, currentClinic.id:', currentClinic.id);
       loadPatientList();
     }
   }, [currentClinic?.id, activeTab]);
