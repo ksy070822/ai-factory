@@ -533,6 +533,20 @@ export function HospitalBooking({ petData, diagnosis, symptomData, onBack, onSel
       return;
     }
 
+    // 🔹 0단계: 테스트 모드일 때 clinicId 재확인 (타이밍 이슈 방지)
+    let currentTestClinicId = testHospital?.id || TEST_HOSPITAL_HAPPYVET.id;
+    if (TEST_MODE_ALL_BOOKINGS_TO_TEST_HOSPITAL && currentTestClinicId === 'happyvet_test_clinic') {
+      // testHospital이 아직 업데이트되지 않은 경우 다시 조회
+      console.log('[예약] ⚠️ testHospital이 기본값이므로 clinicId 재조회...');
+      const freshClinicId = await fetchHappyVetClinicId();
+      if (freshClinicId && freshClinicId !== 'happyvet_test_clinic') {
+        currentTestClinicId = freshClinicId;
+        console.log('[예약] ✅ clinicId 재조회 성공:', freshClinicId);
+      } else {
+        console.warn('[예약] ⚠️ clinicId 재조회 실패, 기본값 사용');
+      }
+    }
+
     // 🔹 1단계: 오늘자 체중 시도 (dailyLogs에서 조회)
     const petId = petData?.id;
     const todayWeight = await getTodayWeightFromDailyLogs(petId);
@@ -637,7 +651,8 @@ export function HospitalBooking({ petData, diagnosis, symptomData, onBack, onSel
 
       // 🧪 테스트 모드: 모든 예약을 테스트 병원 계정으로 전송
       if (TEST_MODE_ALL_BOOKINGS_TO_TEST_HOSPITAL) {
-        actualClinicId = testHospital?.id || TEST_HOSPITAL_HAPPYVET.id;
+        // currentTestClinicId는 위에서 재조회된 값 사용
+        actualClinicId = currentTestClinicId;
         console.log('[예약] 🧪 테스트 모드 - 모든 예약을 테스트 병원으로 전송:', actualClinicId);
         console.log('[예약] 선택한 병원:', bookingHospital.name, '→ 테스트 병원으로 라우팅');
       } else if (bookingHospital.isTestHospital) {

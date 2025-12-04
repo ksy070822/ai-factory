@@ -962,11 +962,16 @@ export async function migrateExistingClinicUser(userId, userData) {
       return { success: true, alreadyMigrated: true, clinics: existingClinics };
     }
 
+    // 🧪 테스트 계정인 경우 "행복 동물병원" 이름 사용
+    const isTestClinicUser = userData.email === 'clinic@happyvet.com' ||
+                             userData.displayName?.includes('수의') ||
+                             userData.displayName?.includes('행복');
+
     // clinicInfo가 users 컬렉션에 있는지 확인
     const clinicInfo = userData.clinicInfo || {
-      name: userData.displayName ? `${userData.displayName}의 병원` : '내 병원',
-      address: null,
-      phone: null,
+      name: isTestClinicUser ? '행복 동물병원' : (userData.displayName ? `${userData.displayName}의 병원` : '내 병원'),
+      address: isTestClinicUser ? '서울특별시 강남구 테헤란로 123' : null,
+      phone: isTestClinicUser ? '02-1234-5678' : null,
       licenseNumber: null
     };
 
