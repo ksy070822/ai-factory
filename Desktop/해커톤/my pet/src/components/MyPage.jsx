@@ -240,7 +240,9 @@ export function MyPage({ onBack, onSelectPet, onViewDiagnosis, onAddPet, onClini
   };
 
   const getRiskColor = (riskLevel) => {
-    switch(riskLevel) {
+    // 객체인 경우 level 속성 추출
+    const level = typeof riskLevel === 'string' ? riskLevel : (riskLevel?.level || riskLevel?.name || 'medium');
+    switch(level) {
       case 'Emergency':
       case 'high': return '#f44336';
       case 'High': return '#ff9800';
@@ -253,7 +255,9 @@ export function MyPage({ onBack, onSelectPet, onViewDiagnosis, onAddPet, onClini
   };
 
   const getRiskLabel = (riskLevel) => {
-    switch(riskLevel) {
+    // 객체인 경우 level 속성 추출
+    const level = typeof riskLevel === 'string' ? riskLevel : (riskLevel?.level || riskLevel?.name || 'medium');
+    switch(level) {
       case 'Emergency':
       case 'high': return '🔴 응급';
       case 'High': return '🟠 위험';
@@ -261,7 +265,7 @@ export function MyPage({ onBack, onSelectPet, onViewDiagnosis, onAddPet, onClini
       case 'medium': return '🟡 보통';
       case 'Low':
       case 'low': return '🟢 경미';
-      default: return riskLevel;
+      default: return '🟡 보통'; // 기본값을 문자열로 반환
     }
   };
 
