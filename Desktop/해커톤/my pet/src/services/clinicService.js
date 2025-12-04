@@ -568,6 +568,65 @@ export async function getClinicResults(clinicId, options = {}) {
 
     return results;
   } catch (error) {
+    // 인덱스 오류인 경우 클라이언트 정렬로 fallback
+    if (error.code === 'failed-precondition' && error.message?.includes('index')) {
+      console.warn('⚠️ Firestore 인덱스가 필요합니다. 클라이언트 정렬로 대체합니다.');
+      const indexUrl = error.message.match(/https:\/\/[^\s]+/)?.[0];
+      if (indexUrl) {
+        console.warn('인덱스 생성 링크:', indexUrl);
+      }
+
+      try {
+        // orderBy 없이 조회
+        const fallbackLimit = options.limit ? options.limit * 2 : 200;
+        const fallbackQuery = query(
+          collection(db, 'clinicResults'),
+          where('clinicId', '==', clinicId),
+          limit(fallbackLimit)
+        );
+        const snapshot = await getDocs(fallbackQuery);
+        let results = [];
+
+        for (const resultDoc of snapshot.docs) {
+          const resultData = resultDoc.data();
+
+          // 펫 정보
+          let pet = null;
+          if (resultData.petId) {
+            try {
+              const petDoc = await getDoc(doc(db, 'pets', resultData.petId));
+              pet = petDoc.exists() ? petDoc.data() : null;
+            } catch (petError) {
+              console.warn('⚠️ [getClinicResults] 펫 정보 조회 실패:', petError.message);
+            }
+          }
+
+          results.push({
+            id: resultDoc.id,
+            ...resultData,
+            pet
+          });
+        }
+
+        // 클라이언트에서 정렬
+        results.sort((a, b) => {
+          const dateA = a.visitDate || '';
+          const dateB = b.visitDate || '';
+          return dateB.localeCompare(dateA);
+        });
+
+        // 제한 적용
+        if (options.limit) {
+          results = results.slice(0, options.limit);
+        }
+
+        return results;
+      } catch (fallbackError) {
+        console.error('❌ [getClinicResults] 진료 결과 조회 실패 (fallback도 실패):', fallbackError);
+        throw error; // 원래 오류 throw
+      }
+    }
+
     console.error('❌ [getClinicResults] 진료 결과 조회 실패:', error);
     throw error;
   }
