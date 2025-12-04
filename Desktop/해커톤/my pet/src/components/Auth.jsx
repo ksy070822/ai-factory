@@ -220,7 +220,7 @@ export function LoginScreen({ onLogin, onGoToRegister, onSkipLogin }) {
         <div className="flex flex-col items-center text-center gap-2 md:gap-3">
           <div className="w-28 h-28 md:w-44 md:h-44 rounded-full bg-white shadow-lg flex items-center justify-center overflow-hidden border-4 border-sky-100">
             <img
-              src={`${import.meta.env.BASE_URL}icon/login/logo.png`}
+              src={`${import.meta.env.BASE_URL}icon/login/logo_red.png`}
               alt="PetMedical.AI"
               className="w-full h-full object-cover p-2"
             />
