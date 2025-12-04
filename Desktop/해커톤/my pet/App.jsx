@@ -1286,7 +1286,7 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet, onLogout }) {
               <header className="bg-gradient-to-r from-sky-500 to-blue-600 text-white px-4 py-4 shadow-lg">
                 <div className="flex items-center justify-center gap-2 relative">
                   <div className="w-9 h-9 bg-white rounded-lg flex items-center justify-center shadow-md flex-shrink-0 overflow-hidden">
-                    <img src={PROFILE_ICON_IMAGES[petData?.species] || PROFILE_ICON_IMAGES.other} alt="Pet" className="w-full h-full object-cover" />
+                    <img src={`${import.meta.env.BASE_URL}icon/login/logo_red.png`} alt="PetMedical.AI" className="w-7 h-7 object-contain" />
                   </div>
                   <div className="text-center">
                     <h1 className="text-xl font-bold tracking-tight">PetMedical.AI</h1>
@@ -1746,7 +1746,7 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet, onLogout }) {
       <header className="bg-gradient-to-r from-sky-500 to-blue-600 text-white px-4 py-4 shadow-lg">
         <div className="flex items-center justify-center gap-2">
           <div className="w-9 h-9 bg-white rounded-lg flex items-center justify-center shadow-md flex-shrink-0 overflow-hidden">
-            <img src={PROFILE_ICON_IMAGES[petData?.species] || PROFILE_ICON_IMAGES.other} alt="Pet" className="w-full h-full object-cover" />
+            <img src={`${import.meta.env.BASE_URL}icon/login/logo_red.png`} alt="PetMedical.AI" className="w-7 h-7 object-contain" />
           </div>
           <div className="text-center">
             <h1 className="text-xl font-bold tracking-tight">PetMedical.AI</h1>
@@ -5927,16 +5927,6 @@ function App() {
     }
     // hospital 탭은 조건 없이 항상 표시 (내부에서 lastDiagnosis 체크)
   };
-  // 디버깅: 현재 상태 출력
-  console.log('🔍 App 상태:', {
-    userMode,
-    currentTab,
-    currentView,
-    hasPetData: !!petData,
-    petDataName: petData?.petName || petData?.name || 'null',
-    hasCurrentUser: !!currentUser
-  });
-
   return (
     <div className="App app-root">
       {/* 플로팅 배경 효과 */}
