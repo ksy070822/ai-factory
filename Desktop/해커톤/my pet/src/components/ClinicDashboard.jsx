@@ -2110,7 +2110,9 @@ export function ClinicDashboard({ currentUser, onBack, onModeSwitch }) {
               <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4">
                 <div className="text-sm text-emerald-600 mb-1">주요 진단</div>
                 <div className="text-lg font-bold text-emerald-900">
-                  {aiDiagnosisModal.diagnosis?.diagnosis || aiDiagnosisModal.diagnosis?.mainDiagnosis || '진단명 없음'}
+                  {typeof aiDiagnosisModal.diagnosis?.diagnosis === 'string'
+                    ? aiDiagnosisModal.diagnosis.diagnosis
+                    : (aiDiagnosisModal.diagnosis?.diagnosis?.name || aiDiagnosisModal.diagnosis?.mainDiagnosis || '진단명 없음')}
                 </div>
               </div>
 
@@ -2212,7 +2214,7 @@ export function ClinicDashboard({ currentUser, onBack, onModeSwitch }) {
                             <div className="text-xs text-emerald-600 mb-1">
                               {d.createdAt?.toDate ? new Date(d.createdAt.toDate()).toLocaleDateString('ko-KR') : d.createdAt}
                           </div>
-                            <div className="font-semibold text-emerald-900">{d.diagnosis}</div>
+                            <div className="font-semibold text-emerald-900">{typeof d.diagnosis === 'string' ? d.diagnosis : (d.diagnosis?.name || '진단 정보')}</div>
                             {d.symptom && <div className="text-sm text-emerald-700 mt-1">{d.symptom}</div>}
                           </div>
                         ))}
