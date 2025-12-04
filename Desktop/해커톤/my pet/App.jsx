@@ -955,12 +955,22 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet, onLogout }) {
         // 조건에 따라 랜덤 메시지 가져오기 (getByPetId 오류 방지를 위해 직접 템플릿 조회)
         const result = await commentTemplateService.getRandomTemplate(false, true);
 
-        if (result.success && result.data) {
+        if (result.success && result.data && typeof result.data.text === 'string') {
           // {name} 플레이스홀더를 실제 이름으로 교체
           const messageText = result.data.text.replace(/{name}/g, petName);
           setRandomMessage({
             ...result.data,
             displayText: messageText
+          });
+        } else if (result.success && result.data) {
+          // text가 문자열이 아닌 경우 안전 처리
+          const textContent = typeof result.data.text === 'object'
+            ? (result.data.text?.content || result.data.text?.message || JSON.stringify(result.data.text))
+            : String(result.data.text || '');
+          const messageText = textContent.replace(/{name}/g, petName);
+          setRandomMessage({
+            ...result.data,
+            displayText: messageText || `${petName}의 건강한 하루를 위해 충분한 물과 규칙적인 식사를 챙겨주세요! 🐾`
           });
         } else {
           // 기본 케어 메시지 설정
@@ -3984,7 +3994,7 @@ function MultiAgentDiagnosis({ petData, symptomData, onComplete, onBack, onDiagn
             </div>
 
             {/* 상세 설명 카드 */}
-            {diagnosisResult.description && (
+            {diagnosisResult.description && typeof diagnosisResult.description === 'string' && (
               <div style={{
                 background: 'white',
                 borderRadius: '16px',
@@ -4380,7 +4390,7 @@ function DiagnosisResultView({ petData, diagnosisResult, symptomData, onGoToTrea
         </div>
 
         {/* 상세 설명 카드 */}
-        {diagnosisResult?.description && (
+        {diagnosisResult?.description && typeof diagnosisResult.description === 'string' && (
           <div style={{
             background: 'white',
             borderRadius: '16px',
