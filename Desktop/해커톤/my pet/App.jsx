@@ -271,17 +271,8 @@ const MAIN_CHARACTER_IMAGES = {
   other: `${BASE_URL}icon/main-image/etc_main-removebg-preview.png`
 };
 
-// 동물 종류별 프로필 아이콘 이미지 (원형 배경 포함)
-const PROFILE_ICON_IMAGES = {
-  dog: `${BASE_URL}icon/dog.png`,
-  cat: `${BASE_URL}icon/cat.png`,
-  rabbit: `${BASE_URL}icon/rabbit.png`,
-  hamster: `${BASE_URL}icon/hamster.png`,
-  bird: `${BASE_URL}icon/bird.png`,
-  hedgehog: `${BASE_URL}icon/hedgehog.png`,
-  reptile: `${BASE_URL}icon/reptile.png`,
-  other: `${BASE_URL}icon/etc.png`
-};
+// 동물 종류별 프로필 아이콘 이미지 - imagePaths.js의 PROFILE_IMAGES 사용
+const PROFILE_ICON_IMAGES = PROFILE_IMAGES;
 
 // 개/고양이 대표 품종 목록
 const DOG_BREEDS = [
