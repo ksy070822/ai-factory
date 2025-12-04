@@ -924,38 +924,15 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet, onLogout }) {
   const [latestBooking, setLatestBooking] = useState(null);
   const [randomMessage, setRandomMessage] = useState(null);
 
-  // 랜덤 유의사항 메시지 로드
+  // 랜덤 유의사항 메시지 (기본 메시지 사용 - API 오류로 비활성화)
   useEffect(() => {
-    const loadRandomMessage = async () => {
-      if (!petData?.id) return;
-
-      try {
-        // 병원 방문 기록 확인 (clinicResults)
-        const clinicResultsResult = await clinicResultService.getByPetId(petData.id);
-        const hasHospitalVisit = clinicResultsResult.success && clinicResultsResult.data && clinicResultsResult.data.length > 0;
-
-        // AI 진단 기록 확인
-        const diagnosesResult = await diagnosisService.getByPetId(petData.id);
-        const hasDiagnosis = diagnosesResult.success && diagnosesResult.data && diagnosesResult.data.length > 0;
-
-        // 조건에 따라 랜덤 메시지 가져오기
-        const result = await commentTemplateService.getRandomTemplate(hasHospitalVisit, hasDiagnosis);
-
-        if (result.success && result.data) {
-          // {name} 플레이스홀더를 실제 이름으로 교체
-          const petName = petData?.petName || petData?.name || '반려동물';
-          const messageText = result.data.text.replace(/{name}/g, petName);
-          setRandomMessage({
-            ...result.data,
-            displayText: messageText
-          });
-        }
-      } catch (error) {
-        console.error('랜덤 메시지 로드 오류:', error);
-      }
-    };
-
-    loadRandomMessage();
+    // 기본 메시지 표시 (API 호출 비활성화)
+    if (petData?.id) {
+      const petName = petData?.petName || petData?.name || '반려동물';
+      setRandomMessage({
+        displayText: `${petName}의 건강을 위해 오늘도 함께해요!`
+      });
+    }
   }, [petData?.id]);
 
   // 오늘 케어 기록 저장
