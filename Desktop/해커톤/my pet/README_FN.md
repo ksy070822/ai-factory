@@ -1,609 +1,221 @@
-# 🤖 PetMedical.AI
+# PetMedical.AI
 
-반려동물 응급도 평가를 위한 멀티에이전트 AI 진료 시스템이다. 6개의 전문 AI 에이전트가 순차적으로 협업하여 증상 분석, 감별진단, 응급도 판정, 홈케어 가이드를 제공한다.
-
----
-
-## ✨ 핵심 기능
-
-### 📊 멀티에이전트 AI 진료 파이프라인
-6개의 전문 에이전트가 순차적으로 진료를 수행한다. CS Agent가 증상을 접수하고, Information Agent가 추가 문진을 진행하며, Medical Agent가 감별진단을 수행한다. Triage Engine이 응급도를 0~5점으로 점수화하고, Ops Agent가 진단서를 생성하며, Care Agent가 홈케어 플랜을 작성한다.
-
-### 🔄 협진 시스템 (Collaborative Diagnosis)
-다중 AI 모델이 교차 검증을 수행하여 진단 정확도를 높인다. Medical Agent와 Triage Engine의 결과를 비교하여 불일치를 감지하고, 불일치 발생 시 보수적으로 높은 위험도를 채택한다. 최종 신뢰도 점수를 산출하여 진단 결과의 신뢰성을 제공한다.
-
-### 🛡️ 응급도 자동 판정 시스템
-5단계 응급도 체계로 긴급성을 분류한다. 0~1점(GREEN)은 홈케어로 충분, 2점(YELLOW)은 악화 시 병원 방문, 3~4점(ORANGE)은 24시간 내 방문, 5점(RED)은 즉시 병원 방문이 필요한 응급 상황이다. 색상과 점수로 보호자가 직관적으로 상황을 파악할 수 있다.
+7개 AI 에이전트 협진과 보호자 주도 데이터 관리를 구현한 반려동물 의료 플랫폼이다. 강아지, 고양이, 토끼, 햄스터, 새, 고슴도치, 파충류 총 7종 반려동물에 대해 종 특화 진단을 제공한다.
 
 ---
 
-## 🤖 AI 기술 활용
+## 기술적 완성도
 
-### 멀티에이전트 오케스트레이션
-6개의 전문 에이전트가 파이프라인 방식으로 순차 실행된다. 각 에이전트는 이전 단계의 structured_data를 입력받아 처리하고, 다음 에이전트에 전달한다. Root Orchestrator가 전체 워크플로우를 조율하며, TRD(Tool Request Discipline) 규칙에 따라 각 단계에서 정확히 하나의 도구만 호출하여 안정성을 보장한다. 상태 기반 조건문으로 각 단계의 완료 여부를 확인하고 순차적으로 진행한다.
+**Multi-Agent 협진 아키텍처**
 
-### 동적 모델 라우팅 (Dynamic Model Router)
-상황별로 최적의 AI 모델을 자동 선택하여 비용을 절감한다. 응급 상황(출혈, 경련, 호흡곤란)에는 Claude Sonnet 4를 사용하고, 이미지 분석이 필요한 경우 GPT-4o Vision을 사용한다. 일반 문의에는 GPT-4o-mini를 사용하여 비용 효율성을 높인다. 규칙 기반 라우팅으로 월간 API 비용이 $5,000에서 $1,990으로 약 60% 절감되었다.
+Medical Agent와 Triage Engine이 독립적으로 진단을 수행한다. 두 에이전트의 판단이 불일치하면 Collaborative System이 Senior Reviewer를 호출하여 합의를 도출한다. 이 과정은 브라우저 콘솔에서 `has_discrepancies: true`, `consensus_reached: true` 로그로 실시간 확인이 가능하며, 단순 재호출이 아닌 실제 협진 로직이 구현되어 있다.
 
-### 프롬프트 엔지니어링 최적화
-각 에이전트는 역할 기반 프롬프트(Role-based Prompting)를 사용한다. Medical Agent는 "경력 10년 이상의 수의사"로 설정되어 근거 중심 진단을 수행한다. temperature=0.1~0.2로 설정하여 일관된 의료 분석을 보장한다. 종(species) 특화 지시문을 포함하여 강아지, 고양이, 토끼 등 7종 반려동물에 대해 맞춤형 진단을 제공한다. JSON 스키마를 명시하여 파싱 오류를 방지한다.
+**보호자 중심 데이터 소유권 구현**
 
-### 멀티모달 비전 분석
-GPT-4o Vision을 활용하여 반려동물 사진을 분석한다. 상처, 부종, 피부 문제, 안구 이상, 자세 이상, 시각적 고통 신호 6가지 카테고리로 구조화된 분석 결과를 반환한다. 이미지 URL 기반으로 처리하며, 분석 결과는 Medical Agent의 감별진단에 추가 컨텍스트로 제공된다.
+기존 병원 중심 의료 데이터 관리와 달리, 보호자가 Firestore에 저장된 자신의 진료 기록을 직접 관리한다. 보호자는 원하는 병원을 선택하여 진단 데이터를 선택적으로 공유하며, 병원 이동 시에도 앱에서 과거 이력을 조회하고 전달할 수 있다. 이는 의료 데이터 주권을 보호자에게 이전하는 기술적 구현이다.
 
 ---
 
-## 🖼️ 멀티모달 이미지 처리 파이프라인
+## AI 기술 구현
 
-반려동물 외상 및 질병 이미지를 분석하기 위한 4단계 이미지 처리 파이프라인을 구현하였다.
+**Polyglot AI 전략 (모델별 역할 분리)**
 
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│            Pet Medical Image Analysis Pipeline                      │
-├─────────────────────────────────────────────────────────────────────┤
-│                                                                     │
-│  📷 이미지 입력 (최대 3장)                                            │
-│       │                                                             │
-│       ▼                                                             │
-│  ┌─────────────────────────────────────────────────────────────┐   │
-│  │ Stage 1: 이미지 품질 검증                                      │   │
-│  │  • 해상도 검증 (최소 320×240, 권장 640×480)                   │   │
-│  │  • 밝기 분석 (과다 노출/저노출 감지)                           │   │
-│  │  • 흐림 감지 (Laplacian Variance 알고리즘)                    │   │
-│  │  • 품질 점수 산출 (0-100점)                                   │   │
-│  └─────────────────────────────────────────────────────────────┘   │
-│       │                                                             │
-│       ▼                                                             │
-│  ┌─────────────────────────────────────────────────────────────┐   │
-│  │ Stage 2: 이미지 전처리                                        │   │
-│  │  • 파일 크기 제한 (프로필 5MB, 증상 10MB)                      │   │
-│  │  • MIME 타입 검증 (JPEG, PNG, HEIC)                          │   │
-│  │  • FileReader API로 Base64 인코딩                            │   │
-│  │  • 복수 이미지 동시 처리 (Promise.all)                        │   │
-│  └─────────────────────────────────────────────────────────────┘   │
-│       │                                                             │
-│       ▼                                                             │
-│  ┌─────────────────────────────────────────────────────────────┐   │
-│  │ Stage 3: GPT-4o Vision 6가지 카테고리 분석                     │   │
-│  │  • 외상 (Wounds): 상처, 열상, 찰과상, 출혈                     │   │
-│  │  • 부종 (Swelling): 부기, 염증, 종창                          │   │
-│  │  • 피부 이상 (Skin): 발적, 발진, 탈모, 각질                    │   │
-│  │  • 안구 이상 (Eyes): 눈곱, 충혈, 혼탁                          │   │
-│  │  • 자세 이상 (Posture): 절뚝거림, 웅크림                       │   │
-│  │  • 고통 신호 (Pain): 표정, 행동 기반 통증 징후                  │   │
-│  │  • 각 항목별 심각도 1-5점 스코어링                             │   │
-│  └─────────────────────────────────────────────────────────────┘   │
-│       │                                                             │
-│       ▼                                                             │
-│  ┌─────────────────────────────────────────────────────────────┐   │
-│  │ Stage 4: 병원 패킷 생성                                       │   │
-│  │  • 첨부 이미지 수 기록 (images_count)                          │   │
-│  │  • 6가지 카테고리별 분석 결과 포함                             │   │
-│  │  • 수의사가 내원 전 사전 확인 가능                             │   │
-│  └─────────────────────────────────────────────────────────────┘   │
-│                                                                     │
-└─────────────────────────────────────────────────────────────────────┘
-```
+CS Agent와 Information Agent는 빠른 응답이 필요한 접수와 문진에서 Gemini 2.0 Flash를 사용한다. 이미지 분석이 필요한 Vision 기반 문진은 GPT-4o가 담당한다. Medical Agent와 Triage Engine은 Claude Sonnet 4로 의심 질환과 응급도를 독립적으로 계산한다. Hospital Packet 생성은 Claude 3.5 Sonnet이, Pattern Analyzer와 OCR Service는 Gemini 2.0 Flash가 처리한다.
 
-### 이미지 처리 핵심 기능
+**Collaborative Diagnosis (환각 방어 메커니즘)**
 
-#### 1. 이미지 품질 검증 (Canvas API 기반)
-클라이언트 사이드에서 이미지 품질을 분석하여 분석에 적합한 이미지인지 사전 검증한다. Laplacian Variance 알고리즘으로 흐림을 감지하고, 해상도와 밝기를 종합하여 품질 점수를 산출한다.
-
-```javascript
-// imageQuality.js - 이미지 품질 검증
-export const validateImageQuality = async (base64Image) => {
-  const img = await loadImage(base64Image);
-
-  // 1. 해상도 검증
-  const resolution = checkResolution(img);  // min 320×240
-
-  // 2. Canvas에 그려서 픽셀 분석
-  const canvas = document.createElement('canvas');
-  ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-  // 3. 밝기 분석 (가중 평균)
-  const brightness = checkBrightness(canvas, ctx);
-
-  // 4. 흐림 감지 (Laplacian Variance)
-  const sharpness = checkBlur(canvas, ctx);  // variance < 100 = 흐림
-
-  // 5. 종합 점수 (0-100)
-  const qualityScore = resolution.score * 0.3 +
-                       brightness.score * 0.3 +
-                       sharpness.score * 0.4;
-
-  return { isValid: qualityScore >= 50, qualityScore, metrics };
-};
-```
-
-#### 2. 증상 이미지 업로드 및 전처리
-보호자가 촬영한 반려동물 사진을 FileReader API로 Base64 인코딩하여 처리한다. 복수 이미지 업로드를 지원하며, 미리보기 및 삭제 기능을 제공한다.
-
-```javascript
-// App.jsx - 증상 이미지 업로드
-const handleImageUpload = (e) => {
-  const files = Array.from(e.target.files);
-  const imagePromises = files.map(file => {
-    return new Promise((resolve) => {
-      const reader = new FileReader();
-      reader.onload = (e) => resolve(e.target.result);
-      reader.readAsDataURL(file);
-    });
-  });
-  Promise.all(imagePromises).then(previews => {
-    setImages(prev => [...prev, ...previews]);
-  });
-};
-```
-
-#### 3. GPT-4o Vision 6가지 카테고리 분석
-Information Agent에서 GPT-4o Vision을 호출하여 이미지 기반 증상 분석을 수행한다. 6가지 카테고리(외상, 부종, 피부, 안구, 자세, 고통)별로 체계적으로 분석하고, 각 항목에 1-5점 심각도를 부여한다.
-
-```javascript
-// informationAgent.js - 멀티모달 분석
-const messageContent = [
-  { type: 'text', text: userPrompt }
-];
-
-// 이미지가 있으면 Vision API에 전달 (최대 3개)
-if (symptomData.images && symptomData.images.length > 0) {
-  for (const imageUrl of symptomData.images.slice(0, 3)) {
-    messageContent.push({
-      type: 'image_url',
-      image_url: { url: imageUrl }
-    });
-  }
-}
-
-const response = await fetch('https://api.openai.com/v1/chat/completions', {
-  body: JSON.stringify({
-    model: 'gpt-4o',
-    messages: [
-      { role: 'system', content: systemPrompt },
-      { role: 'user', content: messageContent }
-    ],
-    temperature: 0.3,
-    max_tokens: 1024
-  })
-});
-```
-
-#### 4. OCR 기반 의료 문서 인식
-Gemini 2.0 Flash Vision을 활용하여 진료비 영수증, 처방전, 진단서, 예방접종 증명서, 검사 결과지를 자동 인식한다. 드래그앤드롭 업로드를 지원하며, 인식 결과를 구조화된 JSON으로 변환하여 Firestore에 저장한다.
-
-```javascript
-// ocrService.js - Gemini Vision OCR
-export async function parseVetDocument(imageBase64, documentType, mimeType) {
-  const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
-    {
-      method: "POST",
-      body: JSON.stringify({
-        contents: [{
-          parts: [
-            { inline_data: { mime_type: mimeType, data: imageBase64 } },
-            { text: buildOCRPrompt(documentType) }
-          ]
-        }],
-        generationConfig: { temperature: 0.1, maxOutputTokens: 4096 }
-      })
-    }
-  );
-
-  // JSON 추출 및 파싱
-  const text = data.candidates[0].content.parts[0].text;
-  const jsonMatch = text.match(/\{[\s\S]*\}/);
-  return { success: true, data: JSON.parse(jsonMatch[0]) };
-}
-```
-
-### 지원 이미지 유형
-
-| 유형 | 용도 | 크기 제한 | AI 모델 |
-|------|------|-----------|---------|
-| 프로필 사진 | 반려동물 등록 | 5MB | - |
-| 증상 사진 | 외상/질병 분석 | 10MB | GPT-4o Vision |
-| 의료 문서 | OCR 텍스트 추출 | 10MB | Gemini 2.0 Flash |
-
-### Information Agent 이미지 분석 출력
-
-```json
-{
-  "symptom_keywords": ["귀 문제", "가려움", "발적"],
-  "body_part_focus": ["귀"],
-  "severity_hint": "medium",
-  "possible_categories": ["귀질환", "외이염"],
-  "owner_responses_summary": "3일 전부터 귀를 자주 긁고 냄새가 남",
-  "notes_for_medical_agent": "외이염 가능성 높음. 이경 검사 권장. 세균/진균 배양 검사 고려",
-  "visual_findings": "[외상] 없음 | [부종] 좌측 귀 주변 부기 관찰(3점) | [피부] 발적 및 삼출물(4점) | [안구] 정상 | [자세] 머리 기울임(2점) | [고통] 귀 긁는 행동(3점)"
-}
-```
-
-6가지 카테고리별 분석 결과와 심각도 점수(1-5점)가 visual_findings 필드에 구조화되어 반환된다.
+Medical Agent와 Triage Engine의 위험도 레벨, 응급도 점수, 병원 방문 권고를 다층 규칙 기반으로 비교하여 불일치를 감지한다. 불일치 시 Senior Reviewer가 Claude Sonnet 4로 양측 판단을 재검토하고, Second Opinion Agent가 GPT-4o로 추가 검증을 수행한다. 합의 결과는 보수적으로 상향 조정되어 의료 안전성을 확보한다.
 
 ---
 
-## 💡 핵심 코드 블록
+## 이미지 처리 파이프라인
 
-### 1. 협진 시스템 - 다중 AI 불일치 검출 알고리즘
-Medical Agent와 Triage Engine의 진단 결과를 비교하여 불일치를 자동으로 감지한다.
+**Canvas API 기반 품질 검증**
+
+클라이언트 사이드에서 업로드 이미지의 품질을 사전 검증한다. Laplacian Variance 알고리즘으로 흐림을 감지하고, 해상도와 밝기를 분석하여 0-100점 품질 점수를 산출한다. 품질 미달 시 재촬영을 권고하여 AI 분석 정확도를 높인다.
 
 ```javascript
-// collaborativeDiagnosis.js - 불일치 검출
-export const detectDiscrepancies = (medicalResult, triageResult) => {
-  const discrepancies = [];
-
-  // 위험도 매핑 테이블
-  const riskMapping = {
-    'low': ['green', 'yellow'],
-    'moderate': ['yellow', 'orange'],
-    'high': ['orange', 'red'],
-    'emergency': ['red']
-  };
-
-  const expectedTriageLevels = riskMapping[medicalResult.risk_level] || ['yellow'];
-
-  // 1. 위험도 불일치 검사
-  if (!expectedTriageLevels.includes(triageResult.triage_level)) {
-    discrepancies.push({
-      type: 'risk_level_mismatch',
-      severity: 'high',
-      description: `Medical Agent는 ${medicalResult.risk_level}로 평가했지만,
-                    Triage Engine은 ${triageResult.triage_level}로 평가했습니다.`
-    });
-  }
-
-  // 2. 응급도 점수와 진단 불일치
-  if ((medicalResult.risk_level === 'emergency' || medicalResult.risk_level === 'high')
-      && triageResult.triage_score < 3) {
-    discrepancies.push({
-      type: 'emergency_score_mismatch',
-      severity: 'critical'
-    });
-  }
-
-  return {
-    has_discrepancies: discrepancies.length > 0,
-    needs_review: discrepancies.some(d => d.severity === 'critical' || d.severity === 'high')
-  };
-};
+// Laplacian Variance 흐림 감지
+const laplacian = 4 * gray[idx] - gray[idx-1] - gray[idx+1] - gray[idx-width] - gray[idx+width];
+const variance = laplacianSqSum / count - mean * mean;  // variance < 100 = 흐림
 ```
 
-### 2. 투표 기반 합의 도출 (안전 우선 원칙)
-여러 AI 모델의 의견을 투표로 종합하고, 불확실할 때는 높은 위험도를 채택한다.
+**GPT-4o Vision 6가지 카테고리 분석**
 
-```javascript
-// collaborativeDiagnosis.js - 합의 도출
-export const generateConsensus = (medicalResult, triageResult, reviewResult, secondOpinion, discrepancyAnalysis) => {
-  // 위험도 투표 수집
-  const riskVotes = [
-    medicalResult.risk_level,
-    triageResult.triage_level,
-    reviewResult?.recommended_risk_level,
-    secondOpinion?.risk_assessment
-  ].filter(Boolean);
+반려동물 사진을 외상, 부종, 피부, 안구, 자세, 고통 6가지 카테고리로 체계적 분석한다. 각 항목에 1-5점 심각도를 부여하며, 구조화된 형식으로 Medical Agent에 전달된다.
 
-  // 가장 높은 위험도 채택 (안전 우선 원칙)
-  const riskHierarchy = ['emergency', 'high', 'moderate', 'low'];
-  const finalRisk = riskHierarchy.find(level =>
-    riskVotes.map(normalizeRisk).includes(level)
-  ) || 'moderate';
-
-  // 불일치가 있으면 안전을 위해 점수 상향
-  let finalTriageScore = calculateAverageScore(triageResult, reviewResult);
-  if (discrepancyAnalysis.critical_count > 0) {
-    finalTriageScore = Math.min(5, finalTriageScore + 1);
-  }
-
-  // 신뢰도 계산 (불일치 시 감소)
-  const confidence = discrepancyAnalysis.has_discrepancies
-    ? (1 - (discrepancyAnalysis.discrepancy_count * 0.1))
-    : 0.95;
-
-  return {
-    final_risk_level: finalRisk,
-    final_triage_score: finalTriageScore,
-    confidence_score: Math.max(0.5, Math.min(0.98, confidence))
-  };
-};
+```
+visual_findings: "[외상] 없음 | [부종] 좌측 귀 부기(3점) | [피부] 발적(4점) | [안구] 정상 | [자세] 머리 기울임(2점) | [고통] 귀 긁는 행동(3점)"
 ```
 
-### 3. 보호자 문진 기반 응급도 동적 조정
-보호자의 추가 답변을 분석하여 응급도 점수를 실시간으로 상향 조정한다.
+**진료과목별 사진 추천**
 
-```javascript
-// triageEngine.js - 프롬프트 내 동적 조정 규칙
-const userPrompt = `
-★★★ 보호자 추가 문진 응답 (매우 중요 - 응급도 평가에 반드시 반영) ★★★
-${symptomData.guardianResponsesSummary}
+피부과, 안과, 외과, 치과, 정형외과, 종양과 선택 시 "📷 사진추천" 뱃지를 표시하여 이미지 기반 진단이 효과적인 과목임을 안내한다.
 
-주의: 위 보호자 문진 결과에서 다음 조건이 해당되면 triage_score를 상향 조정하세요:
-- 증상 지속 기간이 "일주일 이상"이면 +1
-- 식욕이 "거의 안 먹음" 또는 "전혀 안 먹음"이면 +1
-- 활동량이 "거의 움직이지 않음"이면 +1
-- 동반 증상에 "호흡곤란", "발열"이 있으면 +2
-`;
+---
+
+## 백엔드 Multi-Agent 시스템
+
+**LangGraph 기반 에이전트 파이프라인**
+
+백엔드는 FastAPI + LangGraph로 구성된 5단계 파이프라인을 실행한다. 의존성이 없는 단계(예: Vision 분석과 Symptom Intake)는 병렬로 실행하여 응답 시간을 단축한다. 이후 단계는 TRD(Tool Routing Dispatch) 규칙에 따라 순차 실행되며, 각 단계의 출력이 다음 단계의 입력으로 전달된다.
+
+```
+사용자 입력 → [Symptom Intake ∥ Vision(선택)] → Medical → Triage → Careplan → 최종 보고서
 ```
 
-### 4. 멀티에이전트 파이프라인 오케스트레이션
-6개 에이전트를 순차 실행하고 실시간 로그를 UI에 전달한다.
+| 에이전트 | 역할 | 모델 |
+|---------|------|------|
+| Symptom Intake | 자연어 증상을 JSON 구조화 | Gemini 1.5 Flash |
+| Vision Agent | 이미지 분석 (상처, 부종 등) | GPT-4o |
+| Medical Agent | 감별진단 및 위험요인 분석 | Claude Sonnet 4 |
+| Triage Agent | 응급도 점수(0-5) 산정 | Claude Sonnet 4 |
+| Careplan Agent | 홈케어 지침 생성 | Gemini 1.5 Pro |
 
-```javascript
-// agentOrchestrator.js - 파이프라인 실행
-export const runMultiAgentDiagnosis = async (petData, symptomData, onLogReceived, onWaitForGuardianResponse) => {
-  // 1. CS Agent → 접수
-  onLogReceived({ agent: 'CS Agent', icon: '🏥', content: '진료 접수 시작...' });
-  csResult = await callCSAgent(petData, symptomData);
+**GraphState 상태 관리**
 
-  // 2. Information Agent → 추가 문진 + 보호자 응답 대기
-  infoResult = await callInformationAgent(petData, symptomData, csResult.json);
-  guardianResponses = await onWaitForGuardianResponse(questions);  // 인터랙티브 문진
+Pydantic 기반 GraphState가 에이전트 간 데이터를 관리한다. 각 에이전트의 결과는 `symptom_data`, `vision_data`, `medical_data`, `triage_data`, `careplan_data` 필드에 누적되어 최종 보고서 생성에 사용된다.
 
-  // 3. Medical Agent → 감별진단 (이전 결과를 컨텍스트로 전달)
-  medicalResult = await callMedicalAgent(petData, enrichedSymptomData, csResult.json, infoResult.json);
+**Fail-over 및 안정성**
 
-  // 4. Triage Engine → 응급도 점수화
-  triageResult = await calculateTriageScore(petData, enrichedSymptomData, medicalResult.json, csResult.json);
+특정 모델의 응답 지연 또는 장애 발생 시 경량 모델(Gemini Flash, GPT-4o-mini)로 자동 대체하여 서비스 연속성을 보장한다.
 
-  // 5. Collaborative Diagnosis → 교차 검증
-  collaborationResult = await runCollaborativeDiagnosis(petData, symptomData, medicalResult.json, triageResult, infoResult.json);
+**API 엔드포인트**
 
-  // 협진 결과로 최종 진단 업데이트
-  if (collaborationResult.consensus) {
-    triageResult.triage_score = collaborationResult.consensus.final_triage_score;
-    medicalResult.json.risk_level = collaborationResult.consensus.final_risk_level;
-  }
+- `POST /api/triage`: 메인 진단 API. 증상 설명, 종/품종/나이, 이미지 URL을 받아 전체 진단 파이프라인 실행
+- `POST /api/question`: 진단 결과에 대한 보호자 후속 질문 처리
+- `GET /health`: 서비스 상태 확인
 
-  // 6. Ops Agent + Care Agent → 진단서 및 홈케어 플랜 생성
-  opsResult = await callOpsAgent(...);
-  careResult = await callCareAgent(...);
+---
 
-  return { logs, finalDiagnosis };
-};
+## 시스템 아키텍처
+
+```
+[보호자 앱]
+    ↓ Firebase Auth
+[Firestore]
+    ↓ realtime listener
+[AI Orchestrator]
+    ├→ Gemini 2.0 Flash (CS/Info/Care)
+    ├→ GPT-4o (Vision Agent)
+    ├→ Claude Sonnet 4 (Medical/Triage/Senior)
+    └→ Claude 3.5 Sonnet (Hospital Packet)
+    ↓
+[Multi-Agent Backend - FastAPI/LangGraph]
+    ├→ POST /api/triage (진단 파이프라인)
+    └→ POST /api/question (후속 질문)
+    ↓ JSON output
+[병원 어드민]
+    ↓ Submit Diagnosis
+Firestore Update
+    ↓ status: "completed"
+[보호자 앱]
+    └─ Realtime Sync & Display
 ```
 
-### 5. Claude 기반 Senior Reviewer 교차 검증
-독립적인 Claude 모델이 다른 에이전트들의 진단을 검토하고 최종 의견을 제시한다.
+**기술 스택**
 
-```javascript
-// collaborativeDiagnosis.js - 교차 검증
-export const crossValidateDiagnosis = async (petData, symptomData, medicalResult, triageResult, infoResult) => {
-  const systemPrompt = `당신은 "Senior Veterinarian Reviewer (수석 수의사 검토팀)"입니다.
+- Frontend: React 18, Vite 5, TailwindCSS 3
+- Backend: FastAPI, LangGraph, LangChain, Python 3.12
+- Database: Firestore (NoSQL), Google Sheets
+- AI: Claude Sonnet 4, Claude 3.5 Sonnet, GPT-4o, GPT-4o-mini, Gemini 2.0 Flash, Gemini 1.5 Flash/Pro
+- API: Anthropic API, OpenAI API, Google AI API, Kakao Map API
+- Deploy: GitHub Pages (Frontend), Railway (Backend)
 
-[역할]
-- Medical Agent와 Triage Agent의 진단 결과를 독립적으로 검토합니다.
-- 두 에이전트의 의견이 일치하는지, 불일치가 있다면 어느 쪽이 더 타당한지 평가합니다.
-- 누락된 중요한 소견이나 과잉 진단 여부를 확인합니다.
+**핵심 구현 파일**
 
-[원칙]
-- 보수적이고 신중한 접근: 불확실하면 병원 방문을 권장
-- 에이전트 간 불일치가 있을 때는 더 높은 위험도를 채택`;
-
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
-      temperature: 0.3,  // 낮은 temperature로 일관성 확보
-      system: systemPrompt,
-      messages: [{ role: 'user', content: userPrompt }]
-    })
-  });
-
-  return JSON.parse(response.content);
-};
 ```
+# Frontend
+src/services/ai/
+├── agentOrchestrator.js      # 12개 에이전트 순차 실행 로직
+├── collaborativeDiagnosis.js # 협진 검증 알고리즘 (240줄)
+├── medicalAgent.js           # Claude 기반 의료 진단
+└── triageEngine.js           # 응급도 계산 엔진
 
-### 6. GPT-4o 2차 의견 (다른 모델 관점)
-Claude 기반 에이전트들의 진단을 GPT-4o가 독립적으로 검토하여 다른 관점을 제공한다.
+src/utils/
+└── imageQuality.js           # Canvas API 품질 검증 (Laplacian Variance)
 
-```javascript
-// collaborativeDiagnosis.js - 2차 의견 (불일치 또는 고위험 시에만 호출)
-export const getSecondOpinion = async (petData, symptomData, medicalResult, triageResult, reviewResult) => {
-  const systemPrompt = `당신은 "Second Opinion Specialist (제2 의견 전문의)"입니다.
-
-[역할]
-- Claude 기반 에이전트들이 놓쳤을 수 있는 관점을 제시합니다.
-- 최종 진단의 신뢰도를 높이는 데 기여합니다.`;
-
-  // 불일치가 있거나 위험도가 높을 때만 2차 의견 요청 (비용 최적화)
-  if (discrepancyAnalysis.needs_review || medicalResult.risk_level === 'high') {
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      body: JSON.stringify({
-        model: 'gpt-4o',
-        temperature: 0.3,
-        messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: userPrompt }]
-      })
-    });
-    return JSON.parse(response.choices[0].message.content);
-  }
-  return null;
-};
+# Backend (petcare_advisor/)
+src/petcare_advisor/
+├── main.py                   # FastAPI 진입점
+├── agents/
+│   ├── root_orchestrator.py  # TRD 규칙 기반 워크플로우 조율
+│   ├── symptom_intake_agent.py
+│   ├── vision_agent.py
+│   ├── medical_agent.py
+│   ├── triage_agent.py
+│   └── careplan_agent.py
+└── shared/types.py           # GraphState, Pydantic 모델
 ```
 
 ---
 
-## 🏗️ 아키텍처
+## 설치 및 실행
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                        사용자 (보호자)                           │
-└────────────────────────────┬────────────────────────────────────┘
-                             │
-┌────────────────────────────▼────────────────────────────────────┐
-│                   Frontend (React + Vite)                       │
-│                   GitHub Pages 배포                              │
-└────────────────────────────┬────────────────────────────────────┘
-                             │ REST API
-┌────────────────────────────▼────────────────────────────────────┐
-│                   Backend (FastAPI + LangChain)                 │
-│                   Railway/Render 배포                            │
-└────────────────────────────┬────────────────────────────────────┘
-                             │
-┌────────────────────────────▼────────────────────────────────────┐
-│               멀티에이전트 파이프라인                              │
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐         │
-│  │ CS Agent │→ │  Info    │→ │ Medical  │→ │ Triage   │         │
-│  │ (Gemini) │  │  Agent   │  │  Agent   │  │  Engine  │         │
-│  └──────────┘  │ (Gemini) │  │ (Claude) │  │ (Claude) │         │
-│                └──────────┘  └──────────┘  └──────────┘         │
-│                                    ↓                            │
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐                       │
-│  │   Care   │← │   Ops    │← │ Collab   │                       │
-│  │  Agent   │  │  Agent   │  │ Diagnosis│                       │
-│  │ (Gemini) │  │ (Claude) │  │ (Claude) │                       │
-│  └──────────┘  └──────────┘  └──────────┘                       │
-└────────────────────────────┬────────────────────────────────────┘
-                             │
-┌────────────────────────────▼────────────────────────────────────┐
-│                    Firebase (Firestore + Storage)               │
-└─────────────────────────────────────────────────────────────────┘
-```
+**환경 요구사항**
 
-### 기술 스택
-- **Frontend**: React 18.2.0, Vite 5.0.8
-- **Backend**: Python 3.11, FastAPI, LangChain
-- **Database**: Firebase Firestore, Cloud Storage
-- **AI Models**: Claude Sonnet 4, GPT-4o, GPT-4o-mini, Gemini 2.0 Flash, Gemini 1.5 Pro
-- **Deploy**: GitHub Pages (Frontend), Railway/Render (Backend)
+Node.js 18+, Python 3.11+, Firebase 프로젝트, OpenAI API 키, Anthropic API 키, Google AI API 키, Kakao Map API 키
 
----
+**Frontend 설치**
 
-## 📂 프로젝트 구조
-
-```
-ai-factory/                          # Frontend Repository
-├── Desktop/해커톤/my pet/
-│   ├── src/
-│   │   ├── services/ai/
-│   │   │   ├── csAgent.js           # CS Agent (Gemini Flash)
-│   │   │   ├── informationAgent.js  # Information Agent (Gemini)
-│   │   │   ├── medicalAgent.js      # Medical Agent (Claude)
-│   │   │   ├── triageEngine.js      # Triage Engine (Claude)
-│   │   │   ├── opsAgent.js          # Ops Agent (Claude)
-│   │   │   ├── careAgent.js         # Care Agent (Gemini)
-│   │   │   ├── collaborativeDiagnosis.js  # 협진 시스템
-│   │   │   └── agentOrchestrator.js # 오케스트레이터
-│   │   ├── components/              # React UI 컴포넌트
-│   │   └── lib/                     # Firebase 설정
-│   ├── App.jsx                      # 메인 앱 (8800줄)
-│   ├── package.json
-│   └── vite.config.js
-│
-multi-agent/                         # Backend Repository
-├── petcare_advisor/
-│   ├── src/petcare_advisor/
-│   │   ├── agents/
-│   │   │   ├── root_orchestrator.py # 전체 워크플로우 조율
-│   │   │   ├── symptom_intake.py    # 증상 수집
-│   │   │   ├── vision_agent.py      # 이미지 분석
-│   │   │   ├── medical_agent.py     # 의료 분석
-│   │   │   ├── triage_agent.py      # 응급도 판정
-│   │   │   └── careplan_agent.py    # 케어플랜 생성
-│   │   ├── tools/                   # report_builder, persistence
-│   │   ├── config.py                # 설정 관리
-│   │   └── main.py                  # FastAPI 진입점
-│   └── requirements.txt
-```
-
----
-
-## 🚀 빠른 시작
-
-### 1. 사전 준비
-- Node.js 18+
-- Python 3.11+
-- Google AI Studio 계정 (Gemini API)
-- OpenAI 계정 (GPT-4o API)
-- Anthropic 계정 (Claude API)
-- Firebase 프로젝트
-
-### 2. Frontend 설정
 ```bash
-cd ai-factory/Desktop/해커톤/my\ pet
-cp .env.example .env
-# .env 파일에 API 키 설정
+git clone https://github.com/ksy070822/ai-factory.git
 npm install
-npm run dev
+cp .env.example .env.local
+npm run dev  # http://localhost:5173
 ```
 
-### 3. Backend 설정
+**Backend 설치**
+
 ```bash
-cd multi-agent/petcare_advisor
-pip install -r requirements.txt
+git clone https://github.com/ksy070822/multi-agent.git
+cd petcare_advisor
+pip install -e .
 cp .env.example .env
-# .env 파일에 API 키 설정
-uvicorn src.petcare_advisor.main:app --reload
+uvicorn petcare_advisor.main:app --reload  # http://localhost:8000
 ```
 
-### 4. 환경 변수 설정
-```bash
-# AI API Keys
-VITE_GEMINI_API_KEY=your_gemini_api_key
-VITE_OPENAI_API_KEY=your_openai_api_key
-VITE_ANTHROPIC_API_KEY=your_anthropic_api_key
+**Backend 배포 (Railway)**
 
-# Firebase
-VITE_FIREBASE_API_KEY=your_firebase_api_key
-VITE_FIREBASE_PROJECT_ID=your_project_id
-
-# Backend
-VITE_BACKEND_API_URL=http://localhost:8000
-```
+Railway에서 GitHub 연동 후 환경 변수 설정:
+- `OPENAI_API_KEY`, `GEMINI_API_KEY`, `ANTHROPIC_API_KEY`
+- 자동 빌드 및 배포 (railway.json 설정 적용)
 
 ---
 
-## 🔐 보안
+## 보안 설계
 
-- API 키는 환경 변수로만 관리하며 코드에 하드코딩하지 않는다
-- 프로덕션 환경에서는 백엔드 API를 통해 AI 모델을 호출한다
-- Firebase Security Rules로 사용자별 데이터 접근을 제한한다
-- CORS 설정으로 허용된 도메인만 API 접근을 허용한다
-- 의료 정보는 Firebase Firestore에 암호화하여 저장한다
+- Firebase Authentication으로 사용자 인증 구현
+- Firestore Security Rules로 데이터 읽기/쓰기 권한 제어
+- API 키는 환경 변수로 관리하며 클라이언트에 노출되지 않음
+- 백엔드 CORS 설정으로 허용된 도메인만 API 접근 가능
+- 보호자가 진료 데이터를 직접 관리하고 병원 선택 시 선택적으로 공유
 
 ---
 
-## 📝 API 엔드포인트
+## 협진 시스템 검증
 
-| Method | Endpoint | 설명 |
-|--------|----------|------|
-| GET | `/health` | 서버 상태 확인 |
-| POST | `/api/triage` | AI 진료 요청 |
-| POST | `/api/question` | 후속 질문 처리 |
+**실제 작동 콘솔 로그**
 
-### /api/triage 요청 예시
-```json
-{
-  "symptom_text": "강아지가 어제부터 구토를 해요",
-  "species": "dog",
-  "age": "3세",
-  "images": ["https://..."]
+```javascript
+협진 시스템 시작...
+불일치 분석: { has_discrepancies: true, discrepancy_count: 1 }
+검토 결과: {
+  agreement_level: "significant_disagreement",
+  medical_agent_assessment: "적절함",
+  triage_agent_assessment: "과소평가"
+}
+최종 합의: {
+  consensus_reached: true,
+  final_triage_score: 3,
+  confidence_score: 0.65
 }
 ```
 
----
+**검증 방법**
 
-## 🤝 기여
-
-1. 이 저장소를 Fork한다
-2. 기능 브랜치를 생성한다 (`git checkout -b feature/AmazingFeature`)
-3. 변경사항을 커밋한다 (`git commit -m 'Add AmazingFeature'`)
-4. 브랜치에 Push한다 (`git push origin feature/AmazingFeature`)
-5. Pull Request를 생성한다
+브라우저 개발자 도구(F12) → Console 탭에서 진단 실행 시 실시간 협진 로그 확인
 
 ---
 
-## 📄 라이선스
-
-MIT License
-
----
-
-## 📞 지원
-
-- **Frontend Repository**: https://github.com/ksy070822/ai-factory
-- **Backend Repository**: https://github.com/ksy070822/multi-agent
-- **Issues**: GitHub Issues를 통해 버그 리포트 및 기능 요청
-
----
-
-**Made with ❤️ by PetMedical.AI Team**
+Made with ❤️ by PetMedical.AI Team
