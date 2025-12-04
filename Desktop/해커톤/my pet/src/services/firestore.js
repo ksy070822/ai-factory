@@ -33,6 +33,45 @@ const COLLECTIONS = {
   MEDICAL_RECORDS: 'medicalRecords',  // 🔥 환자 기록 (진료 기록)
 };
 
+// 테스트 계정 필터링 (발표용)
+const TEST_ACCOUNTS = {
+  guardian: 'guardian@test.com',
+  clinic: 'clinic@happyvet.com'
+};
+
+// 테스트 계정인지 확인
+function isTestAccount(email) {
+  if (!email) return false;
+  return email === TEST_ACCOUNTS.guardian || email === TEST_ACCOUNTS.clinic;
+}
+
+// 테스트 계정 데이터만 필터링 (발표용)
+function filterTestAccounts(items, currentUserEmail) {
+  if (!isTestAccount(currentUserEmail)) {
+    // 테스트 계정이 아니면 모든 데이터 반환 (기존 동작)
+    return items;
+  }
+  // 테스트 계정이면 테스트 계정 데이터만 필터링
+  return items.filter(item => {
+    // 보호자 이메일 확인 (다양한 필드명 체크)
+    const itemUserEmail = item.user?.email || item.owner?.email || item.userEmail || 
+                         item.user?.userEmail || item.owner?.userEmail;
+    // 병원 이메일 확인
+    const itemClinicEmail = item.clinic?.email || item.clinicEmail || 
+                           item.clinic?.userEmail || item.hospitalEmail;
+    // clinicName으로도 확인 (clinic@happyvet.com의 병원명)
+    const clinicName = item.clinicName || item.hospitalName;
+    const isTestClinic = clinicName && (
+      clinicName.includes('행복') || 
+      clinicName.includes('happyvet') || 
+      clinicName.includes('Happy Vet')
+    );
+    
+    // 테스트 계정 보호자 또는 테스트 계정 병원의 데이터만
+    return isTestAccount(itemUserEmail) || isTestAccount(itemClinicEmail) || isTestClinic;
+  });
+}
+
 // ============ 사용자 관련 ============
 export const userService = {
   // 사용자 생성/업데이트
@@ -378,19 +417,64 @@ export const bookingService = {
   },
 
   // 사용자의 예약 목록 조회
-  async getBookingsByUser(userId) {
+  async getBookingsByUser(userId, currentUser = null) {
     try {
-      const q = query(
+      // 먼저 인덱스 없이 조회 시도
+      let q = query(
         collection(db, COLLECTIONS.BOOKINGS),
-        where('userId', '==', userId),
-        orderBy('createdAt', 'desc')
+        where('userId', '==', userId)
       );
-      const querySnapshot = await getDocs(q);
-      const bookings = querySnapshot.docs.map(doc => ({
+      
+      let querySnapshot;
+      try {
+        // createdAt으로 정렬 시도 (인덱스 있으면)
+        q = query(
+          collection(db, COLLECTIONS.BOOKINGS),
+          where('userId', '==', userId),
+          orderBy('createdAt', 'desc')
+        );
+        querySnapshot = await getDocs(q);
+      } catch (indexError) {
+        // 인덱스 없으면 정렬 없이 조회
+        console.warn('예약 조회: 인덱스 없음, 정렬 없이 조회:', indexError.message);
+        q = query(
+          collection(db, COLLECTIONS.BOOKINGS),
+          where('userId', '==', userId)
+        );
+        querySnapshot = await getDocs(q);
+      }
+      
+      let bookings = querySnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
       }));
-      return { success: true, data: bookings };
+      
+      // 인덱스 없이 조회한 경우 수동 정렬
+      if (!querySnapshot.query._query.orderBy?.length) {
+        bookings.sort((a, b) => {
+          const dateA = a.createdAt?.toDate?.() || new Date(a.createdAtISO || a.createdAt || 0);
+          const dateB = b.createdAt?.toDate?.() || new Date(b.createdAtISO || b.createdAt || 0);
+          return dateB - dateA; // 최신순
+        });
+      }
+      
+      // 테스트 계정 필터링 (발표용)
+      // 예약 데이터는 userId로 조회하므로, currentUser의 email로 필터링
+      const userEmail = currentUser?.email;
+      let filteredBookings = bookings;
+      
+      // 테스트 계정인 경우에만 필터링 적용
+      if (isTestAccount(userEmail)) {
+        // userId로 조회한 예약은 이미 해당 사용자의 것이므로, 
+        // 테스트 계정이면 그대로 반환 (userId가 일치하므로)
+        // 추가 필터링은 필요 없음 (이미 userId로 필터링됨)
+        filteredBookings = bookings;
+      } else {
+        // 일반 계정은 모든 데이터 반환
+        filteredBookings = bookings;
+      }
+      
+      return { success: true, data: filteredBookings };
     } catch (error) {
       console.error('예약 목록 조회 오류:', error);
       return { success: false, error, data: [] };
@@ -561,34 +645,97 @@ export const clinicResultService = {
   },
 
   // 반려동물의 진료 결과 조회
-  async getResultsByPet(petId) {
+  async getResultsByPet(petId, currentUser = null) {
     try {
       console.log('🔍 [getResultsByPet] 입력:', { petId, petIdType: typeof petId });
 
-      const q = query(
-        collection(db, COLLECTIONS.CLINIC_RESULTS),
-        where('petId', '==', petId),
-        orderBy('createdAt', 'desc')
-      );
-      const querySnapshot = await getDocs(q);
+      let results = [];
+      
+      // 1. petId로 먼저 조회 시도
+      try {
+        let querySnapshot;
+        try {
+          // createdAt으로 정렬 시도 (인덱스 있으면)
+          const q = query(
+            collection(db, COLLECTIONS.CLINIC_RESULTS),
+            where('petId', '==', petId),
+            orderBy('createdAt', 'desc')
+          );
+          querySnapshot = await getDocs(q);
+        } catch (indexError) {
+          // 인덱스 없으면 정렬 없이 조회
+          console.warn('진료 결과 조회: 인덱스 없음, 정렬 없이 조회:', indexError.message);
+          const q = query(
+            collection(db, COLLECTIONS.CLINIC_RESULTS),
+            where('petId', '==', petId)
+          );
+          querySnapshot = await getDocs(q);
+        }
+
+        results = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+      } catch (error) {
+        console.warn('petId로 진료 결과 조회 실패:', error);
+      }
+
+      // 2. petId로 조회 결과가 없고 currentUser가 있으면 userId로도 조회 (fallback)
+      if (results.length === 0 && currentUser?.uid) {
+        console.log('📋 petId로 조회 결과 없음, userId로 fallback 조회 시도...');
+        try {
+          let userIdQuerySnapshot;
+          try {
+            const q = query(
+              collection(db, COLLECTIONS.CLINIC_RESULTS),
+              where('userId', '==', currentUser.uid),
+              orderBy('createdAt', 'desc')
+            );
+            userIdQuerySnapshot = await getDocs(q);
+          } catch (indexError) {
+            const q = query(
+              collection(db, COLLECTIONS.CLINIC_RESULTS),
+              where('userId', '==', currentUser.uid)
+            );
+            userIdQuerySnapshot = await getDocs(q);
+          }
+
+          // userId로 조회한 결과 중 petId가 일치하는 것만 필터링
+          const userIdResults = userIdQuerySnapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+          }));
+
+          results = userIdResults.filter(r => {
+            // petId가 일치하거나, petId가 없지만 해당 pet의 소유자인 경우
+            return r.petId === petId || (!r.petId && r.userId === currentUser.uid);
+          });
+
+          console.log(`   ✅ userId로 조회 후 petId 필터링: ${results.length}건`);
+        } catch (error) {
+          console.warn('userId로 진료 결과 조회 실패:', error);
+        }
+      }
+      
+      // 인덱스 없이 조회한 경우 수동 정렬
+      if (results.length > 0) {
+        results.sort((a, b) => {
+          const dateA = a.createdAt?.toDate?.() || new Date(a.createdAtISO || a.createdAt || a.visitDate || 0);
+          const dateB = b.createdAt?.toDate?.() || new Date(b.createdAtISO || b.createdAt || b.visitDate || 0);
+          return dateB - dateA; // 최신순
+        });
+      }
+
+      // 테스트 계정 필터링 (발표용)
+      const userEmail = currentUser?.email;
+      const filteredResults = filterTestAccounts(results, userEmail);
 
       console.log('📊 [getResultsByPet] 조회 결과:', {
-        count: querySnapshot.size,
-        docs: querySnapshot.docs.map(doc => ({
-          id: doc.id,
-          petId: doc.data().petId,
-          petIdType: typeof doc.data().petId,
-          clinicId: doc.data().clinicId,
-          ownerId: doc.data().ownerId,
-          userId: doc.data().userId
-        }))
+        count: filteredResults.length,
+        shared: filteredResults.filter(r => r.sharedToGuardian === true).length
       });
 
-      const results = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-      return { success: true, data: results };
+      return { success: true, data: filteredResults };
     } catch (error) {
       console.error('❌ [getResultsByPet] 진료 결과 목록 조회 오류:', error);
       return { success: false, error, data: [] };

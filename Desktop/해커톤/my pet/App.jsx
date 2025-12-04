@@ -31,8 +31,8 @@ import { LoginScreen, RegisterScreen, getAuthSession, clearAuthSession } from '.
 import { OCRUpload } from './src/components/OCRUpload'
 import { ClinicAdmin } from './src/components/ClinicAdmin'
 import { seedGuardianData, seedClinicData } from './src/utils/seedTestDataUtils'
-import { seedMedicationData } from './src/utils/seedMedicationData'
-import { auth } from './src/lib/firebase'
+import { auth, db } from './src/lib/firebase'
+import { collection, query, where, getDocs, doc } from 'firebase/firestore'
 import { ClinicDashboard } from './src/components/ClinicDashboard'
 import { AICareConsultation } from './src/components/AICareConsultation'
 import { getFAQContext } from './src/data/faqData'
@@ -40,6 +40,7 @@ import { diagnosisService, bookingService, petService, commentTemplateService, c
 import { requestPushPermission, setupForegroundMessageHandler } from './src/services/pushNotificationService'
 import { getUserClinics } from './src/services/clinicService'
 import { getSpeciesDisplayName } from './src/services/ai/commonContext'
+import authService from './src/services/firebaseAuth'
 // 동물 이미지 경로 유틸리티 import
 import { getMainCharacterImage, getPetImage, PROFILE_IMAGES } from './src/utils/imagePaths'
 // AI 캐릭터 생성 관련 import
@@ -970,7 +971,7 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet, onLogout }) {
         // 병원 방문 기록 확인 (예약 + 실제 방문) - 2초 타임아웃
         try {
           if (petData?.userId) {
-            const bookingPromise = bookingService.getBookingsByUser(petData.userId);
+            const bookingPromise = bookingService.getBookingsByUser(petData.userId, currentUser);
             const timeoutPromise = new Promise((_, reject) => 
               setTimeout(() => reject(new Error('타임아웃')), 2000)
             );
@@ -1160,24 +1161,38 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet, onLogout }) {
   // 최신 예약 정보 불러오기
   useEffect(() => {
     const loadLatestBooking = async () => {
-      if (!petData?.userId) return;
+      if (!petData?.userId || !petData?.id) return;
 
       try {
-        const result = await bookingService.getBookingsByUser(petData.userId);
+        const result = await bookingService.getBookingsByUser(petData.userId, currentUser);
         const bookingData = result?.data || result || [];
         if (bookingData && bookingData.length > 0) {
+          // 🔥 현재 선택된 반려동물의 예약만 필터링
+          const petBookings = bookingData.filter(b => {
+            // petId로 매칭
+            if (b.petId === petData.id) return true;
+            // petName으로도 매칭 (petId가 다른 경우 대비)
+            if (b.petName === petData.name || b.pet?.name === petData.name) return true;
+            return false;
+          });
+          
+          if (petBookings.length === 0) {
+            setLatestBooking(null);
+            return;
+          }
+          
           // 미래 예약만 필터링하고 가장 가까운 것 선택
           const now = new Date();
-          const futureBookings = bookingData.filter(b => {
+          const futureBookings = petBookings.filter(b => {
             const bookingDate = b.date ? new Date(b.date) : (b.bookingDate ? new Date(b.bookingDate) : null);
             return bookingDate && bookingDate >= now;
           }).sort((a, b) => new Date(a.date || a.bookingDate) - new Date(b.date || b.bookingDate));
 
           if (futureBookings.length > 0) {
             setLatestBooking(futureBookings[0]);
-          } else if (bookingData.length > 0) {
+          } else if (petBookings.length > 0) {
             // 미래 예약이 없으면 가장 최근 예약 표시
-            const sortedBookings = [...bookingData].sort((a, b) =>
+            const sortedBookings = [...petBookings].sort((a, b) =>
               new Date(b.date || b.bookingDate) - new Date(a.date || a.bookingDate)
             );
             setLatestBooking(sortedBookings[0]);
@@ -1189,7 +1204,7 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet, onLogout }) {
     };
 
     loadLatestBooking();
-  }, [petData?.userId]);
+  }, [petData?.userId, petData?.id]);
 
   const handleLogUpdate = async (newLog) => {
     if (!petData) return;
@@ -5430,79 +5445,8 @@ function App() {
         throw error;
       }
     };
-    window.seedMedicationData = async (uid) => {
-      try {
-        const result = await seedMedicationData(uid);
-        console.log('✅ 약물 처방 정보 추가 완료:', result);
-        return result;
-      } catch (error) {
-        console.error('❌ 약물 처방 정보 추가 오류:', error);
-        throw error;
-      }
-    };
-    
-    // 테스트 계정 반려동물 정리 함수 (뿌꾸, 몽미, 도마만 유지)
-    window.cleanupTestPets = async (userId = null) => {
-      try {
-        const { collection, query, where, getDocs, deleteDoc, doc } = await import('firebase/firestore');
-        const { db } = await import('./src/lib/firebase');
-        
-        const targetUserId = userId || currentUser?.uid;
-        if (!targetUserId) {
-          console.error('❌ 사용자 ID가 필요합니다.');
-          return;
-        }
-        
-        const KEEP_PETS = ['뿌꾸', '몽미', '도마'];
-        const petsRef = collection(db, 'pets');
-        const petsQuery = query(petsRef, where('userId', '==', targetUserId));
-        const petsSnapshot = await getDocs(petsQuery);
-        
-        if (petsSnapshot.empty) {
-          console.log('✅ 삭제할 반려동물이 없습니다.');
-          return;
-        }
-        
-        console.log(`\n📋 총 ${petsSnapshot.size}마리의 반려동물 발견\n`);
-        
-        const petsToDelete = [];
-        petsSnapshot.forEach((petDoc) => {
-          const petData = petDoc.data();
-          const petName = petData.petName || petData.name || '';
-          const petId = petDoc.id;
-          
-          if (!KEEP_PETS.includes(petName)) {
-            petsToDelete.push({ id: petId, name: petName });
-            console.log(`  ❌ 삭제 예정: ${petName} (${petData.species || '종류 미상'})`);
-          } else {
-            console.log(`  ✅ 유지: ${petName} (${petData.species || '종류 미상'})`);
-          }
-        });
-        
-        if (petsToDelete.length > 0) {
-          console.log(`\n🗑️  ${petsToDelete.length}마리 삭제 중...\n`);
-          for (const pet of petsToDelete) {
-            try {
-              await deleteDoc(doc(db, 'pets', pet.id));
-              console.log(`  ✅ 삭제 완료: ${pet.name}`);
-            } catch (error) {
-              console.error(`  ❌ 삭제 실패: ${pet.name}`, error.message);
-            }
-          }
-          console.log(`\n✅ 정리 완료!`);
-        } else {
-          console.log(`\n✅ 삭제할 반려동물이 없습니다.`);
-        }
-      } catch (error) {
-        console.error('❌ 정리 오류:', error);
-        throw error;
-      }
-    };
-    
     console.log('💡 테스트 데이터 시드 함수가 등록되었습니다.');
     console.log('   사용법: const user = window.auth.currentUser; await window.seedGuardianData(user.uid, user.email);');
-    console.log('   약물 처방 정보 추가: await window.seedMedicationData(user.uid);');
-    console.log('   반려동물 정리 (뿌꾸, 몽미, 도마만 유지): await window.cleanupTestPets();');
   }, []);
 
   // 로그인 성공 핸들러
@@ -5650,8 +5594,7 @@ function App() {
     const testAccount = testAccounts[selectedMode] || testAccounts.guardian;
 
     try {
-      // 테스트 계정으로 자동 로그인
-      const { authService } = await import('./src/services/firebaseAuth');
+      // 테스트 계정으로 자동 로그인 (정적 import 사용)
       const loginResult = await authService.login(testAccount.email, testAccount.password);
 
       if (loginResult.success) {
@@ -5734,114 +5677,13 @@ function App() {
           userPets = getPetsForUser(user.uid);
         }
 
-        // 테스트 계정 보호자: 불필요한 반려동물 자동 정리 (뿌꾸, 몽미, 도마만 유지)
-        // 반려동물이 있든 없든 항상 실행 (조건 밖으로 이동)
-        if (mode === 'guardian' && (user.email === 'guardian@test.com' || user.email?.includes('test'))) {
-          // 백그라운드에서 비동기로 실행 (UI 블로킹 방지)
-          (async () => {
-            try {
-              const { collection, query, where, getDocs, deleteDoc, doc } = await import('firebase/firestore');
-              const { db } = await import('./src/lib/firebase');
-              
-              const KEEP_PETS = ['뿌꾸', '몽미', '도마'];
-              const petsRef = collection(db, 'pets');
-              const petsQuery = query(petsRef, where('userId', '==', user.uid));
-              const petsSnapshot = await getDocs(petsQuery);
-              
-              if (!petsSnapshot.empty) {
-                const petsToDelete = [];
-                petsSnapshot.forEach((petDoc) => {
-                  const petData = petDoc.data();
-                  const petName = petData.petName || petData.name || '';
-                  if (!KEEP_PETS.includes(petName)) {
-                    petsToDelete.push({ id: petDoc.id, name: petName });
-                  }
-                });
-                
-                if (petsToDelete.length > 0) {
-                  console.log(`🧹 테스트 계정 반려동물 정리: ${petsToDelete.length}마리 삭제 중...`);
-                  for (const pet of petsToDelete) {
-                    try {
-                      await deleteDoc(doc(db, 'pets', pet.id));
-                      console.log(`  ✅ 삭제 완료: ${pet.name}`);
-                    } catch (error) {
-                      console.warn(`  ⚠️ 삭제 실패: ${pet.name}`, error.message);
-                    }
-                  }
-                  console.log(`✅ 반려동물 정리 완료 (뿌꾸, 몽미, 도마만 유지)`);
-                  
-                  // 삭제 후 반려동물 목록 다시 로드
-                  const updatedPetsResult = await petService.getPetsByUser(user.uid);
-                  if (updatedPetsResult.success && updatedPetsResult.data) {
-                    const updatedPets = updatedPetsResult.data;
-                    setPets(updatedPets);
-                    savePetsForUser(user.uid, updatedPets);
-                    if (updatedPets.length > 0) {
-                      setPetData(updatedPets[0]);
-                    } else {
-                      setPetData(null);
-                    }
-                  }
-                } else {
-                  // 삭제할 것이 없으면 기존 데이터 그대로 사용
-                  setPets(userPets);
-                  if (userPets.length > 0) {
-                    setPetData(userPets[0]);
-                  } else {
-                    setPetData(null);
-                  }
-                }
-              } else {
-                // 반려동물이 없으면 기존 데이터 그대로 사용
-                setPets(userPets);
-                setPetData(null);
-              }
-            } catch (cleanupError) {
-              console.warn('반려동물 정리 실패:', cleanupError);
-              // 오류 발생 시 기존 데이터 그대로 사용
-              setPets(userPets);
-              if (userPets.length > 0) {
-                setPetData(userPets[0]);
-              } else {
-                setPetData(null);
-              }
-            }
-          })();
+        // 테스트 계정 자동 정리 기능 제거 (동적 import로 인한 404 오류 방지)
+        // 반려동물 데이터 설정
+        setPets(userPets);
+        if (userPets.length > 0) {
+          setPetData(userPets[0]);
         } else {
-          // 테스트 계정이 아니면 기존 로직 그대로
-          setPets(userPets);
-          if (userPets.length > 0) {
-            setPetData(userPets[0]);
-          } else {
-            setPetData(null);
-          }
-        }
-        
-        // 테스트 계정 보호자: 약물 정보 자동 추가
-        if (mode === 'guardian' && (user.email === 'guardian@test.com' || user.email?.includes('test'))) {
-          // 약물 정보 조회는 백그라운드에서 비동기로 실행 (프로필 등록 블로킹 방지)
-          (async () => {
-            try {
-              const { collection, query, where, getDocs } = await import('firebase/firestore');
-              const { db } = await import('./src/lib/firebase');
-              const medicationQuery = query(
-                collection(db, 'medicationLogs'),
-                where('userId', '==', user.uid)
-              );
-              const medicationSnapshot = await getDocs(medicationQuery);
-              
-              // 약물 정보가 10개 미만일 때만 자동 추가 (불필요한 조회 방지)
-              if (medicationSnapshot.size < 10) {
-                console.log('💊 테스트 계정: 약물 처방 정보 자동 추가 중...');
-                await seedMedicationData(user.uid);
-                console.log('✅ 약물 처방 정보 추가 완료');
-              } else {
-                console.log(`✅ 기존 약물 처방 정보 ${medicationSnapshot.size}개 확인됨`);
-              }
-            } catch (medError) {
-              console.warn('약물 처방 정보 확인/추가 실패:', medError);
-            }
-          })();
+          setPetData(null);
         }
 
         // 푸시 알림 권한 요청 및 토큰 저장
@@ -6152,6 +5994,8 @@ function App() {
 
       {currentView === 'mypage' && (
         <MyPage
+          selectedPet={petData}
+          currentUser={currentUser}
           onBack={() => {
             setCurrentView(null);
             setCurrentTab('care');
@@ -6526,6 +6370,8 @@ function App() {
           {/* 마이페이지 탭 */}
           {currentTab === 'mypage' && (
             <MyPage
+          selectedPet={petData}
+              currentUser={currentUser}
               onBack={() => setCurrentTab('care')}
               onHome={handleGoHome}
               onAddPet={() => setCurrentView('registration')}

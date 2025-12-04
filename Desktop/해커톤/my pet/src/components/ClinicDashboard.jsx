@@ -297,7 +297,7 @@ export function ClinicDashboard({ currentUser, onBack }) {
       const clinicStats = await getClinicStats(currentClinic.id);
       setStats(clinicStats);
 
-      const bookings = await getTodayBookings(currentClinic.id);
+      const bookings = await getTodayBookings(currentClinic.id, currentUser);
       const enrichedBookings = await Promise.all(bookings.map(enrichBookingWithResult));
       setTodayBookings(enrichedBookings);
 
@@ -442,7 +442,7 @@ export function ClinicDashboard({ currentUser, onBack }) {
       const diagnosesPromise = ownerId
         ? diagnosisService.getDiagnosesByClinicAndPatient(currentClinic.id, ownerId, booking.petId)
         : diagnosisService.getDiagnosesByPet(booking.petId);
-      const resultsPromise = clinicResultService.getResultsByPet(booking.petId);
+      const resultsPromise = clinicResultService.getResultsByPet(booking.petId, currentUser);
       const [diagRes, resultRes] = await Promise.all([diagnosesPromise, resultsPromise]);
       setHistoryData({
         diagnoses: diagRes.success ? diagRes.data : [],
@@ -1805,3 +1805,5 @@ export function ClinicDashboard({ currentUser, onBack }) {
 }
 
 export default ClinicDashboard;
+
+

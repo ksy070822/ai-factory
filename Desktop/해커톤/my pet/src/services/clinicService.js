@@ -24,6 +24,33 @@ const getLocalDateString = (date = new Date()) => {
   return `${year}-${month}-${day}`; // 예: "2025-12-03"
 };
 
+// 테스트 계정 필터링 (발표용)
+const TEST_ACCOUNTS = {
+  guardian: 'guardian@test.com',
+  clinic: 'clinic@happyvet.com'
+};
+
+// 테스트 계정인지 확인
+function isTestAccount(email) {
+  if (!email) return false;
+  return email === TEST_ACCOUNTS.guardian || email === TEST_ACCOUNTS.clinic;
+}
+
+// 테스트 계정 데이터만 필터링 (발표용)
+function filterTestAccounts(items, currentUserEmail) {
+  if (!isTestAccount(currentUserEmail)) {
+    // 테스트 계정이 아니면 모든 데이터 반환 (기존 동작)
+    return items;
+  }
+  // 테스트 계정이면 테스트 계정 데이터만 필터링
+  return items.filter(item => {
+    const itemUserEmail = item.user?.email || item.owner?.email || item.userEmail;
+    const itemClinicEmail = item.clinic?.email || item.clinicEmail;
+    // 테스트 계정 보호자 또는 테스트 계정 병원의 데이터만
+    return isTestAccount(itemUserEmail) || isTestAccount(itemClinicEmail);
+  });
+}
+
 // ============================================
 // 병원 정보 관련
 // ============================================
@@ -142,7 +169,7 @@ export async function getClinicStaff(clinicId) {
  * @param {string} clinicId - 병원 ID (clinics 컬렉션의 문서 ID)
  * @returns {Promise<Array>} 오늘 예약 목록
  */
-export async function getTodayBookings(clinicId) {
+export async function getTodayBookings(clinicId, currentUser = null) {
   try {
     const today = new Date();
     const todayStr = getLocalDateString(today); // 🔴 로컬 기준 YYYY-MM-DD
@@ -230,7 +257,11 @@ export async function getTodayBookings(clinicId) {
       return timeA.localeCompare(timeB);
     });
 
-    return bookings;
+    // 테스트 계정 필터링 (발표용)
+    const clinicEmail = clinicData?.email || currentUser?.email;
+    const filteredBookings = filterTestAccounts(bookings, clinicEmail);
+    
+    return filteredBookings;
   } catch (error) {
     console.error('오늘 예약 조회 실패:', error);
     throw error;

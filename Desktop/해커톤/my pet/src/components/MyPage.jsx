@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { getPetImage, getProfileImage } from '../utils/imagePaths';
-import { clinicResultService, bookingService } from '../services/firestore';
+import { clinicResultService, bookingService, diagnosisService } from '../services/firestore';
+import { collection, query, where, getDocs, onSnapshot, orderBy } from 'firebase/firestore';
+import { db } from '../lib/firebase';
 
 // 동물 종류 한글 매핑
 const SPECIES_LABELS = {
@@ -128,7 +130,7 @@ const getClinicResultsFromStorage = () => {
   }
 };
 
-export function MyPage({ onBack, onSelectPet, onViewDiagnosis, onAddPet, onClinicMode, onHome, userId, onPetsUpdate }) {
+export function MyPage({ onBack, onSelectPet, onViewDiagnosis, onAddPet, onClinicMode, onHome, userId, onPetsUpdate, currentUser, selectedPet }) {
   // localStorage에서 초기 탭 확인
   const getInitialTab = () => {
     const savedTab = localStorage.getItem('mypage_initialTab');
@@ -169,24 +171,118 @@ export function MyPage({ onBack, onSelectPet, onViewDiagnosis, onAddPet, onClini
       setPets(getPetsForUser(userId));
       setDiagnoses(getDiagnosesForUser(userId));
 
-      // Firestore에서 예약 조회 (상태 변경 반영)
-      const loadBookings = async () => {
-        try {
-          const result = await bookingService.getBookingsByUser(userId);
-          if (result.success && result.data.length > 0) {
-            setBookings(result.data);
-            // localStorage도 동기화
-            saveBookingsForUser(userId, result.data);
-          } else {
-            // Firestore에 없으면 localStorage 사용
+      // 실시간 예약 구독 (새로고침 불필요)
+      let unsubscribeBookings = null;
+      
+      try {
+        const q = query(
+          collection(db, 'bookings'),
+          where('userId', '==', userId),
+          orderBy('createdAt', 'desc')
+        );
+
+        unsubscribeBookings = onSnapshot(q, async (snapshot) => {
+          console.log('[실시간] 예약 업데이트:', snapshot.docs.length, '개');
+          
+          const bookingsData = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+          }));
+
+          // 테스트 계정 필터링
+          const isTest = currentUser?.email === 'guardian@test.com' || currentUser?.email === 'clinic@happyvet.com';
+          const filteredBookings = isTest
+            ? bookingsData.filter(b => {
+                const clinicName = b.clinicName || b.hospitalName;
+                return clinicName && (clinicName.includes('행복') || clinicName.includes('happyvet') || clinicName.includes('Happy Vet'));
+              })
+            : bookingsData;
+
+          setBookings(filteredBookings);
+          // localStorage도 동기화
+          saveBookingsForUser(userId, filteredBookings);
+        }, (error) => {
+          console.warn('실시간 예약 구독 오류:', error);
+          // 폴백: 일반 조회
+          const loadBookings = async () => {
+            try {
+              const result = await bookingService.getBookingsByUser(userId, currentUser);
+              if (result.success && result.data.length > 0) {
+                setBookings(result.data);
+                saveBookingsForUser(userId, result.data);
+              } else {
+                setBookings(getBookingsForUser(userId));
+              }
+            } catch (err) {
+              console.warn('Firestore 예약 로드 오류, localStorage 사용:', err);
+              setBookings(getBookingsForUser(userId));
+            }
+          };
+          loadBookings();
+        });
+      } catch (error) {
+        console.warn('실시간 예약 구독 설정 오류:', error);
+        // 폴백: 일반 조회
+        const loadBookings = async () => {
+          try {
+            const result = await bookingService.getBookingsByUser(userId, currentUser);
+            if (result.success && result.data.length > 0) {
+              setBookings(result.data);
+              saveBookingsForUser(userId, result.data);
+            } else {
+              setBookings(getBookingsForUser(userId));
+            }
+          } catch (err) {
+            console.warn('Firestore 예약 로드 오류, localStorage 사용:', err);
             setBookings(getBookingsForUser(userId));
           }
-        } catch (error) {
-          console.warn('Firestore 예약 로드 오류, localStorage 사용:', error);
-          setBookings(getBookingsForUser(userId));
+        };
+        loadBookings();
+      }
+
+      // cleanup 함수
+      return () => {
+        if (unsubscribeBookings) {
+          unsubscribeBookings();
         }
       };
-      loadBookings();
+
+      // Firestore에서 AI 진단 기록 조회
+      const loadDiagnoses = async () => {
+        try {
+          const result = await diagnosisService.getDiagnosesByUser(userId);
+          if (result.success && result.data.length > 0) {
+            // petId 또는 petName으로 필터링 (현재 선택된 반려동물들)
+            const petIds = getPetsForUser(userId).map(pet => pet.id).filter(Boolean);
+            const petNames = getPetsForUser(userId).map(pet => pet.name || pet.petName).filter(Boolean);
+            
+            const filteredDiagnoses = result.data.filter(d => {
+              // petId로 매칭
+              if (d.petId && petIds.includes(d.petId)) {
+                return true;
+              }
+              // petName으로 매칭
+              if (d.petName && petNames.includes(d.petName)) {
+                return true;
+              }
+              return false;
+            });
+            
+            if (filteredDiagnoses.length > 0) {
+              setDiagnoses(filteredDiagnoses);
+              // localStorage도 동기화
+              try {
+                localStorage.setItem(getUserDiagnosesKey(userId), JSON.stringify(filteredDiagnoses));
+              } catch (e) {
+                console.warn('localStorage 저장 실패:', e);
+              }
+            }
+          }
+        } catch (error) {
+          console.warn('Firestore AI 진단 기록 로드 오류, localStorage 사용:', error);
+        }
+      };
+      loadDiagnoses();
     } else {
       setPets(getPetsFromStorage());
       setDiagnoses(getDiagnosesFromStorage());
@@ -195,39 +291,200 @@ export function MyPage({ onBack, onSelectPet, onViewDiagnosis, onAddPet, onClini
 
   }, [userId]);
 
-  // 병원 진료 기록 로드 (pets가 로드된 후)
+  // 병원 진료 기록 실시간 구독 (새로고침 불필요)
   useEffect(() => {
-    const loadClinicResults = async () => {
-      if (pets.length === 0) return;
+    if (!currentUser?.uid) return;
 
+    const petIds = pets.map(pet => pet.id).filter(Boolean);
+    const petNames = pets.map(pet => pet.name || pet.petName).filter(Boolean);
+    const isTest = currentUser?.email === 'guardian@test.com' || currentUser?.email === 'clinic@happyvet.com';
+
+    let unsubscribeResults = null;
+
+    try {
+      // 실시간 진료 결과 구독 (orderBy 없이 시도)
+      let q;
       try {
-        // 모든 반려동물의 진료 기록 로드 (병원에서 공유된 것만)
-        const allResults = [];
-        for (const pet of pets) {
-          if (pet.id) {
-            const resultRes = await clinicResultService.getResultsByPet(pet.id);
-            if (resultRes.success && resultRes.data.length > 0) {
-              // 병원에서 보호자에게 공유한 진단서만 필터링
-              const sharedResults = resultRes.data.filter(r => r.sharedToGuardian === true);
-              allResults.push(...sharedResults);
-            }
-          }
+        // 테스트 계정이면 sharedToGuardian 필터링 없이 조회
+        if (isTest) {
+          q = query(
+            collection(db, 'clinicResults'),
+            where('userId', '==', currentUser.uid)
+          );
+        } else {
+          q = query(
+            collection(db, 'clinicResults'),
+            where('userId', '==', currentUser.uid),
+            where('sharedToGuardian', '==', true)
+          );
         }
-
-        if (allResults.length > 0) {
-          setClinicResults(allResults);
-          return;
-        }
-      } catch (error) {
-        console.warn('Firestore 진료 결과 로드 오류:', error);
+      } catch (queryError) {
+        console.warn('쿼리 생성 오류:', queryError);
+        // 가장 간단한 쿼리로 폴백
+        q = query(
+          collection(db, 'clinicResults'),
+          where('userId', '==', currentUser.uid)
+        );
       }
 
-      // Firestore 실패 시 localStorage 폴백
-      setClinicResults(getClinicResultsFromStorage());
-    };
+      unsubscribeResults = onSnapshot(q, (snapshot) => {
+        console.log('[실시간] 진료 결과 업데이트:', snapshot.docs.length, '개');
+        console.log('[실시간] 필터링 기준 - petIds:', petIds, 'petNames:', petNames);
 
-    loadClinicResults();
-  }, [pets]);
+        const allResults = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+
+        // petId 또는 petName으로 매칭 (pets가 있으면 필터링, 없으면 모두 표시)
+        const matchedResults = (petIds.length > 0 || petNames.length > 0)
+          ? allResults.filter(r => {
+              // petId가 일치하는 경우
+              if (r.petId && petIds.includes(r.petId)) {
+                console.log(`[실시간] petId 매칭: ${r.petId}`);
+                return true;
+              }
+              // petName이 일치하는 경우
+              if (r.petName && petNames.includes(r.petName)) {
+                console.log(`[실시간] petName 매칭: ${r.petName}`);
+                return true;
+              }
+              return false;
+            })
+          : allResults; // pets가 없으면 모든 결과 표시
+
+        // 테스트 계정이 아니면 sharedToGuardian 필터링
+        const finalResults = isTest
+          ? matchedResults // 테스트 계정은 모든 결과 표시
+          : matchedResults.filter(r => r.sharedToGuardian === true); // 일반 계정은 공유된 것만
+
+        // 중복 제거 및 정렬 (클라이언트에서)
+        const uniqueResults = Array.from(
+          new Map(finalResults.map(r => [r.id, r])).values()
+        );
+        uniqueResults.sort((a, b) => {
+          const dateA = a.createdAt?.toDate?.() || new Date(a.visitDate || a.sharedAt || 0);
+          const dateB = b.createdAt?.toDate?.() || new Date(b.visitDate || b.sharedAt || 0);
+          return dateB - dateA;
+        });
+
+        console.log(`✅ 실시간 진료 결과 필터링: ${uniqueResults.length}건 (전체: ${allResults.length}건)`);
+        setClinicResults(uniqueResults);
+      }, (error) => {
+        console.warn('실시간 진료 결과 구독 오류:', error);
+        // 폴백: 일반 조회
+        const loadClinicResults = async () => {
+          try {
+            const allResults = [];
+            if (petIds.length > 0) {
+              for (const petId of petIds) {
+                const resultRes = await clinicResultService.getResultsByPet(petId, currentUser);
+                if (resultRes.success && resultRes.data.length > 0) {
+                  const sharedResults = isTest
+                    ? resultRes.data
+                    : resultRes.data.filter(r => r.sharedToGuardian === true);
+                  allResults.push(...sharedResults);
+                }
+              }
+            } else {
+              // pets가 없으면 userId로만 조회
+              const q = query(
+                collection(db, 'clinicResults'),
+                where('userId', '==', currentUser.uid)
+              );
+              const snapshot = await getDocs(q);
+              const results = snapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+              }));
+              const sharedResults = isTest
+                ? results
+                : results.filter(r => r.sharedToGuardian === true);
+              allResults.push(...sharedResults);
+            }
+            
+            if (allResults.length > 0) {
+              // 중복 제거
+              const uniqueResults = Array.from(
+                new Map(allResults.map(r => [r.id, r])).values()
+              );
+              uniqueResults.sort((a, b) => {
+                const dateA = a.createdAt?.toDate?.() || new Date(a.visitDate || 0);
+                const dateB = b.createdAt?.toDate?.() || new Date(b.visitDate || 0);
+                return dateB - dateA;
+              });
+              setClinicResults(uniqueResults);
+            } else {
+              setClinicResults(getClinicResultsFromStorage());
+            }
+          } catch (err) {
+            console.warn('Firestore 진료 결과 로드 오류:', err);
+            setClinicResults(getClinicResultsFromStorage());
+          }
+        };
+        loadClinicResults();
+      });
+    } catch (error) {
+      console.warn('실시간 진료 결과 구독 설정 오류:', error);
+      // 폴백: 일반 조회
+      const loadClinicResults = async () => {
+        try {
+          const allResults = [];
+          if (petIds.length > 0) {
+            for (const petId of petIds) {
+              const resultRes = await clinicResultService.getResultsByPet(petId, currentUser);
+              if (resultRes.success && resultRes.data.length > 0) {
+                const sharedResults = isTest
+                  ? resultRes.data
+                  : resultRes.data.filter(r => r.sharedToGuardian === true);
+                allResults.push(...sharedResults);
+              }
+            }
+          } else {
+            // pets가 없으면 userId로만 조회
+            const q = query(
+              collection(db, 'clinicResults'),
+              where('userId', '==', currentUser.uid)
+            );
+            const snapshot = await getDocs(q);
+            const results = snapshot.docs.map(doc => ({
+              id: doc.id,
+              ...doc.data()
+            }));
+            const sharedResults = isTest
+              ? results
+              : results.filter(r => r.sharedToGuardian === true);
+            allResults.push(...sharedResults);
+          }
+          
+          if (allResults.length > 0) {
+            const uniqueResults = Array.from(
+              new Map(allResults.map(r => [r.id, r])).values()
+            );
+            uniqueResults.sort((a, b) => {
+              const dateA = a.createdAt?.toDate?.() || new Date(a.visitDate || 0);
+              const dateB = b.createdAt?.toDate?.() || new Date(b.visitDate || 0);
+              return dateB - dateA;
+            });
+            setClinicResults(uniqueResults);
+          } else {
+            setClinicResults(getClinicResultsFromStorage());
+          }
+        } catch (err) {
+          console.warn('Firestore 진료 결과 로드 오류:', err);
+          setClinicResults(getClinicResultsFromStorage());
+        }
+      };
+      loadClinicResults();
+    }
+
+    // cleanup 함수
+    return () => {
+      if (unsubscribeResults) {
+        unsubscribeResults();
+      }
+    };
+  }, [pets, currentUser?.uid, currentUser?.email]);
 
   const formatDate = (timestamp) => {
     return new Date(timestamp).toLocaleDateString('ko-KR', {
@@ -619,40 +876,61 @@ export function MyPage({ onBack, onSelectPet, onViewDiagnosis, onAddPet, onClini
         </div>
       )}
 
-      {activeTab === 'bookings' && (
-        <div className="px-3 sm:px-4 pt-3 sm:pt-4 pb-40">
-          {bookings.length === 0 ? (
-            <div className="text-center py-16 sm:py-20">
-              <div className="text-5xl sm:text-6xl mb-3 sm:mb-4">📅</div>
-              <p className="text-slate-500 mb-1.5 sm:mb-2 text-sm sm:text-base">예약 내역이 없습니다</p>
-              <p className="text-slate-400 text-xs sm:text-sm">병원 예약을 하면 여기서 확인할 수 있어요</p>
-            </div>
-          ) : (
-            <div className="space-y-3 sm:space-y-4">
-              {/* 예약 상태별 요약 */}
-              <div className="grid grid-cols-3 gap-1.5 sm:gap-2 mb-3 sm:mb-4">
-                <div className="bg-amber-50 rounded-lg p-2 sm:p-3 text-center">
-                  <p className="text-xl sm:text-2xl font-bold text-amber-600">
-                    {bookings.filter(b => b.status === 'pending').length}
-                  </p>
-                  <p className="text-[10px] sm:text-xs text-amber-700">대기중</p>
-                </div>
-                <div className="bg-green-50 rounded-lg p-2 sm:p-3 text-center">
-                  <p className="text-xl sm:text-2xl font-bold text-green-600">
-                    {bookings.filter(b => b.status === 'confirmed').length}
-                  </p>
-                  <p className="text-[10px] sm:text-xs text-green-700">확정</p>
-                </div>
-                <div className="bg-slate-50 rounded-lg p-2 sm:p-3 text-center">
-                  <p className="text-xl sm:text-2xl font-bold text-slate-600">
-                    {bookings.filter(b => b.status === 'completed').length}
-                  </p>
-                  <p className="text-[10px] sm:text-xs text-slate-700">완료</p>
-                </div>
-              </div>
+      {activeTab === 'bookings' && (() => {
+        // 선택된 동물로 필터링
+        const filteredBookings = selectedPet
+          ? bookings.filter(b => {
+              // petId로 매칭
+              if (b.petId && b.petId === selectedPet.id) return true;
+              // petName으로 매칭
+              const bookingPetName = b.petName || b.pet?.name || b.pet?.petName;
+              const selectedPetName = selectedPet.name || selectedPet.petName;
+              if (bookingPetName && selectedPetName && bookingPetName === selectedPetName) return true;
+              return false;
+            })
+          : bookings;
 
-              {/* 예약 목록 */}
-              {bookings.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).map(booking => {
+        // 최신순 정렬 (date 또는 createdAt 기준)
+        const sortedBookings = [...filteredBookings].sort((a, b) => {
+          const dateA = a.date || a.bookingDate || a.createdAt?.toDate?.() || new Date(a.createdAt || 0);
+          const dateB = b.date || b.bookingDate || b.createdAt?.toDate?.() || new Date(b.createdAt || 0);
+          return new Date(dateB) - new Date(dateA);
+        });
+
+        return (
+          <div className="px-3 sm:px-4 pt-3 sm:pt-4 pb-40">
+            {sortedBookings.length === 0 ? (
+              <div className="text-center py-16 sm:py-20">
+                <div className="text-5xl sm:text-6xl mb-3 sm:mb-4">📅</div>
+                <p className="text-slate-500 mb-1.5 sm:mb-2 text-sm sm:text-base">예약 내역이 없습니다</p>
+                <p className="text-slate-400 text-xs sm:text-sm">병원 예약을 하면 여기서 확인할 수 있어요</p>
+              </div>
+            ) : (
+              <div className="space-y-3 sm:space-y-4">
+                {/* 예약 상태별 요약 */}
+                <div className="grid grid-cols-3 gap-1.5 sm:gap-2 mb-3 sm:mb-4">
+                  <div className="bg-amber-50 rounded-lg p-2 sm:p-3 text-center">
+                    <p className="text-xl sm:text-2xl font-bold text-amber-600">
+                      {sortedBookings.filter(b => b.status === 'pending').length}
+                    </p>
+                    <p className="text-[10px] sm:text-xs text-amber-700">대기중</p>
+                  </div>
+                  <div className="bg-green-50 rounded-lg p-2 sm:p-3 text-center">
+                    <p className="text-xl sm:text-2xl font-bold text-green-600">
+                      {sortedBookings.filter(b => b.status === 'confirmed').length}
+                    </p>
+                    <p className="text-[10px] sm:text-xs text-green-700">확정</p>
+                  </div>
+                  <div className="bg-slate-50 rounded-lg p-2 sm:p-3 text-center">
+                    <p className="text-xl sm:text-2xl font-bold text-slate-600">
+                      {sortedBookings.filter(b => b.status === 'completed').length}
+                    </p>
+                    <p className="text-[10px] sm:text-xs text-slate-700">완료</p>
+                  </div>
+                </div>
+
+                {/* 예약 목록 */}
+                {sortedBookings.map(booking => {
                 const statusInfo = getBookingStatusInfo(booking.status);
                 return (
                   <div
@@ -732,22 +1010,51 @@ export function MyPage({ onBack, onSelectPet, onViewDiagnosis, onAddPet, onClini
                   </div>
                 );
               })}
-            </div>
-          )}
-        </div>
-      )}
+              </div>
+            )}
+          </div>
+        );
+      })()}
 
       {activeTab === 'records' && (() => {
+        // 선택된 동물로 필터링
+        const filteredDiagnoses = selectedPet
+          ? diagnoses.filter(d => {
+              // petId로 매칭
+              if (d.petId && d.petId === selectedPet.id) return true;
+              // petName으로 매칭
+              const diagnosisPetName = d.petName || d.pet?.name || d.pet?.petName;
+              const selectedPetName = selectedPet.name || selectedPet.petName;
+              if (diagnosisPetName && selectedPetName && diagnosisPetName === selectedPetName) return true;
+              return false;
+            })
+          : diagnoses;
+
+        const filteredClinicResults = selectedPet
+          ? clinicResults.filter(r => {
+              // petId로 매칭
+              if (r.petId && r.petId === selectedPet.id) return true;
+              // petName으로 매칭
+              const resultPetName = r.petName || r.pet?.name || r.pet?.petName;
+              const selectedPetName = selectedPet.name || selectedPet.petName;
+              if (resultPetName && selectedPetName && resultPetName === selectedPetName) return true;
+              return false;
+            })
+          : clinicResults;
+
         // AI 진단 기록과 병원 진료 기록 합치기
-        const aiRecords = diagnoses.map(d => ({
+        const aiRecords = filteredDiagnoses.map(d => ({
           ...d,
           source: 'ai'
         }));
 
         // ✅ 병원에서 보호자에게 실제로 공유한 진료만 리스트에 포함
-        const hospitalRecords = clinicResults
-          .filter(r => r.sharedToGuardian === true)
-          .map(result => ({
+        // 테스트 계정은 모든 결과 표시, 일반 계정은 공유된 것만
+        const isTestAccount = currentUser?.email === 'guardian@test.com' || currentUser?.email === 'clinic@happyvet.com';
+        const hospitalRecords = (isTestAccount
+          ? filteredClinicResults // 테스트 계정은 모든 결과 표시
+          : filteredClinicResults.filter(r => r.sharedToGuardian === true) // 일반 계정은 공유된 것만
+        ).map(result => ({
             id: result.id,
             date: result.visitDate || result.createdAt,
             created_at: result.visitDate || result.createdAt,
