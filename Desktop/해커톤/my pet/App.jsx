@@ -1286,7 +1286,7 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet, onLogout }) {
               <header className="bg-gradient-to-r from-sky-500 to-blue-600 text-white px-4 py-4 shadow-lg">
                 <div className="flex items-center justify-center gap-2 relative">
                   <div className="w-9 h-9 bg-white rounded-lg flex items-center justify-center shadow-md flex-shrink-0 overflow-hidden">
-                    <img src={PROFILE_ICON_IMAGES[petData?.species] || PROFILE_ICON_IMAGES.other} alt="Pet" className="w-full h-full object-cover" />
+                    <img src={`${import.meta.env.BASE_URL}icon/login/logo_red.png`} alt="PetMedical.AI" className="w-7 h-7 object-contain" />
                   </div>
                   <div className="text-center">
                     <h1 className="text-xl font-bold tracking-tight">PetMedical.AI</h1>
@@ -1439,15 +1439,36 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet, onLogout }) {
                             <h4 className="text-sm font-bold text-gray-800 mb-0.5">병원 예약일</h4>
                             {latestBooking ? (
                               <div className="text-xs text-gray-500 space-y-0.5">
-                                <p className="font-medium text-gray-700">{latestBooking.clinicName || latestBooking.hospitalName || '병원'}</p>
-                                <p>{new Date(latestBooking.bookingDate || latestBooking.date).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })} {latestBooking.bookingTime || latestBooking.time || ''}</p>
-                                {(latestBooking.symptomText || latestBooking.aiDiagnosis || latestBooking.diagnosis) && (
-                                  <p className="text-blue-600">
-                                    {typeof latestBooking.symptomText === 'string' ? latestBooking.symptomText :
-                                      (typeof latestBooking.aiDiagnosis === 'string' ? latestBooking.aiDiagnosis :
-                                        (typeof latestBooking.diagnosis === 'string' ? latestBooking.diagnosis : (latestBooking.diagnosis?.name || '')))}
-                                  </p>
-                                )}
+                                <p className="font-medium text-gray-700">
+                                  {typeof latestBooking.clinicName === 'string' ? latestBooking.clinicName :
+                                    (typeof latestBooking.hospitalName === 'string' ? latestBooking.hospitalName : '병원')}
+                                </p>
+                                <p>
+                                  {(() => {
+                                    try {
+                                      const dateValue = latestBooking.bookingDate || latestBooking.date;
+                                      if (!dateValue) return '';
+                                      return new Date(dateValue).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
+                                    } catch { return ''; }
+                                  })()}{' '}
+                                  {typeof latestBooking.bookingTime === 'string' ? latestBooking.bookingTime :
+                                    (typeof latestBooking.time === 'string' ? latestBooking.time : '')}
+                                </p>
+                                {(() => {
+                                  let symptomText = '';
+                                  if (typeof latestBooking.symptomText === 'string' && latestBooking.symptomText) {
+                                    symptomText = latestBooking.symptomText;
+                                  } else if (typeof latestBooking.aiDiagnosis === 'string' && latestBooking.aiDiagnosis) {
+                                    symptomText = latestBooking.aiDiagnosis;
+                                  } else if (latestBooking.diagnosis) {
+                                    if (typeof latestBooking.diagnosis === 'string') {
+                                      symptomText = latestBooking.diagnosis;
+                                    } else if (typeof latestBooking.diagnosis?.name === 'string') {
+                                      symptomText = latestBooking.diagnosis.name;
+                                    }
+                                  }
+                                  return symptomText ? <p className="text-blue-600">{symptomText}</p> : null;
+                                })()}
                               </div>
                             ) : (
                               <p className="text-xs text-gray-500">예약된 진료가 없습니다</p>
@@ -1588,15 +1609,36 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet, onLogout }) {
                             <p className="font-medium text-gray-900">병원 예약일</p>
                             {latestBooking ? (
                               <div className="text-sm text-gray-500 space-y-0.5">
-                                <p className="font-medium text-gray-700">{latestBooking.clinicName || latestBooking.hospitalName || '병원'}</p>
-                                <p>{new Date(latestBooking.bookingDate || latestBooking.date).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })} {latestBooking.bookingTime || latestBooking.time || ''}</p>
-                                {(latestBooking.symptomText || latestBooking.aiDiagnosis || latestBooking.diagnosis) && (
-                                  <p className="text-blue-600">
-                                    {typeof latestBooking.symptomText === 'string' ? latestBooking.symptomText :
-                                      (typeof latestBooking.aiDiagnosis === 'string' ? latestBooking.aiDiagnosis :
-                                        (typeof latestBooking.diagnosis === 'string' ? latestBooking.diagnosis : (latestBooking.diagnosis?.name || '')))}
-                                  </p>
-                                )}
+                                <p className="font-medium text-gray-700">
+                                  {typeof latestBooking.clinicName === 'string' ? latestBooking.clinicName :
+                                    (typeof latestBooking.hospitalName === 'string' ? latestBooking.hospitalName : '병원')}
+                                </p>
+                                <p>
+                                  {(() => {
+                                    try {
+                                      const dateValue = latestBooking.bookingDate || latestBooking.date;
+                                      if (!dateValue) return '';
+                                      return new Date(dateValue).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
+                                    } catch { return ''; }
+                                  })()}{' '}
+                                  {typeof latestBooking.bookingTime === 'string' ? latestBooking.bookingTime :
+                                    (typeof latestBooking.time === 'string' ? latestBooking.time : '')}
+                                </p>
+                                {(() => {
+                                  let symptomText = '';
+                                  if (typeof latestBooking.symptomText === 'string' && latestBooking.symptomText) {
+                                    symptomText = latestBooking.symptomText;
+                                  } else if (typeof latestBooking.aiDiagnosis === 'string' && latestBooking.aiDiagnosis) {
+                                    symptomText = latestBooking.aiDiagnosis;
+                                  } else if (latestBooking.diagnosis) {
+                                    if (typeof latestBooking.diagnosis === 'string') {
+                                      symptomText = latestBooking.diagnosis;
+                                    } else if (typeof latestBooking.diagnosis?.name === 'string') {
+                                      symptomText = latestBooking.diagnosis.name;
+                                    }
+                                  }
+                                  return symptomText ? <p className="text-blue-600">{symptomText}</p> : null;
+                                })()}
                               </div>
                             ) : (
                               <p className="text-sm text-gray-500">예약된 진료가 없습니다</p>
@@ -1704,7 +1746,7 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet, onLogout }) {
       <header className="bg-gradient-to-r from-sky-500 to-blue-600 text-white px-4 py-4 shadow-lg">
         <div className="flex items-center justify-center gap-2">
           <div className="w-9 h-9 bg-white rounded-lg flex items-center justify-center shadow-md flex-shrink-0 overflow-hidden">
-            <img src={PROFILE_ICON_IMAGES[petData?.species] || PROFILE_ICON_IMAGES.other} alt="Pet" className="w-full h-full object-cover" />
+            <img src={`${import.meta.env.BASE_URL}icon/login/logo_red.png`} alt="PetMedical.AI" className="w-7 h-7 object-contain" />
           </div>
           <div className="text-center">
             <h1 className="text-xl font-bold tracking-tight">PetMedical.AI</h1>
@@ -1860,15 +1902,37 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet, onLogout }) {
                     <h4 className="text-sm font-bold text-gray-800 mb-0.5">병원 예약일</h4>
                     {latestBooking ? (
                       <div className="text-xs text-gray-500 space-y-0.5">
-                        <p className="font-medium text-gray-700">{latestBooking.clinicName || latestBooking.hospitalName || '병원'}</p>
-                        <p>{new Date(latestBooking.bookingDate || latestBooking.date).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })} {latestBooking.bookingTime || latestBooking.time || ''}</p>
-                        {(latestBooking.symptomText || latestBooking.aiDiagnosis || latestBooking.diagnosis) && (
-                          <p className="text-blue-600">
-                            {typeof latestBooking.symptomText === 'string' ? latestBooking.symptomText :
-                              (typeof latestBooking.aiDiagnosis === 'string' ? latestBooking.aiDiagnosis :
-                                (typeof latestBooking.diagnosis === 'string' ? latestBooking.diagnosis : (latestBooking.diagnosis?.name || '')))}
-                          </p>
-                        )}
+                        <p className="font-medium text-gray-700">
+                          {typeof latestBooking.clinicName === 'string' ? latestBooking.clinicName :
+                            (typeof latestBooking.hospitalName === 'string' ? latestBooking.hospitalName : '병원')}
+                        </p>
+                        <p>
+                          {(() => {
+                            try {
+                              const dateValue = latestBooking.bookingDate || latestBooking.date;
+                              if (!dateValue) return '';
+                              return new Date(dateValue).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
+                            } catch { return ''; }
+                          })()}{' '}
+                          {typeof latestBooking.bookingTime === 'string' ? latestBooking.bookingTime :
+                            (typeof latestBooking.time === 'string' ? latestBooking.time : '')}
+                        </p>
+                        {(() => {
+                          // 증상 텍스트 안전 추출
+                          let symptomText = '';
+                          if (typeof latestBooking.symptomText === 'string' && latestBooking.symptomText) {
+                            symptomText = latestBooking.symptomText;
+                          } else if (typeof latestBooking.aiDiagnosis === 'string' && latestBooking.aiDiagnosis) {
+                            symptomText = latestBooking.aiDiagnosis;
+                          } else if (latestBooking.diagnosis) {
+                            if (typeof latestBooking.diagnosis === 'string') {
+                              symptomText = latestBooking.diagnosis;
+                            } else if (typeof latestBooking.diagnosis?.name === 'string') {
+                              symptomText = latestBooking.diagnosis.name;
+                            }
+                          }
+                          return symptomText ? <p className="text-blue-600">{symptomText}</p> : null;
+                        })()}
                       </div>
                     ) : (
                       <p className="text-xs text-gray-500">예약된 진료가 없습니다</p>
@@ -5863,7 +5927,6 @@ function App() {
     }
     // hospital 탭은 조건 없이 항상 표시 (내부에서 lastDiagnosis 체크)
   };
-  
   return (
     <div className="App app-root">
       {/* 플로팅 배경 효과 */}
