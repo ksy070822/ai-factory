@@ -688,6 +688,8 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
   const [healthPoints, setHealthPoints] = useState(100);
   const [todayWeight, setTodayWeight] = useState('');
   const [careSaved, setCareSaved] = useState(false);
+  const [latestBooking, setLatestBooking] = useState(null);
+  const [bookingData, setBookingData] = useState([]);
   const [careActions, setCareActions] = useState({
     meal: 0,
     water: 0,
@@ -789,6 +791,63 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
         .catch(err => console.error('패턴 분석 오류:', err));
     }
   }, [petData]);
+
+  // 최근 예약 정보 로드 (현재 동물만 필터링)
+  useEffect(() => {
+    const loadLatestBooking = async () => {
+      if (!petData?.id) {
+        setLatestBooking(null);
+        return;
+      }
+
+      try {
+        const user = auth.currentUser;
+        if (!user) {
+          setLatestBooking(null);
+          return;
+        }
+
+        // Firestore에서 예약 데이터 가져오기
+        const result = await bookingService.getBookingsByUser(user.uid);
+        if (result.success && result.data) {
+          // 현재 동물의 예약만 필터링
+          const petBookings = result.data.filter(b => {
+            // petId로 매칭
+            if (b.petId === petData.id) return true;
+            // petName으로 매칭 (fallback)
+            const bookingPetName = b.petName || b.pet?.name || b.petProfile?.name;
+            const currentPetName = petData.name || petData.petName;
+            if (bookingPetName && currentPetName && bookingPetName === currentPetName) return true;
+            return false;
+          });
+
+          // 날짜순 정렬 (최신순)
+          petBookings.sort((a, b) => {
+            const dateA = new Date(a.bookingDate || a.date || 0);
+            const dateB = new Date(b.bookingDate || b.date || 0);
+            return dateB - dateA;
+          });
+
+          // 가장 최근 예약 설정
+          if (petBookings.length > 0) {
+            setLatestBooking(petBookings[0]);
+          } else {
+            setLatestBooking(null);
+          }
+          setBookingData(petBookings);
+        } else {
+          setLatestBooking(null);
+          setBookingData([]);
+        }
+      } catch (error) {
+        console.warn('예약 정보 로드 오류:', error);
+        setLatestBooking(null);
+        setBookingData([]);
+      }
+    };
+
+    loadLatestBooking();
+  }, [petData?.id]);
 
   const handleLogUpdate = async (newLog) => {
     if (!petData) return;
@@ -960,16 +1019,32 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
           <div className="relative w-[430px] h-[932px] rounded-[3rem] shadow-2xl border-8 border-gray-800 overflow-hidden bg-white">
             {/* 모바일 컨텐츠 */}
             <div className="h-full overflow-y-auto overflow-x-hidden bg-slate-50 pb-20">
-              {/* Header - 회사 로고 가운데 배치 */}
+              {/* Header - 회사 로고 가운데 배치, 로그아웃 버튼 우측 끝 */}
               <header className="bg-gradient-to-r from-sky-400 to-sky-500 text-white px-4 pt-4 pb-4 shadow-lg">
-                <div className="flex items-center justify-center">
-                  <div className="w-9 h-9 bg-white rounded-lg flex items-center justify-center shadow-md flex-shrink-0">
-                    <span className="text-xl">🐾</span>
+                <div className="flex items-center justify-center relative">
+                  <div className="flex items-center">
+                    <div className="w-9 h-9 bg-white rounded-lg flex items-center justify-center shadow-md flex-shrink-0">
+                      <span className="text-xl">🐾</span>
+                    </div>
+                    <div className="text-center ml-2">
+                      <h1 className="text-xl font-bold tracking-tight">PetMedical.AI</h1>
+                      <p className="text-sky-100 text-xs font-medium">AI 기반 반려동물 건강 관리 서비스</p>
+                    </div>
                   </div>
-                  <div className="text-center ml-2">
-                    <h1 className="text-xl font-bold tracking-tight">PetMedical.AI</h1>
-                    <p className="text-sky-100 text-xs font-medium">AI 기반 반려동물 건강 관리 서비스</p>
-                  </div>
+                  <button
+                    onClick={() => {
+                      if (confirm('로그아웃 하시겠습니까?')) {
+                        clearAuthSession();
+                        window.location.reload();
+                      }
+                    }}
+                    className="absolute right-4 p-2 hover:bg-white/20 rounded-lg transition-colors"
+                    title="로그아웃"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                  </button>
                 </div>
               </header>
 
@@ -1394,16 +1469,32 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
 
         <div className="relative md:w-[430px] md:h-[932px] md:rounded-[3rem] md:shadow-2xl md:border-8 md:border-gray-800 overflow-hidden">
           <div className="h-full overflow-y-auto overflow-x-hidden bg-slate-50 pb-20">
-      {/* Header - 회사 로고 가운데 배치 */}
+      {/* Header - 회사 로고 가운데 배치, 로그아웃 버튼 우측 끝 */}
       <header className="bg-gradient-to-r from-sky-400 to-sky-500 text-white px-4 pt-4 pb-4 shadow-lg">
-        <div className="flex items-center justify-center">
-          <div className="w-9 h-9 bg-white rounded-lg flex items-center justify-center shadow-md flex-shrink-0">
-            <span className="text-xl">🐾</span>
+        <div className="flex items-center justify-center relative">
+          <div className="flex items-center">
+            <div className="w-9 h-9 bg-white rounded-lg flex items-center justify-center shadow-md flex-shrink-0">
+              <span className="text-xl">🐾</span>
+            </div>
+            <div className="text-center ml-2">
+              <h1 className="text-xl font-bold tracking-tight">PetMedical.AI</h1>
+              <p className="text-sky-100 text-xs font-medium">AI 기반 반려동물 건강 관리 서비스</p>
+            </div>
           </div>
-          <div className="text-center ml-2">
-            <h1 className="text-xl font-bold tracking-tight">PetMedical.AI</h1>
-            <p className="text-sky-100 text-xs font-medium">AI 기반 반려동물 건강 관리 서비스</p>
-          </div>
+          <button
+            onClick={() => {
+              if (confirm('로그아웃 하시겠습니까?')) {
+                clearAuthSession();
+                window.location.reload();
+              }
+            }}
+            className="absolute right-4 p-2 hover:bg-white/20 rounded-lg transition-colors"
+            title="로그아웃"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+          </button>
         </div>
       </header>
 
@@ -1541,7 +1632,21 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet }) {
                   </div>
                   <div className="flex-1">
                     <h4 className="text-sm font-bold text-gray-800 mb-0.5">병원 예약일</h4>
-                    <p className="text-xs text-gray-500">다음 진료: 2025년 12월 15일</p>
+                    {latestBooking ? (
+                      <div className="text-xs text-gray-500 space-y-0.5">
+                        <p className="font-medium text-gray-700">{latestBooking.clinicName || latestBooking.hospitalName || latestBooking.hospital?.name || '병원'}</p>
+                        <p>{new Date(latestBooking.bookingDate || latestBooking.date).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })} {latestBooking.bookingTime || latestBooking.time || ''}</p>
+                        {(latestBooking.symptomText || latestBooking.aiDiagnosis || latestBooking.diagnosis) && (
+                          <p className="text-blue-600">
+                            {typeof latestBooking.symptomText === 'string' ? latestBooking.symptomText :
+                              (typeof latestBooking.aiDiagnosis === 'string' ? latestBooking.aiDiagnosis :
+                                (typeof latestBooking.diagnosis === 'string' ? latestBooking.diagnosis : (latestBooking.diagnosis?.name || '')))}
+                          </p>
+                        )}
+                      </div>
+                    ) : (
+                      <p className="text-xs text-gray-500">추후 서비스 제공 예정</p>
+                    )}
                   </div>
                   <span className="text-gray-400 text-lg">&gt;</span>
                 </div>
