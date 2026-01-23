@@ -1,0 +1,16 @@
+{
+  "project": "PetMedical.AI",
+  "description": "멀티에이전트 협진 기반 반려동물 의료 진단 시스템",
+  "stories": [
+    {
+      "id": 1,
+      "title": "샘플 태스크",
+      "description": "ralph 루프 테스트를 위한 샘플 태스크입니다. 실제 태스크로 교체하세요.",
+      "status": "open",
+      "gates": ["테스트 통과", "빌드 성공"]
+    }
+  ],
+  "gates": {
+    "default": ["npm run build", "npm run lint"]
+  }
+}
