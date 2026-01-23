@@ -6266,6 +6266,30 @@ function App() {
         />
       )}
 
+      {/* 마이페이지 진료기록에서 클릭 시 진단서 보기 */}
+      {currentView === 'diagnosis-view-from-tab' && lastDiagnosis && (
+        <DiagnosisReport
+          petData={lastDiagnosis.pet || petData}
+          diagnosisResult={lastDiagnosis}
+          symptomData={symptomData}
+          userData={currentUser}
+          mode={lastDiagnosis.source === 'clinic' ? 'clinic' : 'ai'}
+          onClose={() => {
+            setCurrentView(null);
+            setCurrentTab('mypage');
+          }}
+          onGoToHospital={() => {
+            setSymptomData({ symptomText: lastDiagnosis.symptom || lastDiagnosis.description });
+            setCurrentTab('hospital');
+            setCurrentView(null);
+          }}
+          onGoToTreatment={() => {
+            setCurrentTab('care');
+            setCurrentView(null);
+          }}
+        />
+      )}
+
       {/* 기존 커스텀 UI는 제거하고 DiagnosisReport 사용 */}
       {false && currentView === 'diagnosis-view-old' && petData && lastDiagnosis && (
         <div className="page-container">
