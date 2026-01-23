@@ -313,7 +313,7 @@ export function HospitalPacketReview({ petData, diagnosis, hospital, hospitalPac
       </div>
 
       {/* Bottom Buttons - 본문 안에 배치 */}
-      <div className="px-4 pb-8">
+      <div className="px-4 pb-28">
         <button
           onClick={onEdit}
           className="w-full bg-slate-100 text-slate-700 font-bold py-4 px-4 rounded-xl text-base hover:bg-slate-200 transition-colors mb-3"

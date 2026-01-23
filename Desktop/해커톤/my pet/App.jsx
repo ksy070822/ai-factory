@@ -1698,18 +1698,8 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet, onLogout }) {
         </main>
       </div>
 
-      {/* 태블릿/모바일/PC 레이아웃 */}
-      <div className="md:flex md:items-center md:justify-center md:p-8 md:min-h-screen">
-        {/* 모바일 프레임 (태블릿에서만 보임) */}
-        <div className="hidden md:block fixed inset-0 pointer-events-none">
-          <div className="absolute inset-0 bg-gradient-to-br from-slate-200 via-sky-100 to-blue-200"></div>
-        </div>
-
-        <div className="relative md:w-[430px] md:h-[932px] md:rounded-[3rem] md:shadow-2xl md:border-8 md:border-gray-800 overflow-hidden">
-          {/* 노치 (태블릿에서만) */}
-          <div className="hidden md:block absolute top-0 left-1/2 -translate-x-1/2 w-32 h-7 bg-gray-800 rounded-b-2xl z-50"></div>
-
-          <div className="h-full overflow-y-auto overflow-x-hidden bg-gradient-to-b from-sky-50 to-white pb-20">
+      {/* 메인 컨텐츠 */}
+      <div className="min-h-screen bg-gradient-to-b from-sky-50 to-white pb-20">
       {/* Header - 회사명 가운데 정렬 */}
       <header className="bg-gradient-to-r from-sky-500 to-blue-600 text-white px-4 py-4 shadow-lg">
         <div className="flex items-center justify-center gap-2">
@@ -2088,9 +2078,6 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet, onLogout }) {
             </div>
           </>
         )}
-      </div>
-          </div>
-        </div>
       </div>
     </div>
   );
@@ -2712,6 +2699,7 @@ function MultiAgentDiagnosis({ petData, symptomData, onComplete, onBack, onDiagn
   const messagesEndRef = useRef(null); // 자동 스크롤을 위한 ref
   const chatContainerRef = useRef(null); // 채팅 컨테이너 ref
   const userScrolledRef = useRef(false); // 사용자가 스크롤했는지 추적
+  const [hasNewMessage, setHasNewMessage] = useState(false); // 새 메시지 알림
 
   // 보호자 응답 관련 상태
   const [guardianQuestions, setGuardianQuestions] = useState([]); // 현재 질문들
@@ -2730,6 +2718,10 @@ function MultiAgentDiagnosis({ petData, symptomData, onComplete, onBack, onDiagn
   useEffect(() => {
     if (messagesEndRef.current && !userScrolledRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+      setHasNewMessage(false);
+    } else if (userScrolledRef.current && messages.length > 0) {
+      // 사용자가 위로 스크롤 중이면 새 메시지 알림 표시
+      setHasNewMessage(true);
     }
   }, [messages]);
 
@@ -2740,11 +2732,12 @@ function MultiAgentDiagnosis({ petData, symptomData, onComplete, onBack, onDiagn
 
     const handleScroll = () => {
       const { scrollTop, scrollHeight, clientHeight } = container;
-      const isAtBottom = scrollHeight - scrollTop - clientHeight < 50;
+      const isAtBottom = scrollHeight - scrollTop - clientHeight < 100;
 
       // 맨 아래에 있으면 자동 스크롤 다시 활성화
       if (isAtBottom) {
         userScrolledRef.current = false;
+        setHasNewMessage(false);
       } else {
         userScrolledRef.current = true;
       }
@@ -2753,6 +2746,15 @@ function MultiAgentDiagnosis({ petData, symptomData, onComplete, onBack, onDiagn
     container.addEventListener('scroll', handleScroll);
     return () => container.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // 새 메시지 보기 버튼 클릭 핸들러
+  const scrollToBottom = () => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+      userScrolledRef.current = false;
+      setHasNewMessage(false);
+    }
+  };
   
   useEffect(() => {
     let isMounted = true; // 컴포넌트 마운트 상태 추적
@@ -3977,6 +3979,36 @@ function MultiAgentDiagnosis({ petData, symptomData, onComplete, onBack, onDiagn
         {/* 자동 스크롤을 위한 참조 지점 */}
         <div ref={messagesEndRef} />
         </div>
+
+      {/* 새 메시지 알림 버튼 */}
+      {hasNewMessage && (
+        <button
+          onClick={scrollToBottom}
+          style={{
+            position: 'absolute',
+            bottom: '120px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
+            color: 'white',
+            border: 'none',
+            borderRadius: '20px',
+            padding: '10px 20px',
+            fontSize: '13px',
+            fontWeight: '600',
+            cursor: 'pointer',
+            boxShadow: '0 4px 12px rgba(59, 130, 246, 0.4)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            zIndex: 100,
+            animation: 'bounce 1s infinite'
+          }}
+        >
+          <span>↓</span>
+          <span>새 메시지 보기</span>
+        </button>
+      )}
 
       {/* 하단 영역 */}
       {!showResult && !isWaitingForGuardian && !isFAQPhase && (
@@ -6222,6 +6254,30 @@ function App() {
           userData={currentUser}
           mode={diagnosisMode}
           onClose={() => setCurrentView('mypage')}
+          onGoToHospital={() => {
+            setSymptomData({ symptomText: lastDiagnosis.symptom || lastDiagnosis.description });
+            setCurrentTab('hospital');
+            setCurrentView(null);
+          }}
+          onGoToTreatment={() => {
+            setCurrentTab('care');
+            setCurrentView(null);
+          }}
+        />
+      )}
+
+      {/* 마이페이지 진료기록에서 클릭 시 진단서 보기 */}
+      {currentView === 'diagnosis-view-from-tab' && lastDiagnosis && (
+        <DiagnosisReport
+          petData={lastDiagnosis.pet || petData}
+          diagnosisResult={lastDiagnosis}
+          symptomData={symptomData}
+          userData={currentUser}
+          mode={lastDiagnosis.source === 'clinic' ? 'clinic' : 'ai'}
+          onClose={() => {
+            setCurrentView(null);
+            setCurrentTab('mypage');
+          }}
           onGoToHospital={() => {
             setSymptomData({ symptomText: lastDiagnosis.symptom || lastDiagnosis.description });
             setCurrentTab('hospital');
