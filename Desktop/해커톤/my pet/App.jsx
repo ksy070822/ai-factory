@@ -2080,6 +2080,7 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet, onLogout }) {
         )}
       </div>
     </div>
+    </div>
   );
 }
 
