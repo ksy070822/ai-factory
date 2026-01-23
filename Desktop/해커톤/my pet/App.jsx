@@ -2699,6 +2699,7 @@ function MultiAgentDiagnosis({ petData, symptomData, onComplete, onBack, onDiagn
   const messagesEndRef = useRef(null); // 자동 스크롤을 위한 ref
   const chatContainerRef = useRef(null); // 채팅 컨테이너 ref
   const userScrolledRef = useRef(false); // 사용자가 스크롤했는지 추적
+  const [hasNewMessage, setHasNewMessage] = useState(false); // 새 메시지 알림
 
   // 보호자 응답 관련 상태
   const [guardianQuestions, setGuardianQuestions] = useState([]); // 현재 질문들
@@ -2717,6 +2718,10 @@ function MultiAgentDiagnosis({ petData, symptomData, onComplete, onBack, onDiagn
   useEffect(() => {
     if (messagesEndRef.current && !userScrolledRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+      setHasNewMessage(false);
+    } else if (userScrolledRef.current && messages.length > 0) {
+      // 사용자가 위로 스크롤 중이면 새 메시지 알림 표시
+      setHasNewMessage(true);
     }
   }, [messages]);
 
@@ -2727,11 +2732,12 @@ function MultiAgentDiagnosis({ petData, symptomData, onComplete, onBack, onDiagn
 
     const handleScroll = () => {
       const { scrollTop, scrollHeight, clientHeight } = container;
-      const isAtBottom = scrollHeight - scrollTop - clientHeight < 50;
+      const isAtBottom = scrollHeight - scrollTop - clientHeight < 100;
 
       // 맨 아래에 있으면 자동 스크롤 다시 활성화
       if (isAtBottom) {
         userScrolledRef.current = false;
+        setHasNewMessage(false);
       } else {
         userScrolledRef.current = true;
       }
@@ -2740,6 +2746,15 @@ function MultiAgentDiagnosis({ petData, symptomData, onComplete, onBack, onDiagn
     container.addEventListener('scroll', handleScroll);
     return () => container.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // 새 메시지 보기 버튼 클릭 핸들러
+  const scrollToBottom = () => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+      userScrolledRef.current = false;
+      setHasNewMessage(false);
+    }
+  };
   
   useEffect(() => {
     let isMounted = true; // 컴포넌트 마운트 상태 추적
@@ -3964,6 +3979,36 @@ function MultiAgentDiagnosis({ petData, symptomData, onComplete, onBack, onDiagn
         {/* 자동 스크롤을 위한 참조 지점 */}
         <div ref={messagesEndRef} />
         </div>
+
+      {/* 새 메시지 알림 버튼 */}
+      {hasNewMessage && (
+        <button
+          onClick={scrollToBottom}
+          style={{
+            position: 'absolute',
+            bottom: '120px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
+            color: 'white',
+            border: 'none',
+            borderRadius: '20px',
+            padding: '10px 20px',
+            fontSize: '13px',
+            fontWeight: '600',
+            cursor: 'pointer',
+            boxShadow: '0 4px 12px rgba(59, 130, 246, 0.4)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            zIndex: 100,
+            animation: 'bounce 1s infinite'
+          }}
+        >
+          <span>↓</span>
+          <span>새 메시지 보기</span>
+        </button>
+      )}
 
       {/* 하단 영역 */}
       {!showResult && !isWaitingForGuardian && !isFAQPhase && (
