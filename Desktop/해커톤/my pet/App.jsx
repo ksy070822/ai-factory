@@ -1283,7 +1283,7 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet, onLogout }) {
                     <h3 className="text-lg font-bold text-slate-900 mb-2">반려동물을 등록해주세요</h3>
                     <p className="text-sm text-slate-500 mb-4">사용자님만의 반려동물 정보를 등록하면 맞춤형 건강을 시작하세요</p>
                     <button
-                      onClick={() => onNavigate('profile-registration')}
+                      onClick={() => onNavigate('registration')}
                       className="w-full py-3 bg-gradient-to-r from-sky-500 to-sky-600 text-white font-bold rounded-xl hover:shadow-lg transition-all"
                     >
                       반려동물 등록하기
@@ -1528,7 +1528,7 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet, onLogout }) {
                     <h3 className="text-xl font-bold text-gray-900 mb-2">반려동물을 등록해주세요</h3>
                     <p className="text-gray-500 mb-6">맞춤형 AI 건강관리 서비스를 시작하세요</p>
                     <button
-                      onClick={() => onNavigate('profile-registration')}
+                      onClick={() => onNavigate('registration')}
                       className="px-8 py-3 bg-gradient-to-r from-sky-500 to-sky-600 text-white font-bold rounded-xl hover:shadow-lg transition-all"
                     >
                       반려동물 등록하기
@@ -1698,8 +1698,8 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet, onLogout }) {
         </main>
       </div>
 
-      {/* 태블릿/모바일 레이아웃 (lg 미만) */}
-      <div className="lg:hidden md:flex md:items-center md:justify-center md:p-8 md:min-h-screen">
+      {/* 태블릿/모바일/PC 레이아웃 */}
+      <div className="md:flex md:items-center md:justify-center md:p-8 md:min-h-screen">
         {/* 모바일 프레임 (태블릿에서만 보임) */}
         <div className="hidden md:block fixed inset-0 pointer-events-none">
           <div className="absolute inset-0 bg-gradient-to-br from-slate-200 via-sky-100 to-blue-200"></div>
@@ -1741,7 +1741,7 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet, onLogout }) {
             <h3 className="text-lg font-bold text-slate-900 mb-2">반려동물을 등록해주세요</h3>
             <p className="text-sm text-slate-500 mb-4">사용자님만의 반려동물 정보를 등록하면 맞춤형 건강을 시작하세요</p>
             <button
-              onClick={() => onNavigate('profile-registration')}
+              onClick={() => onNavigate('registration')}
               className="w-full py-3 bg-gradient-to-r from-sky-500 to-sky-600 text-white font-bold rounded-xl hover:shadow-lg transition-all"
             >
               반려동물 등록하기
@@ -6462,7 +6462,7 @@ function App() {
       {userMode === 'guardian' && !currentView && currentTab && (
         <div className="main-content" style={{ paddingBottom: '80px' }}>
           {/* 내 동물 돌보기 탭 */}
-          {currentTab === 'care' && petData && (
+          {currentTab === 'care' && (
             <Dashboard
               petData={petData}
               pets={pets}
@@ -6574,65 +6574,6 @@ function App() {
                 }
               }}
             />
-          )}
-
-          {/* 반려동물이 없을 때 - care 탭에서만 등록 유도 */}
-          {!petData && currentTab === 'care' && (
-            <div className="page-container">
-              <div className="px-4 pt-8 pb-24">
-                <div className="text-center mb-8">
-                  <div className="w-24 h-24 mx-auto mb-4 rounded-full overflow-hidden">
-                    <img src={PROFILE_ICON_IMAGES.other} alt="Pet" className="w-full h-full object-cover" />
-                  </div>
-                  <h2 className="text-2xl font-bold text-slate-900 mb-2">환영합니다!</h2>
-                  <p className="text-slate-600">반려동물을 등록하고 AI 건강 관리를 시작하세요</p>
-                </div>
-
-                {/* 기능 소개 카드들 */}
-                <div className="space-y-4 mb-8">
-                  <div className="bg-surface-light p-4 rounded-lg shadow-soft border border-slate-200">
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center">
-                        <span className="material-symbols-outlined text-primary">smart_toy</span>
-                      </div>
-                      <div>
-                        <h3 className="font-bold text-slate-900">AI 증상 진단</h3>
-                        <p className="text-sm text-slate-600">증상을 입력하면 AI가 분석해드려요</p>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="bg-surface-light p-4 rounded-lg shadow-soft border border-slate-200">
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 bg-accent/20 rounded-full flex items-center justify-center">
-                        <span className="material-symbols-outlined text-accent">local_hospital</span>
-                      </div>
-                      <div>
-                        <h3 className="font-bold text-slate-900">병원 예약</h3>
-                        <p className="text-sm text-slate-600">주변 동물병원 검색 및 예약</p>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="bg-surface-light p-4 rounded-lg shadow-soft border border-slate-200">
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 bg-secondary/20 rounded-full flex items-center justify-center">
-                        <span className="material-symbols-outlined text-secondary">monitor_heart</span>
-                      </div>
-                      <div>
-                        <h3 className="font-bold text-slate-900">건강 기록</h3>
-                        <p className="text-sm text-slate-600">일일 케어 및 건강 상태 추적</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <button
-                  onClick={() => setCurrentView('registration')}
-                  className="w-full bg-primary text-white px-6 py-4 rounded-xl font-bold hover:bg-primary/90 transition-colors shadow-lg shadow-primary/30"
-                >
-                  반려동물 등록하기
-                </button>
-              </div>
-            </div>
           )}
 
           {/* 반려동물 없이 다른 탭 접근 시 */}
