@@ -214,62 +214,63 @@ export function LoginScreen({ onLogin, onGoToRegister, onSkipLogin }) {
   };
 
   return (
-    <div className="min-h-screen bg-slate-100 flex flex-col items-center justify-center p-4 sm:p-6 pt-8 sm:pt-12">
-      {/* 로고 - 좌측 정렬 */}
-      <div className="w-full max-w-sm mb-6 sm:mb-8">
-        <div className="flex items-center gap-3 sm:gap-4">
-          <img
-            src={`${import.meta.env.BASE_URL}icon/login/logo.png`}
-            alt="PetMedical.AI"
-            className="w-12 h-12 sm:w-16 sm:h-16 object-contain flex-shrink-0"
-          />
-          <div className="min-w-0">
-            <h1 className="text-xl sm:text-2xl font-bold text-slate-900 font-display truncate">PetMedical.AI</h1>
-            <p className="text-slate-500 text-xs sm:text-sm leading-tight">AI 기반 반려동물 건강 관리 서비스</p>
+    <div className="min-h-screen bg-slate-100 flex flex-col items-center justify-center p-6 pt-12">
+      {/* 로고 + 텍스트 가로 배치, 중앙 정렬 */}
+      <div className="w-full max-w-sm mb-8">
+        <div className="flex flex-col items-center text-center">
+          {/* 로고와 타이틀 가로 배치 */}
+          <div className="flex items-center gap-4 mb-3">
+            <img
+              src={`${import.meta.env.BASE_URL}icon/login/logo_red.png`}
+              alt="PetMedical.AI"
+              className="w-16 h-16 sm:w-20 sm:h-20 object-contain"
+            />
+            <h1 className="text-3xl sm:text-4xl font-bold text-slate-900 font-display">PetMedical.AI</h1>
           </div>
+          <p className="text-slate-500 text-base sm:text-lg">AI기반 반려동물 건강관리 플랫폼</p>
         </div>
       </div>
 
       {/* 모드 선택 카드 */}
-      <div className="w-full max-w-sm mb-4 sm:mb-6">
-        <div className="flex gap-2 sm:gap-3">
+      <div className="w-full max-w-sm mb-6">
+        <div className="flex gap-3">
           <button
             type="button"
             onClick={() => setUserMode('guardian')}
-            className={`flex-1 py-3 sm:py-4 px-2 sm:px-3 rounded-xl bg-white shadow-md transition-all flex flex-col items-center ${
+            className={`flex-1 py-5 px-4 rounded-2xl bg-white shadow-sm transition-all flex flex-col items-center border-2 ${
               userMode === 'guardian'
-                ? 'ring-2 ring-sky-500 bg-sky-50'
-                : 'hover:shadow-lg'
+                ? 'border-sky-400 bg-sky-50/50'
+                : 'border-transparent hover:shadow-md'
             }`}
           >
-            <div className="w-16 h-16 sm:w-24 sm:h-24 flex items-center justify-center mb-1 sm:mb-2">
+            <div className="w-20 h-20 sm:w-24 sm:h-24 flex items-center justify-center mb-2">
               <img
                 src={`${import.meta.env.BASE_URL}icon/login/main_friend.png`}
                 alt="보호자"
                 className="w-full h-full object-contain"
               />
             </div>
-            <span className="font-bold text-slate-800 text-sm sm:text-base">보호자</span>
-            <span className="text-[10px] sm:text-xs text-slate-500 mt-0.5 sm:mt-1">반려동물 건강 관리</span>
+            <span className="font-bold text-slate-800 text-base">보호자</span>
+            <span className="text-xs text-slate-500 mt-1">반려동물 건강 관리</span>
           </button>
           <button
             type="button"
             onClick={() => setUserMode('clinic')}
-            className={`flex-1 py-3 sm:py-4 px-2 sm:px-3 rounded-xl bg-white shadow-md transition-all flex flex-col items-center ${
+            className={`flex-1 py-5 px-4 rounded-2xl bg-white shadow-sm transition-all flex flex-col items-center border-2 ${
               userMode === 'clinic'
-                ? 'ring-2 ring-sky-500 bg-sky-50'
-                : 'hover:shadow-lg'
+                ? 'border-sky-400 bg-sky-50/50'
+                : 'border-transparent hover:shadow-md'
             }`}
           >
-            <div className="w-16 h-16 sm:w-24 sm:h-24 flex items-center justify-center mb-1 sm:mb-2">
+            <div className="w-20 h-20 sm:w-24 sm:h-24 flex items-center justify-center mb-2">
               <img
                 src={`${import.meta.env.BASE_URL}icon/login/main_hospital.png`}
                 alt="병원"
                 className="w-full h-full object-contain"
               />
             </div>
-            <span className="font-bold text-slate-800 text-sm sm:text-base">병원</span>
-            <span className="text-[10px] sm:text-xs text-slate-500 mt-0.5 sm:mt-1">예약 및 환자 관리</span>
+            <span className="font-bold text-slate-800 text-base">병원</span>
+            <span className="text-xs text-slate-500 mt-1">예약 및 환자 관리</span>
           </button>
         </div>
       </div>
@@ -281,12 +282,12 @@ export function LoginScreen({ onLogin, onGoToRegister, onSkipLogin }) {
           <button
             onClick={() => setShowEmailForm(true)}
             disabled={loading}
-            className="w-full py-3 sm:py-4 bg-gradient-to-r from-sky-500 to-sky-600 text-white text-sm sm:text-base font-bold rounded-xl hover:from-sky-600 hover:to-sky-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-sky-500/30"
+            className="w-full py-4 bg-gradient-to-r from-sky-500 to-sky-600 text-white text-base font-bold rounded-full hover:from-sky-600 hover:to-sky-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg"
           >
             {loading ? (
               <>
-                <div className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                <span className="text-sm sm:text-base">로딩 중...</span>
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                <span>로딩 중...</span>
               </>
             ) : (
               '이메일로 시작하기'
@@ -433,35 +434,35 @@ export function LoginScreen({ onLogin, onGoToRegister, onSkipLogin }) {
 
         {/* 소셜 로그인 */}
         {!showEmailForm && (
-          <div className="mt-4 sm:mt-6">
+          <div className="mt-6">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-slate-300"></div>
               </div>
-              <div className="relative flex justify-center text-xs sm:text-sm">
-                <span className="px-3 bg-slate-100 text-slate-500">또는</span>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-4 bg-slate-100 text-slate-500">또는</span>
               </div>
             </div>
 
-            <div className="mt-3 sm:mt-4 flex gap-2 sm:gap-3">
+            <div className="mt-4 flex gap-3">
               {/* 카카오 로그인 */}
               <button
                 onClick={handleKakaoLogin}
                 disabled={loading}
-                className="flex-1 flex items-center justify-center gap-1.5 sm:gap-2 py-2.5 sm:py-3 rounded-xl bg-[#FEE500] hover:bg-[#FDD835] transition-colors disabled:opacity-50 font-medium"
+                className="flex-1 flex items-center justify-center gap-2 py-3 rounded-full bg-[#FEE500] hover:bg-[#FDD835] transition-colors disabled:opacity-50 font-medium"
               >
-                <span className="text-base sm:text-lg">●</span>
-                <span className="text-slate-900 font-bold text-sm sm:text-base">카카오</span>
+                <span className="text-lg">●</span>
+                <span className="text-slate-900 font-bold text-base">카카오</span>
               </button>
 
               {/* 구글 로그인 버튼 */}
               <button
                 onClick={handleGoogleLogin}
                 disabled={loading}
-                className="flex-1 flex items-center justify-center gap-1.5 sm:gap-2 py-2.5 sm:py-3 border border-slate-300 rounded-xl bg-white hover:bg-slate-50 transition-colors disabled:opacity-50"
+                className="flex-1 flex items-center justify-center gap-2 py-3 border border-slate-300 rounded-full bg-white hover:bg-slate-50 transition-colors disabled:opacity-50"
               >
-                <span className="text-base sm:text-lg font-bold text-blue-500">G</span>
-                <span className="font-bold text-slate-700 text-sm sm:text-base">구글</span>
+                <span className="text-lg font-bold text-blue-500">G</span>
+                <span className="font-bold text-slate-700 text-base">구글</span>
               </button>
             </div>
           </div>
@@ -485,7 +486,7 @@ export function LoginScreen({ onLogin, onGoToRegister, onSkipLogin }) {
           <div className="mt-4">
             <button
               onClick={() => onSkipLogin(userMode)}
-              className="w-full py-3 bg-white/80 text-sky-700 font-medium rounded-xl hover:bg-white transition-all flex items-center justify-center gap-2 border border-sky-200 shadow-sm"
+              className="w-full py-3 bg-white text-sky-600 font-medium rounded-full hover:bg-slate-50 transition-all flex items-center justify-center gap-2 border border-slate-200"
             >
               <span className="material-symbols-outlined text-sm">rocket_launch</span>
               로그인 없이 바로 입장하기
@@ -624,13 +625,17 @@ export function RegisterScreen({ onRegister, onGoToLogin }) {
   };
 
   return (
-    <div className="min-h-screen bg-background-light flex flex-col items-center justify-center p-4 sm:p-6 pt-8 sm:pt-12">
-      {/* 로고 */}
-      <div className="text-center mb-4 sm:mb-6">
-        <div className="w-12 h-12 sm:w-16 sm:h-16 bg-white rounded-2xl shadow-lg mx-auto mb-2 sm:mb-3 flex items-center justify-center">
-          <span className="text-2xl sm:text-3xl">🐾</span>
+    <div className="min-h-screen bg-slate-100 flex flex-col items-center justify-center p-4 sm:p-6 pt-8 sm:pt-12">
+      {/* 로고 + 텍스트 가로 배치, 중앙 정렬 */}
+      <div className="w-full max-w-sm mb-4 sm:mb-6">
+        <div className="flex items-center justify-center gap-3 mb-2">
+          <img
+            src={`${import.meta.env.BASE_URL}icon/login/logo_red.png`}
+            alt="PetMedical.AI"
+            className="w-12 h-12 sm:w-14 sm:h-14 object-contain"
+          />
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 font-display">회원가입</h1>
         </div>
-        <h1 className="text-lg sm:text-xl font-bold text-slate-900 font-display">회원가입</h1>
       </div>
 
       {/* 진행 상태 */}
@@ -672,7 +677,7 @@ export function RegisterScreen({ onRegister, onGoToLogin }) {
               <button
                 type="button"
                 onClick={() => setFormData({ ...formData, userMode: 'guardian' })}
-                className={`w-full p-3 sm:p-5 rounded-xl border-2 transition-all flex items-start gap-3 sm:gap-4 text-left ${
+                className={`w-full p-3 sm:p-5 rounded-xl border-2 transition-all flex items-center gap-3 sm:gap-4 text-left ${
                   formData.userMode === 'guardian'
                     ? 'border-sky-500 bg-sky-50'
                     : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'
@@ -709,7 +714,7 @@ export function RegisterScreen({ onRegister, onGoToLogin }) {
               <button
                 type="button"
                 onClick={() => setFormData({ ...formData, userMode: 'clinic' })}
-                className={`w-full p-3 sm:p-5 rounded-xl border-2 transition-all flex items-start gap-3 sm:gap-4 text-left ${
+                className={`w-full p-3 sm:p-5 rounded-xl border-2 transition-all flex items-center gap-3 sm:gap-4 text-left ${
                   formData.userMode === 'clinic'
                     ? 'border-sky-500 bg-sky-50'
                     : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'
@@ -764,7 +769,11 @@ export function RegisterScreen({ onRegister, onGoToLogin }) {
         {step === 2 && (
           <div className="space-y-4">
             <div className="flex items-center gap-2 mb-2">
-              <span className="text-2xl">{formData.userMode === 'guardian' ? '🐕' : '🏥'}</span>
+              <img
+                src={`${import.meta.env.BASE_URL}icon/login/${formData.userMode === 'guardian' ? 'main_friend' : 'main_hospital'}.png`}
+                alt={formData.userMode === 'guardian' ? '보호자' : '병원'}
+                className="w-8 h-8 object-contain"
+              />
               <span className="text-sm font-medium text-slate-500">
                 {formData.userMode === 'guardian' ? '보호자' : '병원'} 회원가입
               </span>
@@ -1082,3 +1091,4 @@ export function RegisterScreen({ onRegister, onGoToLogin }) {
     </div>
   );
 }
+

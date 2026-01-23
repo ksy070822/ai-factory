@@ -52,7 +52,7 @@ export const runMultiAgentDiagnosis = async (petData, symptomData, onLogReceived
       timestamp: Date.now()
     });
 
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    await new Promise(resolve => setTimeout(resolve, 2500));
 
     csResult = await callCSAgent(normalizedPetData, normalizedSymptomData);
     logs.push({
@@ -65,7 +65,7 @@ export const runMultiAgentDiagnosis = async (petData, symptomData, onLogReceived
     });
     onLogReceived(logs[logs.length - 1]);
 
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    await new Promise(resolve => setTimeout(resolve, 3000));
 
     // 접수센터 → 증상 상담실 이관
     onLogReceived({
@@ -77,7 +77,7 @@ export const runMultiAgentDiagnosis = async (petData, symptomData, onLogReceived
       timestamp: Date.now()
     });
 
-    await new Promise(resolve => setTimeout(resolve, 1200));
+    await new Promise(resolve => setTimeout(resolve, 2000));
 
     // 2. Information Agent - 증상 사전 상담실
     onLogReceived({
@@ -89,7 +89,7 @@ export const runMultiAgentDiagnosis = async (petData, symptomData, onLogReceived
       timestamp: Date.now()
     });
 
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    await new Promise(resolve => setTimeout(resolve, 2500));
 
     infoResult = await callInformationAgent(normalizedPetData, normalizedSymptomData, csResult.json);
 
@@ -103,7 +103,7 @@ export const runMultiAgentDiagnosis = async (petData, symptomData, onLogReceived
     });
     onLogReceived(logs[logs.length - 1]);
 
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    await new Promise(resolve => setTimeout(resolve, 3000));
 
     // 보호자에게 추가 정보 질문
     onLogReceived({
@@ -115,7 +115,7 @@ export const runMultiAgentDiagnosis = async (petData, symptomData, onLogReceived
       timestamp: Date.now()
     });
 
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise(resolve => setTimeout(resolve, 1800));
 
     // 필수 질문들 생성
     const questions = [
@@ -174,7 +174,7 @@ export const runMultiAgentDiagnosis = async (petData, symptomData, onLogReceived
         timestamp: Date.now()
       });
 
-      await new Promise(resolve => setTimeout(resolve, 800));
+      await new Promise(resolve => setTimeout(resolve, 1500));
     } else {
       // 콜백이 없으면 기존 방식으로 질문만 표시 (백워드 호환)
       for (const q of questions) {
@@ -188,9 +188,9 @@ export const runMultiAgentDiagnosis = async (petData, symptomData, onLogReceived
           questionData: q,
           timestamp: Date.now()
         });
-        await new Promise(resolve => setTimeout(resolve, 800));
+        await new Promise(resolve => setTimeout(resolve, 1500));
       }
-      await new Promise(resolve => setTimeout(resolve, 1200));
+      await new Promise(resolve => setTimeout(resolve, 2000));
     }
 
     // 보호자 응답을 symptomData에 추가
@@ -215,7 +215,7 @@ export const runMultiAgentDiagnosis = async (petData, symptomData, onLogReceived
       timestamp: Date.now()
     });
 
-    await new Promise(resolve => setTimeout(resolve, 1200));
+    await new Promise(resolve => setTimeout(resolve, 2000));
 
     // 3. Medical Agent (GPT-4o) - 전문 진료실
     onLogReceived({
@@ -227,7 +227,7 @@ export const runMultiAgentDiagnosis = async (petData, symptomData, onLogReceived
       timestamp: Date.now()
     });
 
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    await new Promise(resolve => setTimeout(resolve, 2500));
 
     // Firestore에서 FAQ와 과거 진료기록 컨텍스트 조회
     let dataContext = '';
@@ -253,7 +253,7 @@ export const runMultiAgentDiagnosis = async (petData, symptomData, onLogReceived
     });
     onLogReceived(logs[logs.length - 1]);
 
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    await new Promise(resolve => setTimeout(resolve, 3500));
 
     // 전문 진료실 → 응급도 판정실 요청
     onLogReceived({
@@ -265,7 +265,7 @@ export const runMultiAgentDiagnosis = async (petData, symptomData, onLogReceived
       timestamp: Date.now()
     });
 
-    await new Promise(resolve => setTimeout(resolve, 1200));
+    await new Promise(resolve => setTimeout(resolve, 2000));
 
     // 4. Triage Engine (Claude Sonnet) - 응급도 판정실
     onLogReceived({
@@ -277,7 +277,7 @@ export const runMultiAgentDiagnosis = async (petData, symptomData, onLogReceived
       timestamp: Date.now()
     });
 
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    await new Promise(resolve => setTimeout(resolve, 2500));
 
     try {
       triageResult = await calculateTriageScore(normalizedPetData, enrichedSymptomData, medicalResult.json, csResult.json);
@@ -294,7 +294,7 @@ export const runMultiAgentDiagnosis = async (petData, symptomData, onLogReceived
       console.error('Triage 계산 오류:', err);
     }
 
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    await new Promise(resolve => setTimeout(resolve, 3000));
 
     // 4.5 협진 시스템 (Collaborative Diagnosis) - 다중 모델 교차 검증
     onLogReceived({
@@ -306,7 +306,7 @@ export const runMultiAgentDiagnosis = async (petData, symptomData, onLogReceived
       timestamp: Date.now()
     });
 
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise(resolve => setTimeout(resolve, 2000));
 
     let collaborationResult = null;
     try {
@@ -354,7 +354,7 @@ export const runMultiAgentDiagnosis = async (petData, symptomData, onLogReceived
       });
     }
 
-    await new Promise(resolve => setTimeout(resolve, 800));
+    await new Promise(resolve => setTimeout(resolve, 1500));
 
     // 협진팀 → 치료 계획실 이관
     onLogReceived({
@@ -366,7 +366,7 @@ export const runMultiAgentDiagnosis = async (petData, symptomData, onLogReceived
       timestamp: Date.now()
     });
 
-    await new Promise(resolve => setTimeout(resolve, 600));
+    await new Promise(resolve => setTimeout(resolve, 1200));
 
     // 5. Data Agent - 치료 계획 수립실
     onLogReceived({
@@ -378,7 +378,7 @@ export const runMultiAgentDiagnosis = async (petData, symptomData, onLogReceived
       timestamp: Date.now()
     });
 
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    await new Promise(resolve => setTimeout(resolve, 2500));
 
     opsResult = await callOpsAgent(
       normalizedPetData,
@@ -399,7 +399,7 @@ export const runMultiAgentDiagnosis = async (petData, symptomData, onLogReceived
     });
     onLogReceived(logs[logs.length - 1]);
 
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    await new Promise(resolve => setTimeout(resolve, 3000));
 
     // 치료 계획실 → 처방 관리실 이관 (메시지 통합)
     onLogReceived({
@@ -411,7 +411,7 @@ export const runMultiAgentDiagnosis = async (petData, symptomData, onLogReceived
       timestamp: Date.now()
     });
 
-    await new Promise(resolve => setTimeout(resolve, 1200));
+    await new Promise(resolve => setTimeout(resolve, 2000));
 
     // 6. Care Agent - 처방 · 약물 관리실
     careResult = await callCareAgent(
@@ -421,17 +421,15 @@ export const runMultiAgentDiagnosis = async (petData, symptomData, onLogReceived
       triageResult
     );
 
-    // 약물 안내 생성 (임시로 비활성화 - medicationService 파일 없음)
-    // const medicationGuidance = getMedicationGuidance(medicalResult.json, enrichedSymptomData);
-    // const medicationSummary = getShortMedicationSummary(medicationGuidance);
-    const medicationGuidance = null;
+    // 약물 안내 생성
+    const medicationGuidance = getMedicationGuidance(medicalResult.json, enrichedSymptomData);
 
     // 약물 안내가 있으면 포함
     let careMessage = careResult.message;
-    // if (medicationGuidance && medicationGuidance.hasMedicationGuidance) {
-    //   const primaryMed = medicationGuidance.medications[0]?.medications[0];
-    //   careMessage = `${normalizedPetData.petName}를 위한 케어 플랜!\n\n💊 ${medicationGuidance.message}\n\n${primaryMed ? `• 복용: ${primaryMed.usage}\n• 기간: ${primaryMed.duration}` : ''}\n\n${medicationGuidance.disclaimer}`;
-    // }
+    if (medicationGuidance && medicationGuidance.hasMedicationGuidance) {
+      const primaryMed = medicationGuidance.medications[0]?.medications[0];
+      careMessage = `${normalizedPetData.petName}를 위한 케어 플랜!\n\n💊 ${medicationGuidance.message}\n\n${primaryMed ? `• 복용: ${primaryMed.usage}\n• 기간: ${primaryMed.duration}` : ''}\n\n${medicationGuidance.disclaimer}`;
+    }
 
     logs.push({
       agent: 'Care Agent',
@@ -444,7 +442,7 @@ export const runMultiAgentDiagnosis = async (petData, symptomData, onLogReceived
     });
     onLogReceived(logs[logs.length - 1]);
 
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    await new Promise(resolve => setTimeout(resolve, 3000));
 
     // 처방실 → FAQ 선택 단계
     onLogReceived({
@@ -456,7 +454,7 @@ export const runMultiAgentDiagnosis = async (petData, symptomData, onLogReceived
       timestamp: Date.now()
     });
 
-    await new Promise(resolve => setTimeout(resolve, 800));
+    await new Promise(resolve => setTimeout(resolve, 1500));
 
     // FAQ 조회 및 보호자 선택 단계 (진단서 작성 전)
     let recommendedFAQs = [];
@@ -508,7 +506,7 @@ export const runMultiAgentDiagnosis = async (petData, symptomData, onLogReceived
               timestamp: Date.now()
             });
 
-            await new Promise(resolve => setTimeout(resolve, 1500));
+            await new Promise(resolve => setTimeout(resolve, 2500));
           }
         }
       }
@@ -561,19 +559,19 @@ export const runMultiAgentDiagnosis = async (petData, symptomData, onLogReceived
       // FAQ 정보 (진단서 작성 전 조회된 보호자 예상 질문과 답변)
       faqAnswers: faqAnswers.length > 0 ? faqAnswers : null,
       recommendedFAQs: recommendedFAQs.length > 0 ? recommendedFAQs : null,
-      // 협진 정보
+      // 협진 정보 (undefined 값 방지를 위한 null 체크)
       collaboration: collaborationResult ? {
-        consensus_reached: collaborationResult.consensus.consensus_reached,
-        confidence_score: collaborationResult.consensus.confidence_score,
-        discrepancies_found: collaborationResult.discrepancy_analysis.discrepancy_count,
+        consensus_reached: collaborationResult.consensus?.consensus_reached ?? false,
+        confidence_score: collaborationResult.consensus?.confidence_score ?? 0,
+        discrepancies_found: collaborationResult.discrepancy_analysis?.discrepancy_count ?? 0,
         models_consulted: [
           'Claude Sonnet (Medical Agent)',
           'Claude Sonnet (Triage Engine)',
           'Claude Sonnet (Senior Reviewer)',
           collaborationResult.second_opinion ? 'GPT-4o (Second Opinion)' : null
         ].filter(Boolean),
-        final_recommendation: collaborationResult.consensus.collaborative_notes.reviewer_opinion,
-        resolution_notes: collaborationResult.consensus.discrepancy_resolution
+        final_recommendation: collaborationResult.consensus?.collaborative_notes?.reviewer_opinion || '협진 검토 결과를 가져올 수 없습니다.',
+        resolution_notes: collaborationResult.consensus?.discrepancy_resolution || null
       } : null
     };
 

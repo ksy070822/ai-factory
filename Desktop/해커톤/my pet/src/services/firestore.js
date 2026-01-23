@@ -112,16 +112,22 @@ export const petService = {
   // 사용자의 모든 반려동물 조회
   async getPetsByUser(userId) {
     try {
+      // 복합 인덱스 필요 없이 userId로만 조회 후 JS에서 정렬
       const q = query(
         collection(db, COLLECTIONS.PETS),
-        where('userId', '==', userId),
-        orderBy('createdAt', 'desc')
+        where('userId', '==', userId)
       );
       const querySnapshot = await getDocs(q);
       const pets = querySnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
       }));
+      // createdAt 기준 내림차순 정렬
+      pets.sort((a, b) => {
+        const dateA = a.createdAt ? new Date(a.createdAt) : new Date(0);
+        const dateB = b.createdAt ? new Date(b.createdAt) : new Date(0);
+        return dateB - dateA;
+      });
       return { success: true, data: pets };
     } catch (error) {
       console.error('반려동물 목록 조회 오류:', error);
@@ -156,6 +162,27 @@ export const petService = {
 };
 
 // ============ AI 진단 관련 ============
+
+// Firestore에 저장하기 전 undefined 값을 재귀적으로 제거하는 헬퍼 함수
+function removeUndefinedValues(obj) {
+  if (obj === null || obj === undefined) {
+    return null;
+  }
+  if (Array.isArray(obj)) {
+    return obj.map(item => removeUndefinedValues(item)).filter(item => item !== undefined);
+  }
+  if (typeof obj === 'object') {
+    const cleaned = {};
+    for (const [key, value] of Object.entries(obj)) {
+      if (value !== undefined) {
+        cleaned[key] = removeUndefinedValues(value);
+      }
+    }
+    return cleaned;
+  }
+  return obj;
+}
+
 export const diagnosisService = {
   // 진단 기록 저장
   async saveDiagnosis(diagnosisData) {
@@ -177,7 +204,10 @@ export const diagnosisService = {
         createdAt: serverTimestamp()
       };
 
-      const docRef = await addDoc(collection(db, COLLECTIONS.DIAGNOSES), docData);
+      // undefined 값 제거 (Firestore는 undefined를 허용하지 않음)
+      const cleanedData = removeUndefinedValues(docData);
+
+      const docRef = await addDoc(collection(db, COLLECTIONS.DIAGNOSES), cleanedData);
       return { success: true, id: docRef.id };
     } catch (error) {
       console.error('진단 저장 오류:', error);
@@ -188,16 +218,22 @@ export const diagnosisService = {
   // 반려동물의 진단 기록 조회
   async getDiagnosesByPet(petId) {
     try {
+      // 복합 인덱스 필요 없이 petId로만 조회 후 JS에서 정렬
       const q = query(
         collection(db, COLLECTIONS.DIAGNOSES),
-        where('petId', '==', petId),
-        orderBy('createdAt', 'desc')
+        where('petId', '==', petId)
       );
       const querySnapshot = await getDocs(q);
       const diagnoses = querySnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
       }));
+      // createdAt 기준 내림차순 정렬
+      diagnoses.sort((a, b) => {
+        const dateA = a.createdAt ? new Date(a.createdAt) : new Date(0);
+        const dateB = b.createdAt ? new Date(b.createdAt) : new Date(0);
+        return dateB - dateA;
+      });
       return { success: true, data: diagnoses };
     } catch (error) {
       console.error('진단 기록 조회 오류:', error);
@@ -208,16 +244,22 @@ export const diagnosisService = {
   // 사용자의 모든 진단 기록 조회
   async getDiagnosesByUser(userId) {
     try {
+      // 복합 인덱스 필요 없이 userId로만 조회 후 JS에서 정렬
       const q = query(
         collection(db, COLLECTIONS.DIAGNOSES),
-        where('userId', '==', userId),
-        orderBy('createdAt', 'desc')
+        where('userId', '==', userId)
       );
       const querySnapshot = await getDocs(q);
       const diagnoses = querySnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
       }));
+      // createdAt 기준 내림차순 정렬
+      diagnoses.sort((a, b) => {
+        const dateA = a.createdAt ? new Date(a.createdAt) : new Date(0);
+        const dateB = b.createdAt ? new Date(b.createdAt) : new Date(0);
+        return dateB - dateA;
+      });
       return { success: true, data: diagnoses };
     } catch (error) {
       console.error('진단 기록 조회 오류:', error);
@@ -228,18 +270,24 @@ export const diagnosisService = {
   // 🔥 병원 모드: 특정 환자의 진단 기록 조회 (clinicId 기준)
   async getDiagnosesByClinicAndPatient(clinicId, ownerId, petId) {
     try {
+      // 복합 인덱스 필요 없이 조회 후 JS에서 정렬
       const q = query(
         collection(db, COLLECTIONS.DIAGNOSES),
         where('clinicId', '==', clinicId),
         where('ownerId', '==', ownerId),
-        where('petId', '==', petId),
-        orderBy('createdAt', 'desc')
+        where('petId', '==', petId)
       );
       const querySnapshot = await getDocs(q);
       const diagnoses = querySnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
       }));
+      // createdAt 기준 내림차순 정렬
+      diagnoses.sort((a, b) => {
+        const dateA = a.createdAt ? new Date(a.createdAt) : new Date(0);
+        const dateB = b.createdAt ? new Date(b.createdAt) : new Date(0);
+        return dateB - dateA;
+      });
       return { success: true, data: diagnoses };
     } catch (error) {
       console.error('병원 진단 기록 조회 오류:', error);
@@ -250,16 +298,24 @@ export const diagnosisService = {
   // 최근 진단 기록 가져오기
   async getLatestDiagnosis(petId) {
     try {
+      // 복합 인덱스 필요 없이 petId로만 조회 후 JS에서 정렬하여 첫 번째 반환
       const q = query(
         collection(db, COLLECTIONS.DIAGNOSES),
-        where('petId', '==', petId),
-        orderBy('createdAt', 'desc'),
-        limit(1)
+        where('petId', '==', petId)
       );
       const querySnapshot = await getDocs(q);
       if (!querySnapshot.empty) {
-        const doc = querySnapshot.docs[0];
-        return { success: true, data: { id: doc.id, ...doc.data() } };
+        const diagnoses = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        // createdAt 기준 내림차순 정렬
+        diagnoses.sort((a, b) => {
+          const dateA = a.createdAt ? new Date(a.createdAt) : new Date(0);
+          const dateB = b.createdAt ? new Date(b.createdAt) : new Date(0);
+          return dateB - dateA;
+        });
+        return { success: true, data: diagnoses[0] };
       }
       return { success: true, data: null };
     } catch (error) {
@@ -356,16 +412,22 @@ export const bookingService = {
   // 사용자의 예약 목록 조회
   async getBookingsByUser(userId) {
     try {
+      // 복합 인덱스 필요 없이 userId로만 조회 후 JS에서 정렬
       const q = query(
         collection(db, COLLECTIONS.BOOKINGS),
-        where('userId', '==', userId),
-        orderBy('createdAt', 'desc')
+        where('userId', '==', userId)
       );
       const querySnapshot = await getDocs(q);
       const bookings = querySnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
       }));
+      // createdAt 기준 내림차순 정렬
+      bookings.sort((a, b) => {
+        const dateA = a.createdAt ? new Date(a.createdAt) : new Date(0);
+        const dateB = b.createdAt ? new Date(b.createdAt) : new Date(0);
+        return dateB - dateA;
+      });
       return { success: true, data: bookings };
     } catch (error) {
       console.error('예약 목록 조회 오류:', error);
@@ -376,20 +438,26 @@ export const bookingService = {
   // 병원의 예약 목록 조회 (병원 모드용)
   async getBookingsByClinic(clinicId) {
     try {
+      // 인덱스 에러 방지: orderBy 제거
       const q = query(
         collection(db, COLLECTIONS.BOOKINGS),
-        where('clinicId', '==', clinicId),
-        orderBy('date', 'asc')
+        where('clinicId', '==', clinicId)
       );
       const querySnapshot = await getDocs(q);
-      const bookings = querySnapshot.docs.map(doc => ({
+      let bookings = querySnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
       }));
-      return { success: true, data: bookings };
+
+      // 클라이언트에서 날짜순 정렬
+      bookings.sort((a, b) => (a.date || '').localeCompare(b.date || ''));
+
+      // 배열 직접 반환 (ClinicDashboard 호환성)
+      return bookings;
     } catch (error) {
       console.error('병원 예약 조회 오류:', error);
-      return { success: false, error, data: [] };
+      // 에러 시 빈 배열 반환
+      return [];
     }
   },
 
@@ -909,6 +977,120 @@ export const migrationHelper = {
   }
 };
 
+// ============ 코멘트 템플릿 관련 ============
+export const commentTemplateService = {
+  // 모든 템플릿 가져오기
+  async getAllTemplates() {
+    try {
+      const querySnapshot = await getDocs(collection(db, 'commentTemplates'));
+      const templates = [];
+      querySnapshot.forEach((doc) => {
+        templates.push({ id: doc.id, ...doc.data() });
+      });
+      return { success: true, data: templates };
+    } catch (error) {
+      console.error('템플릿 조회 오류:', error);
+      return { success: false, error, data: [] };
+    }
+  },
+
+  // 카테고리별 템플릿 가져오기
+  async getTemplatesByCategory(category) {
+    try {
+      const q = query(
+        collection(db, 'commentTemplates'),
+        where('category', '==', category)
+      );
+      const querySnapshot = await getDocs(q);
+      const templates = [];
+      querySnapshot.forEach((doc) => {
+        templates.push({ id: doc.id, ...doc.data() });
+      });
+      return { success: true, data: templates };
+    } catch (error) {
+      console.error('카테고리별 템플릿 조회 오류:', error);
+      return { success: false, error, data: [] };
+    }
+  },
+
+  // 조건에 따른 랜덤 템플릿 가져오기
+  // hasHospitalVisit: 병원 방문 기록이 있는지
+  // hasDiagnosis: AI 진단 기록이 있는지
+  async getRandomTemplate(hasHospitalVisit = false, hasDiagnosis = false) {
+    try {
+      let categories;
+
+      if (hasHospitalVisit || hasDiagnosis) {
+        // 병원 방문 또는 AI 진단 기록이 있으면 병원/투약 모드 (카테고리 1, 2)
+        categories = [1, 2];
+      } else {
+        // 일반 메시지 (카테고리 4, 5, 7)
+        categories = [4, 5, 7];
+      }
+
+      // 해당 카테고리 중 랜덤 선택
+      const randomCategory = categories[Math.floor(Math.random() * categories.length)];
+
+      const result = await this.getTemplatesByCategory(randomCategory);
+      if (result.success && result.data.length > 0) {
+        // 랜덤 템플릿 선택
+        const randomIndex = Math.floor(Math.random() * result.data.length);
+        return { success: true, data: result.data[randomIndex] };
+      }
+
+      return { success: false, data: null };
+    } catch (error) {
+      console.error('랜덤 템플릿 조회 오류:', error);
+      return { success: false, error, data: null };
+    }
+  }
+};
+
+// ============ 약물 처방 기록 서비스 ============
+export const medicationLogService = {
+  // 반려동물의 약물 처방 기록 조회
+  async getMedicationsByPet(petId) {
+    try {
+      console.log('🔍 [getMedicationsByPet] 입력:', { petId });
+
+      const q = query(
+        collection(db, 'medicationLogs'),
+        where('petId', '==', petId),
+        orderBy('createdAt', 'desc')
+      );
+      const querySnapshot = await getDocs(q);
+
+      console.log('📊 [getMedicationsByPet] 조회 결과:', {
+        count: querySnapshot.size
+      });
+
+      const medications = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      return { success: true, data: medications };
+    } catch (error) {
+      console.error('❌ [getMedicationsByPet] 약물 기록 조회 오류:', error);
+      return { success: false, error, data: [] };
+    }
+  },
+
+  // 약물 피드백 업데이트
+  async updateMedicationFeedback(medicationId, feedback) {
+    try {
+      const medRef = doc(db, 'medicationLogs', medicationId);
+      await updateDoc(medRef, {
+        'evaluation.userFeedback': feedback,
+        'evaluation.feedbackAt': serverTimestamp()
+      });
+      return { success: true };
+    } catch (error) {
+      console.error('약물 피드백 업데이트 오류:', error);
+      return { success: false, error };
+    }
+  }
+};
+
 export default {
   userService,
   petService,
@@ -919,5 +1101,7 @@ export default {
   recordService,
   preQuestionnaireService,  // 🔥 사전 문진 서비스
   medicalRecordService,  // 🔥 환자 기록 서비스
+  commentTemplateService,  // 🔥 코멘트 템플릿 서비스
+  medicationLogService,  // 🔥 약물 처방 기록 서비스
   migrationHelper
 };

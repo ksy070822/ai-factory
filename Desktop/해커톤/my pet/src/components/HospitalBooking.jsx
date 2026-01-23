@@ -130,6 +130,9 @@ const createTestHospital = (clinicId) => ({
 // 기본 테스트 병원 (초기값, 나중에 실제 clinicId로 업데이트됨)
 let TEST_HOSPITAL_HAPPYVET = createTestHospital('happyvet_test_clinic');
 
+// 🧪 테스트 모드: true이면 모든 예약이 테스트 병원으로 전송됨
+const TEST_MODE_ALL_BOOKINGS_TO_TEST_HOSPITAL = true;
+
 // 나이 계산 함수
 const calculateAge = (birthDate) => {
   if (!birthDate) return '';
@@ -530,6 +533,20 @@ export function HospitalBooking({ petData, diagnosis, symptomData, onBack, onSel
       return;
     }
 
+    // 🔹 0단계: 테스트 모드일 때 clinicId 재확인 (타이밍 이슈 방지)
+    let currentTestClinicId = testHospital?.id || TEST_HOSPITAL_HAPPYVET.id;
+    if (TEST_MODE_ALL_BOOKINGS_TO_TEST_HOSPITAL && currentTestClinicId === 'happyvet_test_clinic') {
+      // testHospital이 아직 업데이트되지 않은 경우 다시 조회
+      console.log('[예약] ⚠️ testHospital이 기본값이므로 clinicId 재조회...');
+      const freshClinicId = await fetchHappyVetClinicId();
+      if (freshClinicId && freshClinicId !== 'happyvet_test_clinic') {
+        currentTestClinicId = freshClinicId;
+        console.log('[예약] ✅ clinicId 재조회 성공:', freshClinicId);
+      } else {
+        console.warn('[예약] ⚠️ clinicId 재조회 실패, 기본값 사용');
+      }
+    }
+
     // 🔹 1단계: 오늘자 체중 시도 (dailyLogs에서 조회)
     const petId = petData?.id;
     const todayWeight = await getTodayWeightFromDailyLogs(petId);
@@ -631,23 +648,36 @@ export function HospitalBooking({ petData, diagnosis, symptomData, onBack, onSel
       // clinics 컬렉션에서 병원명으로 clinics ID 찾기
       let actualClinicId = bookingHospital.id; // 기본값은 animal_hospitals ID
       let animalHospitalId = bookingHospital.id; // 원본 ID 보관
-      
-      try {
-        const clinicsQuery = query(
-          collection(db, 'clinics'),
-          where('name', '==', bookingHospital.name),
-          limit(1)
-        );
-        const clinicsSnapshot = await getDocs(clinicsQuery);
-        
-        if (!clinicsSnapshot.empty) {
-          actualClinicId = clinicsSnapshot.docs[0].id;
-          console.log('[예약] clinics ID 찾음:', actualClinicId, '병원명:', bookingHospital.name);
-        } else {
-          console.warn('[예약] clinics에서 병원을 찾을 수 없음, animal_hospitals ID 사용:', bookingHospital.id);
+
+      // 🧪 테스트 모드: 모든 예약을 테스트 병원 계정으로 전송
+      if (TEST_MODE_ALL_BOOKINGS_TO_TEST_HOSPITAL) {
+        // currentTestClinicId는 위에서 재조회된 값 사용
+        actualClinicId = currentTestClinicId;
+        console.log('[예약] 🧪 테스트 모드 - 모든 예약을 테스트 병원으로 전송:', actualClinicId);
+        console.log('[예약] 선택한 병원:', bookingHospital.name, '→ 테스트 병원으로 라우팅');
+      } else if (bookingHospital.isTestHospital) {
+        // 테스트 병원인 경우 ID를 직접 사용 (이미 clinicId가 설정되어 있음)
+        actualClinicId = bookingHospital.id;
+        console.log('[예약] 테스트 병원 - clinicId 직접 사용:', actualClinicId);
+      } else {
+        // 일반 병원: clinics 컬렉션에서 검색
+        try {
+          const clinicsQuery = query(
+            collection(db, 'clinics'),
+            where('name', '==', bookingHospital.name),
+            limit(1)
+          );
+          const clinicsSnapshot = await getDocs(clinicsQuery);
+
+          if (!clinicsSnapshot.empty) {
+            actualClinicId = clinicsSnapshot.docs[0].id;
+            console.log('[예약] clinics ID 찾음:', actualClinicId, '병원명:', bookingHospital.name);
+          } else {
+            console.warn('[예약] clinics에서 병원을 찾을 수 없음, animal_hospitals ID 사용:', bookingHospital.id);
+          }
+        } catch (clinicSearchError) {
+          console.warn('[예약] clinics 검색 오류:', clinicSearchError);
         }
-      } catch (clinicSearchError) {
-        console.warn('[예약] clinics 검색 오류:', clinicSearchError);
       }
       
       const firestoreBookingData = {
@@ -1005,12 +1035,6 @@ export function HospitalBooking({ petData, diagnosis, symptomData, onBack, onSel
               <p className="text-sm font-medium text-green-800">
                 내 위치 기반으로 주변 병원을 검색합니다
               </p>
-              <button
-                onClick={handleRefreshLocation}
-                className="ml-auto px-2 py-1 text-xs text-green-600 hover:bg-green-100 rounded"
-              >
-                🔄 새로고침
-              </button>
             </div>
           </div>
         )}
@@ -1047,6 +1071,21 @@ export function HospitalBooking({ petData, diagnosis, symptomData, onBack, onSel
                     <p className="text-sm text-slate-500">{petData?.breed} • {petData?.birthDate ? calculateAge(petData.birthDate) : ''}</p>
                   </div>
                 </div>
+
+                {/* 진단명 */}
+                {(diagnosis.diagnosis || diagnosis.suspectedConditions?.[0]?.name) && (
+                  <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+                    <p className="text-xs text-amber-700 mb-1 flex items-center gap-1">
+                      <span className="material-symbols-outlined text-sm">diagnosis</span>
+                      AI 진단명
+                    </p>
+                    <p className="text-amber-900 font-bold">
+                      {typeof diagnosis.diagnosis === 'string'
+                        ? diagnosis.diagnosis
+                        : (diagnosis.diagnosis?.name || diagnosis.suspectedConditions?.[0]?.name || '진단 정보 없음')}
+                    </p>
+                  </div>
+                )}
 
                 {/* 주요 증상 */}
                 {diagnosis.symptom && (
@@ -1207,12 +1246,12 @@ export function HospitalBooking({ petData, diagnosis, symptomData, onBack, onSel
                       href={hospital.url || `https://map.kakao.com/link/search/${encodeURIComponent(hospital.name)}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="px-1.5 sm:px-2 py-0.5 bg-[#FFEB00] text-[#3C1E1E] text-[10px] sm:text-xs font-bold rounded hover:bg-[#F5E100] transition-colors flex-shrink-0"
+                      className="px-1 py-0.5 bg-[#FFEB00] text-[#3C1E1E] text-[9px] sm:text-[10px] font-medium rounded hover:bg-[#F5E100] transition-colors flex-shrink-0"
                     >
                       상세정보
                     </a>
                     {hospital.is24Hours && (
-                      <span className="px-1.5 sm:px-2 py-0.5 bg-red-500 text-white text-[10px] sm:text-xs font-bold rounded flex-shrink-0">24시</span>
+                      <span className="px-1 py-0.5 bg-red-500 text-white text-[9px] sm:text-[10px] font-medium rounded flex-shrink-0">24시</span>
                     )}
                   </div>
                   <div className="flex items-center gap-1.5 sm:gap-2 mt-1 flex-wrap">
@@ -1241,9 +1280,9 @@ export function HospitalBooking({ petData, diagnosis, symptomData, onBack, onSel
                   ) : (
                     <button
                       onClick={() => generateReviewSummary(hospital)}
-                      className="text-xs text-sky-600 hover:text-sky-700 font-semibold flex items-center gap-1 bg-sky-50 px-2 py-1.5 rounded-lg hover:bg-sky-100 transition-colors"
+                      className="text-[10px] sm:text-xs text-sky-600 hover:text-sky-700 font-medium flex items-center gap-0.5 bg-sky-50 px-1.5 py-1 rounded hover:bg-sky-100 transition-colors"
                     >
-                      <span className="text-xs">🤖</span>
+                      <span className="text-[10px]">🤖</span>
                       <span>AI 병원 분석</span>
                     </button>
                   )}

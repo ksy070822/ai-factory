@@ -52,7 +52,13 @@ ${symptomData.symptomText || '증상 정보 없음'}
       }
     );
 
-    if (!response.ok) throw new Error('API 오류');
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      if (response.status === 400 && errorData.error?.message?.includes('API key not valid')) {
+        console.error('[Information Agent] Gemini API 키가 유효하지 않습니다:', errorData.error?.message);
+      }
+      throw new Error(`Gemini API 오류: ${response.status}`);
+    }
 
     const data = await response.json();
     const text = data.candidates[0].content.parts[0].text;
@@ -139,6 +145,18 @@ export const analyzeOwnerResponse = async (petData, symptomData, ownerResponses,
 - 제공된 이미지가 있다면 시각적으로 관찰 가능한 증상을 분석합니다.
 - Medical Agent가 진단에 활용할 수 있도록 핵심 정보를 정리합니다.
 
+[이미지 분석 시 반드시 확인할 6가지 카테고리]
+이미지가 제공된 경우, 아래 6가지 카테고리를 체계적으로 분석하세요:
+1. 외상 (Wounds): 상처, 열상, 찰과상, 출혈 여부
+2. 부종 (Swelling): 부기, 염증, 종창 여부 및 위치
+3. 피부 이상 (Skin): 발적, 발진, 탈모, 각질, 궤양 여부
+4. 안구 이상 (Eyes): 눈곱, 충혈, 혼탁, 눈물 과다 여부
+5. 자세 이상 (Posture): 절뚝거림, 웅크림, 머리 기울임 여부
+6. 고통 신호 (Pain): 표정, 행동으로 나타나는 통증 징후
+
+각 항목에 대해 발견된 이상이 있으면 심각도를 1-5점으로 평가하세요.
+(1: 경미, 2: 약간, 3: 중등도, 4: 심각, 5: 매우 심각)
+
 [출력 형식 - JSON ONLY]
 {
   "symptom_keywords": ["증상 키워드 1", "증상 키워드 2"],
@@ -147,7 +165,7 @@ export const analyzeOwnerResponse = async (petData, symptomData, ownerResponses,
   "possible_categories": ["질환 카테고리 1", "질환 카테고리 2"],
   "owner_responses_summary": "보호자 답변 요약 (한국어 2-3문장)",
   "notes_for_medical_agent": "Medical Agent가 참고할 핵심 포인트 (한국어 3-4문장)",
-  "visual_findings": "이미지에서 발견된 시각적 소견 (이미지가 있을 경우, 한국어 2-3문장)"
+  "visual_findings": "이미지에서 발견된 시각적 소견. 6가지 카테고리별 분석 결과를 포함. 예: '[외상] 없음 | [부종] 좌측 귀 주변 부기 관찰(3점) | [피부] 발적 및 삼출물(4점) | [안구] 정상 | [자세] 머리 기울임(2점) | [고통] 귀 긁는 행동(3점)'. 이미지가 없으면 null"
 }`;
 
   const userPrompt = `
