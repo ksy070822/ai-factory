@@ -1698,18 +1698,8 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet, onLogout }) {
         </main>
       </div>
 
-      {/* 태블릿/모바일/PC 레이아웃 */}
-      <div className="md:flex md:items-center md:justify-center md:p-8 md:min-h-screen">
-        {/* 모바일 프레임 (태블릿에서만 보임) */}
-        <div className="hidden md:block fixed inset-0 pointer-events-none">
-          <div className="absolute inset-0 bg-gradient-to-br from-slate-200 via-sky-100 to-blue-200"></div>
-        </div>
-
-        <div className="relative md:w-[430px] md:h-[932px] md:rounded-[3rem] md:shadow-2xl md:border-8 md:border-gray-800 overflow-hidden">
-          {/* 노치 (태블릿에서만) */}
-          <div className="hidden md:block absolute top-0 left-1/2 -translate-x-1/2 w-32 h-7 bg-gray-800 rounded-b-2xl z-50"></div>
-
-          <div className="h-full overflow-y-auto overflow-x-hidden bg-gradient-to-b from-sky-50 to-white pb-20">
+      {/* 메인 컨텐츠 */}
+      <div className="min-h-screen bg-gradient-to-b from-sky-50 to-white pb-20">
       {/* Header - 회사명 가운데 정렬 */}
       <header className="bg-gradient-to-r from-sky-500 to-blue-600 text-white px-4 py-4 shadow-lg">
         <div className="flex items-center justify-center gap-2">
@@ -2088,9 +2078,6 @@ function Dashboard({ petData, pets, onNavigate, onSelectPet, onLogout }) {
             </div>
           </>
         )}
-      </div>
-          </div>
-        </div>
       </div>
     </div>
   );
